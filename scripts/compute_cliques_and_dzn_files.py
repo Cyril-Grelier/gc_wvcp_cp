@@ -185,7 +185,7 @@ class Graph:
             file.write("edges=[")
             for i, edge in enumerate(self.edges_list):
                 file.write("{")
-                file.write(f"{edge[0]},{edge[0]}")
+                file.write(f"{edge[0]},{edge[1]}")
                 file.write("}")
                 if i != len(self.cliques) - 1:
                     file.write(",")
