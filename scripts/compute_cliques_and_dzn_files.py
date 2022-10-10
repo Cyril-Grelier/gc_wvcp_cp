@@ -17,11 +17,22 @@ def main():
         instances_names = instances_file.read().splitlines()
     for instance_name in instances_names:
         print(instance_name)
+        # Reduced version
+        repertory_red: str = f"reduced_{problem}_dzn"
         instance_file: str = f"instances/reduced_{problem}/{instance_name}.col"
         weights_file: str = "" if problem == "gcp" else instance_file + ".w"
         graph: Graph = Graph(instance_file, weights_file)
-        graph.save_cliques(f"cliques_{problem}/{instance_name}.clq")
-        graph.save_cliques_dzn(f"cliques_{problem}/{instance_name}.dzn")
+        graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
+        graph.save_cliques_dzn(f"{repertory_red}/{instance_name}.clq.dzn")
+        graph.save_graph_dzn(f"{repertory_red}/{instance_name}.dzn")
+        # Original version
+        repertory_or: str = f"original_{problem}_dzn/"
+        instance_file: str = f"instances/original_graphs/{instance_name}.col"
+        weights_file: str = "" if problem == "gcp" else instance_file + ".w"
+        graph: Graph = Graph(instance_file, weights_file)
+        graph.save_cliques(f"{repertory_or}/{instance_name}.clq")
+        graph.save_cliques_dzn(f"{repertory_or}/{instance_name}.clq.dzn")
+        graph.save_graph_dzn(f"{repertory_or}/{instance_name}.dzn")
 
 
 def read_col_files(instance_file: str) -> tuple[int, list[tuple[int, int]]]:
@@ -161,6 +172,49 @@ class Graph:
                     file.write(",")
             file.write("];\n")
             file.write(f"nb_cliques={nb_cliques};\n")
+
+    def save_graph_dzn(self, output_file: str):
+        """convert graph to dzn"""
+        with open(output_file, "w", encoding="utf8") as file:
+
+            file.write(f'name="{self.name}";\n')
+            file.write(f'nb_vertices="{self.nb_vertices}";\n')
+            file.write(f'nb_edges="{self.nb_edges}";\n')
+
+            # add edges
+            file.write("edges=[")
+            for i, edge in enumerate(self.edges_list):
+                file.write("{")
+                file.write(f"{edge[0]},{edge[0]}")
+                file.write("}")
+                if i != len(self.cliques) - 1:
+                    file.write(",")
+            file.write("];\n")
+
+            # add adjacency matrix
+            file.write("adjacency_matrix=[")
+            for i, line in enumerate(self.adjacency_matrix):
+                file.write("{")
+                file.write(",".join(str(int(b)) for b in line))
+                file.write("}")
+                if i != self.nb_vertices - 1:
+                    file.write(",")
+            file.write("];\n")
+
+            # add neighborhood
+            file.write("neighborhood=[")
+            for i, neighbors in enumerate(self.neighborhood):
+                file.write("{")
+                file.write(",".join(str(n) for n in neighbors))
+                file.write("}")
+                if i != self.nb_vertices - 1:
+                    file.write(",")
+            file.write("];\n")
+
+            # add weights
+            file.write("weights=[")
+            file.write(",".join(str(w) for w in self.weights))
+            file.write("];\n")
 
 
 if __name__ == "__main__":
