@@ -128,5 +128,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
+# dzn: instance files only
 *.clq
-*.dzn
+original_wvcp_dzn/
+reduced_wvcp_dzn/
