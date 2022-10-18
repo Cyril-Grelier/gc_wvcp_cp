@@ -171,38 +171,38 @@ class Graph:
                 if i != len(self.cliques) - 1:
                     file.write(",")
             file.write("];\n")
-            file.write(f"nb_cliques={nb_cliques};\n")
+            file.write(f"nr_cliques={nb_cliques};\n")
 
     def save_graph_dzn(self, output_file: str):
         """convert graph to dzn"""
         with open(output_file, "w", encoding="utf8") as file:
 
             file.write(f'name="{self.name}";\n')
-            file.write(f'nb_vertices="{self.nb_vertices}";\n')
-            file.write(f'nb_edges="{self.nb_edges}";\n')
+            file.write(f'nr_vertices={self.nb_vertices};\n')
+            file.write(f'nr_edges={self.nb_edges};\n')
 
             # add edges
-            file.write("edges=[")
-            for i, edge in enumerate(self.edges_list):
-                file.write("{")
-                file.write(f"{edge[0]},{edge[1]}")
-                file.write("}")
-                if i != len(self.cliques) - 1:
-                    file.write(",")
-            file.write("];\n")
+            # file.write("edges=[")
+            # for i, edge in enumerate(self.edges_list):
+            #     file.write("{")
+            #     file.write(f"{edge[0]},{edge[1]}")
+            #     file.write("}")
+            #     if i != len(self.cliques) - 1:
+            #         file.write(",")
+            # file.write("];\n")
 
             # add adjacency matrix
-            file.write("adjacency_matrix=[")
-            for i, line in enumerate(self.adjacency_matrix):
-                file.write("{")
-                file.write(",".join(str(int(b)) for b in line))
-                file.write("}")
-                if i != self.nb_vertices - 1:
-                    file.write(",")
-            file.write("];\n")
+            # file.write("adjacency_matrix=[")
+            # for i, line in enumerate(self.adjacency_matrix):
+            #     file.write("{")
+            #     file.write(",".join(str(int(b)) for b in line))
+            #     file.write("}")
+            #     if i != self.nb_vertices - 1:
+            #         file.write(",")
+            # file.write("];\n")
 
             # add neighborhood
-            file.write("neighborhood=[")
+            file.write("neighborhoods=[")
             for i, neighbors in enumerate(self.neighborhood):
                 file.write("{")
                 file.write(",".join(str(n) for n in neighbors))
