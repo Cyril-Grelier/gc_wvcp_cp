@@ -1,0 +1,4 @@
+{
+    "intermediate-solutions": true,
+    "solver": "com.google.or-tools@9.2.9972"
+}

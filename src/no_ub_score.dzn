@@ -1,0 +1,2 @@
+% use this data file together with the basic instance data file when upper bound on scores is not used
+ub_score = sum(weights);

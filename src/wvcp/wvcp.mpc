@@ -1,0 +1,8 @@
+{
+    "compiler-statistics": true,
+    "intermediate-solutions": true,
+    "output-time": true,
+    "solver": "com.google.or-tools",
+    "solver-statistics": true,
+    "time-limit": 3600000
+}
