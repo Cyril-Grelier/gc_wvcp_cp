@@ -1,15 +1,11 @@
 {
     "openFiles": [
-        "../data.mzn",
-        "../heuristics.mzn",
-        "../instance_output.mzn",
         "mwssp_heuristics.mzn",
         "mwssp_solve.mzn",
         "mwssp.mzn",
-        "../parameters.dzn",
         "mwssp_parameters.dzn"
     ],
-    "openTab": 4,
+    "openTab": 1,
     "projectFiles": [
         "../../original_wvcp_dzn/p06.dzn",
         "../../reduced_wvcp_dzn/p06.clq.dzn",
@@ -20,6 +16,7 @@
         "mwssp.mpc",
         "mwssp.mzn",
         "mwssp_heuristics.mzn",
+        "mwssp_output.mzn",
         "mwssp_parameters.dzn",
         "mwssp_solve.mzn",
         "../no_cliques.dzn",

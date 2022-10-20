@@ -63,10 +63,18 @@ function bool: greater(VERTEX: u, VERTEX: v) =
 	endif;
 
 % returns greatest of (real) vertices in U with >_{w}
+%% par version
 R_VERTEX: greatest(set of R_VERTEX: U) =
 	if (M_SORT in WVCP_M) /\ I_SORT
 	then	min(U)
 	else	sort_by_desc_weight(U)[1]
+	endif;
+
+%% var version
+var R_VERTEX: greatest(var set of R_VERTEX: U) =
+	if (M_SORT in WVCP_M) /\ I_SORT
+	then	min(U)
+	else	arg_max(i in R_VERTEX)(vertices[i] in U)
 	endif;
 
 % sorts the set of (real) vertices U in descending order of weight with >_{w}
@@ -223,7 +231,8 @@ predicate SGDV() =
 
 % for output only: measures application rate of rule SGDV in a solution
 function array[int] of int: count_SGDV() =
-	[	card({v | v in R_VERTEX where GNA[v]!={}}),
+	[	
+		card({v | v in R_VERTEX where GNA[v]!={}}),
 		card(R_VERTEX)
 	];
 

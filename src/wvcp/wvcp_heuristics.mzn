@@ -2,7 +2,6 @@
 % WVCP HEURISTICS
 
 include "../heuristics.mzn";
-include "wvcp.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

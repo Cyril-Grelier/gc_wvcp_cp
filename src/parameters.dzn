@@ -1,4 +1,4 @@
-% Parameter file
+% Common parameter file
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % Fix bound flags by uncommenting a single line (see data.mzn)
@@ -7,3 +7,59 @@ WVCP_B	= {                   };
 % WVCP_B	= {UB_COLORS          };
 % WVCP_B	= {UB_COLORS, UB_SCORE};
 % WVCP_B	= {           UB_SCORE};
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fix model flags by uncommenting a single line (see data.mzn)
+
+% WVCP_M	= {                                             };
+% WVCP_M	= {                   M_SR1,                    };
+% WVCP_M	= {                   M_SR1,        M_SR2,      };
+% WVCP_M	= {                   M_SR1,               M_DR2};
+% WVCP_M	= {                   M_SR1,        M_SR2, M_DR2};
+% WVCP_M	= {                          M_DR1,             };
+% WVCP_M	= {                          M_DR1, M_SR2,      };
+% WVCP_M	= {                          M_DR1,        M_DR2};
+% WVCP_M	= {                          M_DR1, M_SR2, M_DR2};
+% WVCP_M	= {                                 M_SR2,      };
+% WVCP_M	= {                                        M_DR2};
+% WVCP_M	= {                                 M_SR2, M_DR2};
+
+% WVCP_M	= {        M_CLIQUES,                           };
+% WVCP_M	= {        M_CLIQUES, M_SR1,                    };
+% WVCP_M	= {        M_CLIQUES, M_SR1,        M_SR2,      };
+% WVCP_M	= {        M_CLIQUES, M_SR1,               M_DR2};
+% WVCP_M	= {        M_CLIQUES, M_SR1,        M_SR2, M_DR2};
+% WVCP_M	= {        M_CLIQUES,        M_DR1,             };
+% WVCP_M	= {        M_CLIQUES,        M_DR1, M_SR2,      };
+% WVCP_M	= {        M_CLIQUES,        M_DR1,        M_DR2};
+% WVCP_M	= {        M_CLIQUES,        M_DR1, M_SR2, M_DR2};
+% WVCP_M	= {        M_CLIQUES,               M_SR2,      };
+% WVCP_M	= {        M_CLIQUES,                      M_DR2};
+% WVCP_M	= {        M_CLIQUES,               M_SR2, M_DR2};
+
+% WVCP_M	= {M_SORT,                                      };
+% WVCP_M	= {M_SORT,            M_SR1,                    };
+% WVCP_M	= {M_SORT,            M_SR1,        M_SR2,      };
+% WVCP_M	= {M_SORT,            M_SR1,               M_DR2};
+% WVCP_M	= {M_SORT,            M_SR1,        M_SR2, M_DR2};
+% WVCP_M	= {M_SORT,                   M_DR1,             };
+% WVCP_M	= {M_SORT,                   M_DR1, M_SR2,      };
+% WVCP_M	= {M_SORT,                   M_DR1,        M_DR2};
+% WVCP_M	= {M_SORT,                   M_DR1, M_SR2, M_DR2};
+% WVCP_M	= {M_SORT,                          M_SR2,      };
+% WVCP_M	= {M_SORT,                                 M_DR2};
+% WVCP_M	= {M_SORT,                          M_SR2, M_DR2};
+
+% WVCP_M	= {M_SORT, M_CLIQUES,                           };
+% WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,                    };
+WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,        M_SR2,      };
+% WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,               M_DR2};
+% WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,        M_SR2, M_DR2};
+% WVCP_M	= {M_SORT, M_CLIQUES,        M_DR1,             };
+% WVCP_M	= {M_SORT, M_CLIQUES,        M_DR1, M_SR2,      };
+% WVCP_M	= {M_SORT, M_CLIQUES,        M_DR1,        M_DR2};
+% WVCP_M	= {M_SORT, M_CLIQUES,        M_DR1, M_SR2, M_DR2};
+% WVCP_M	= {M_SORT, M_CLIQUES,               M_SR2,      };
+% WVCP_M	= {M_SORT, M_CLIQUES,                      M_DR2};
+% WVCP_M	= {M_SORT, M_CLIQUES,               M_SR2, M_DR2};

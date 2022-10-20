@@ -1,15 +1,12 @@
 {
     "openFiles": [
-        "../data.mzn",
-        "../heuristics.mzn",
-        "../instance_output.mzn",
         "wvcp_heuristics.mzn",
         "wvcp_solve.mzn",
         "wvcp.mzn",
-        "../parameters.dzn",
-        "wvcp_parameters.dzn"
+        "wvcp_parameters.dzn",
+        "wvcp_output.mzn"
     ],
-    "openTab": 7,
+    "openTab": 1,
     "projectFiles": [
         "../../original_wvcp_dzn/p06.dzn",
         "../../reduced_wvcp_dzn/p06.clq.dzn",
@@ -24,6 +21,7 @@
         "wvcp.mpc",
         "wvcp.mzn",
         "wvcp_heuristics.mzn",
+        "wvcp_output.mzn",
         "wvcp_parameters.dzn",
         "wvcp_solve.mzn"
     ],

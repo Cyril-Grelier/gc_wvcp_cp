@@ -1,8 +1,9 @@
 {
     "compiler-statistics": true,
+    "solver-statistics": true,
     "intermediate-solutions": true,
     "output-time": true,
-    "solver": "com.google.or-tools",
-    "solver-statistics": true,
+    "random-seed": 1,
+    "solver": "com.google.or-tools@9.2.9972",
     "time-limit": 3600000
 }
