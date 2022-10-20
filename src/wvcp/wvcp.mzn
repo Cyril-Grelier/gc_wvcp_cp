@@ -371,7 +371,7 @@ endif;
 
 % heaviest clique provides lower bound on score
 constraint
-if (M_CLIQUES in WVCP_M)
+if (M_CLIQUES in WVCP_M /\ CLIQUE!={})
 then
 x_score >= max(k in CLIQUE)(sum([weight[u] | u in clique[k]]))
 endif;
