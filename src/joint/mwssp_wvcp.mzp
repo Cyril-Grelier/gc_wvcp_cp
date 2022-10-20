@@ -1,0 +1,31 @@
+{
+    "openFiles": [
+        "mwssp_wvcp.mzn",
+        "mwssp_wvcp_heuristics.mzn",
+        "mwssp_wvcp_solve.mzn",
+        "mwssp_wvcp_parameters.dzn",
+        "mwssp_wvcp_output.mzn"
+    ],
+    "openTab": 4,
+    "projectFiles": [
+        "../data.mzn",
+        "../heuristics.mzn",
+        "../instance_output.mzn",
+        "mwssp_wvcp.mpc",
+        "mwssp_wvcp.mzn",
+        "mwssp_wvcp_heuristics.mzn",
+        "mwssp_wvcp_output.mzn",
+        "mwssp_wvcp_parameters.dzn",
+        "mwssp_wvcp_solve.mzn",
+        "../mwssp/mwssp.mzn",
+        "../mwssp/mwssp_heuristics.mzn",
+        "../no_cliques.dzn",
+        "../no_ub_colors.dzn",
+        "../no_ub_score.dzn",
+        "../parameters.dzn",
+        "../wvcp/wvcp.mzn",
+        "../wvcp/wvcp_heuristics.mzn"
+    ],
+    "selectedSolverConfigFile": "mwssp_wvcp.mpc",
+    "version": 106
+}
