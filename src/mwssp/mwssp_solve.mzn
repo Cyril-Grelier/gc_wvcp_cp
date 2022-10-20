@@ -15,16 +15,16 @@ solve :: mwssp_search() :: mwssp_restart()
 
 output
 % 			show_instance()
+% 	++  SNL ++ ["**************************"] ++ SNL
+% 	++	
+% 			show_flags()
+% 	++	SNL ++ ["**************************"] ++ SNL
+% 	++	
+% 			show_mwssp_heuristics()
 % 	++  SNL
-% 	++  ["**************************"]
+% 	++	
+% 			show_mwssp_solution()
 % 	++  SNL
-% 	++		show_flags()
-% 	++		SNL
-% 	++  ["**************************"]
-% 	++  SNL
-% 	++	show_mwssp_heuristics()
-% 	++  SNL
-% 	++		show_mwssp_solution()
-% 	++  SNL
+% 	++
 			show_mwssp_score()
 ;
