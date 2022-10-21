@@ -19,15 +19,15 @@ output
 			SNL
 	++
 			show_instance()
-	++  SNL ++ ["**************************"] ++ SNL
-	++
-			show_flags()
-	++	SNL ++ ["**************************"] ++ SNL
-	++	
-			show_wvcp_heuristics()
-	++  SNL
-	++	
-			show_wvcp_solution()
+% 	++  SNL ++ ["**************************"] ++ SNL
+% 	++
+% 			show_flags()
+% 	++	SNL ++ ["**************************"] ++ SNL
+% 	++	
+% 			show_wvcp_heuristics()
+% 	++  SNL
+% 	++	
+% 			show_wvcp_solution()
 	++  SNL
 	++	
 			show_wvcp_score()
