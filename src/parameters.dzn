@@ -49,11 +49,11 @@ WVCP_B	= {                   };
 % WVCP_M	= {M_SORT,                   M_DR1, M_SR2, M_DR2};
 % WVCP_M	= {M_SORT,                          M_SR2,      };
 % WVCP_M	= {M_SORT,                                 M_DR2};
-% WVCP_M	= {M_SORT,                          M_SR2, M_DR2};
+WVCP_M	= {M_SORT,                          M_SR2, M_DR2};
 
 % WVCP_M	= {M_SORT, M_CLIQUES,                           };
 % WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,                    };
-WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,        M_SR2,      };
+% WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,        M_SR2,      };
 % WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,               M_DR2};
 % WVCP_M	= {M_SORT, M_CLIQUES, M_SR1,        M_SR2, M_DR2};
 % WVCP_M	= {M_SORT, M_CLIQUES,        M_DR1,             };

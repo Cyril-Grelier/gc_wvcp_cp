@@ -1,146 +1,382 @@
-# CP SOLVER FOR WVCP
+# CONTENTS
 
-Three alternative models are provided
+- [Software](#software)
+    - [Minizinc](##minizinc)
+    - [OR-Tools](##ort)
+    - [Alternative CP solvers](##other_cp_solvers)
 
-1. Stand-alone WVCP model - main file `./wvcp/wvcp_solve.mzn`
-2. Stand-alone MWSSP model - main file `./mwssp/mwssp_solve.mzn`
-3. Joint WVCP and MWSSP model - main file `./joint/mwssp_wvcp_solve.mzn`
+- [Datasets](#datasets)
+
+- [CP models for WVCP](#cp_models)
+
+- [Customizing the models](#model_configuration)
+    - [Parameters](##parameters)
+    - [Options](##options)
+        - [Upper bounds](###oub)
+        - [Cliques, vertex ordering and symmetry breaking](###cliques)
+        - [Search strategies and heuristics](###ssh)
+        - [Primal model: decision variables, search strategies and heuristics](###pmssh)
+        - [Dual model: decision variables, search strategies and heuristics](###dmssh)
+        - [Joint model: decision variables, search strategies and heuristics](###jmssh)
+
+- [Running the models from the command line](#cli)
+    - [Running the primal model](##rpm)
+    - [Running the dual model](##rdm)
+    - [Running the joint model](##rjm)
+    - [Extracting results](##rpm)
+    - [Tuning the solver](##solver)
+    - [Using the IDE](##ide)
+
+---
+# Software
+
+---
+
+## Minizinc
+
+CP models for WVCP have been implemented and tested with Minizinc 2.6.4 using OR-Tools plugin 9.2.9972 on Mac OS Monterey 12.4.
+
+To install the Minizinc distribution and IDE, visit [Minizinc](https://www.minizinc.org/software.html).
+
+---
+
+## OR-Tools
+
+To install the OR-Tools plugin for Flatzinc and adding it to Minizinc IDE:
+
+1. Download the [ORT v9.2 archive](https://github.com/google/or-tools/releases/tag/v9.2)
+2. Extract in the directory of your choosing
+3. Start up Minizinc IDE
+4. In menu `Preferences > Solvers`, choose `Add new ...` in the drop-down menu then fill in the different fields as follows:
+
+    - Name : Google OR-Tools `[free text]`
+    - Id: com.google.or-tools
+    - Version : 9.2.9972 
+    - Executable : [`the path to <or-tools_flatzinc>/bin/fzn-or-tools`]
+    - Solver library path : [`the path to <or-tools_flatzinc>/share/minizinc`]
+    - Flags : [`check 'Run with mzn2fzn' and 'Run with solns2out`]
+    - Command line flags : [check all checkboxes except '-t'`]
+
+Mininzinc IDE will create a configuration file for OR-Tools in your home directory (`~/.minizinc/solvers/com.google.or-tools.msc`) or some other directory (see https://www.minizinc.org/doc-2.3.0/en/fzn-spec.html#solver-configuration-files).
+
+Note
+
+- OR-tools flatzinc plugin version 9.2.9972 is compatible with Minizinc 2.6.4
+
+- OR-tools flatzinc plugin version 9.3.10497 seems incompatible with Minizinc 2.6.4
 
 
-# DATASETS
+---
 
-Two variants of each instance are provided: 
+## Alternative CP solvers
 
-- the original instance located in `../original_wvcp_dzn`
-- the reduced instance obtained by generating cliques and removing redundant vertices and located in `../reduced_wvcp_dzn`.
+The CP solvers packaged in the Minizinc distribution (Gecode, Chuffed, etc.) may be equally used to run the WVCP models.
 
-Each variant is encoded using one or two `dzn` files sharing the name of the instance (eg. `C2000.5`) but having different extensions: 
+Note
 
-- the file with extension `dzn` solely encodes the instance,
+- Some annotations of the Minizinc language are not supported by certain solvers or require custom file inclusions and therefore cannot be used in a solver-agnostic model. For instance, random variable or value selection heuristics are supported differently by Gecode and Chuffed and do not seem supported by OR-Tools.
+
+---
+
+# Datasets
+
+Two variants of each WVCP instance are available: 
+
+- the original instance located in `original_wvcp_dzn`
+- the reduced instance obtained by generating cliques and removing redundant vertices and located in `reduced_wvcp_dzn`.
+
+Each variant is encoded using one or two `dzn` files sharing the same instance name (eg. `C2000.5`) but having different extensions: 
+
+- the file with extension `dzn` solely encodes the instance
 - the file with extension `clq.dzn` provides the list of computed cliques on the instance graph.
 
-Note that vertices in reduced instances are sorted in descending order of weight. This is not the case in the original instances.
+Note 
+
+- Vertices in reduced instances are sorted in descending order of weight. This is not necessarily the case in the original instances.
 
 
+---
 
-# MODEL AND SOLVER FLAGS
+# CP models for WVCP
 
-Each of the 3 minizinc models may be run with any CP solver supporting flatzinc (eg. OR-Tools, Chuffed) on any variant of any instance.
+Three alternative models are provided to solve WVCP instances
 
-Restart strategies may be used.
+1. The *wvcp* model whose main file is `./wvcp/wvcp_solve.mzn`
+2. The *dual* model whose main file is `./mwssp/mwssp_solve.mzn`
+3. The *joint* model whose main file is `./joint/mwssp_wvcp_solve.mzn`
 
-Each model is configurable with flags and heuristics. Some flags/heuristics are common to the 3 models while others are model-specific. Note that the combined model combines both the flags used for MWSSP and WVCP.
+The primal model directly handles the labelled graph encoding the input WVCP instance *without any preliminary reformulation*.
 
-Flags/heuristics are directly set in the following parameter files:
+The dual model is based on the reduction of the WVCP to the Maximum Weighted Stable set Problem (MWSSP) - see [[1](https://dblp.org/rec/journals/dam/CornazFM17),[2](https://dblp.org/rec/journals/siamdm/CornazM07)]. The dual reasons over a directed graph that it pre-computes by complementing and orientating the input graph.
 
-- `./parameters.dzn`
-- `./wvcp/wvcp_parameters.dzn`
-- `./mwssp/mwssp_parameters.dzn`
-- `./mwssp_wvcp/mwssp_wvcp_parameters.dzn`
-
-<!-- Default flag values are provided in the files `wvcp.mpc`, `mwssp.mpc` and `mwssp_wvcp.mpc` which may be overriden when using the commmand-line or the IDE. -->
+The joint model couples the primal and dual models and operates both on the original graph and its dual representation.
 
 
+---
 
-## Common flags
+# Customizing the models
 
-`WVCP_B` is a flag indicating which of the provided upper bounds should effectively be used in the model. Technically, it is a minizinc set that may include the following enumeration cases
+Each model is customizable using parameters and options to switch between equivalent constraint formulations, enable or disable redundant constraints, or tailor the search strategy. Note that some parameters and options are common to the 3 models while others are model-specific. Values must be passed separately from the instance and model files either as command line arguments or using additional DZN/JSON files.
 
--- `UB_SCORE`: indicates whether the model uses the provided upper bound on the score or not
--- `UB_COLORS`: indicates whether the model uses the provided upper known of the number of colors 
+---
 
-`WVCP_M` is a flag indicating which features of the model should be turned on. Technically, it is a minizinc set that may include the following enumeration cases
+## Parameters
 
--- `M_SORT`: indicates if the model does itself sort vertices in descending order of weight and use this ordering
--- `M_CLIQUES`: indicates if each clique is modeled with an all-different constraint instead of a clique of binary disequality constraints
--- `M_SR1`: indicates if symmetry breaking rule SR1 (Static Greatest Dominating Vertex rule) should be enforced
--- `M_DR1`: indicates if symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule) should be enforced
--- `M_SR2`: indicates if symmetry breaking rule SR2 (Static Greatest Dominating Color rule) should be enforced
--- `M_DR2`: indicates if symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule) should be enforced.
+The following parameters *must* be defined for each model
 
-
-## WVCP specific flags
-
-Search flags are cases of enumerations defined in `heuristics.mzn` (generic CP heuristics) and `./wvcp/wvcp_heuristics.mzn` (WVCP-specific heuristics).
-
-- enum: WVCP_SEARCH_STRATEGY - variables to branch on
-- enum: WVCP_SEARCH_RESTART - restart strategy or none
-- enum: WVCP_SEARCH_VARIABLES_COLORS - variable heuristics on colors to open/close
-- enum: WVCP_SEARCH_DOMAIN_COLORS - domain heuristics on openness/closure of color variables
-- enum: WVCP_SEARCH_VARIABLES_DOMINANTS - variable heuristics on dominating vertices
-- enum: WVCP_SEARCH_DOMAIN_DOMINANTS - domain heuristics on coloring of dominating vertex variables
-- enum: WVCP_SEARCH_VARIABLES_VERTICES - variable heuristics on vertices to color
-- enum: WVCP_SEARCH_DOMAIN_VERTICES - domain heuristics on coloring of vertex variables
+- `ub_colors (int)`- upper bound on the number of colors
+- `ub_score (int)`- upper bound on the score
+- `nr_cliques (int)`- the number of pre-computed cliques
+- `cliques (array of set of ints)`- the precomputed set of cliques
 
 
-## MWSSP specific flags
+The following data files *may* be used to enforce default values
 
-Search flags are cases of enumerations defined in `heuristics.mzn` (generic CP heuristics) and `mwssp/mwssp_heuristics.mzn` (MWSSP-specific heuristics).
+- `default_ub_colors.dzn` sets `ub_colors` to the number of vertices
+- `default_ub_score.dzn` sets `ub_score` to the sum of the weights of the vertices
+- `no_cliques.dzn` sets `nr_cliques` to 0 and `cliques` to the empty array
 
-- enum: MWSSP_SEARCH_STRATEGY - variables to branch on
-- enum: MWSSP_SEARCH_RESTART - restart strategy or none
-- enum: MWSSP_SEARCH_VARIABLES_ARCS - variable heuristics on arc to include/exclude
-- enum: MWSSP_SEARCH_DOMAIN_ARCS - domain heuristics on inclusion/exclusion of arc variables
+---
+
+## Options
+
+Options serve different purposes
+
+- to enforce upper bound constraints
+- to exploit a weight-based ordering of vertices
+- to enforce additional coloring and symmetry breaking rules
+- to select the search strategy and variable and value selection heuristics.
+
+<!-- TODO - to exploit a precomputed set of cliques -->
+
+---
+
+### Upper bounds
+
+Option `WVCP_B` indicates whether the user-defined upper bounds should be enforced. Its value *must* be any subset of the following enumeration cases
+
+- `UB_COLORS` - if supplied, the user-defined upper bound on the number of colors is enforced 
+- `UB_SCORE` - if supplied, the user-defined upper bound on the score is enforced
+
+---
+
+### Cliques, vertex ordering and symmetry breaking
+
+Option `WVCP_M` regroups various flags that switch on or off different fragments of the model. Its value *must* be any subset of the following enumeration cases
+
+- `M_SORT` - if supplied, the model is adapted according to whether or not vertices are encoded in descending order of weights
+- `M_CLIQUES` - if supplied, the modeling of each user-defined clique by a clique of binary disequality constraints is replaced with a single all-different constraint 
+- `M_SR1` - if supplied, enforces symmetry breaking rule SR1 (Static Greatest Dominating Vertex rule)
+- `M_DR1` - if supplied, enforces symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule)
+- `M_SR2` - if supplied, enforces symmetry breaking rule SR2 (Static Greatest Dominating Color rule)
+- `M_DR2` - if supplied, enforces symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
+
+Notes
+
+- The model systematically checks whether vertices are readily sorted in the instance but does not perform any sort itself. Constraints are adapted based on the result and whether `M_SORT` is set or not, effectively leading to 4 different model variants.
+
+- The symmetry breaking rules are implemented in the primal model and documented in file `wvcp/wvcp.mzn`.
+
+---
+
+### Search strategies and heuristics
+
+ The models include options to set the search strategy, the restart strategy, the variable selection heuristics and the value selection heuristics. Each option is typed by a model-specific enumeration which may include generic values in addition to model-specific values. For instance, the heuristics selecting the vertex variables to branch on in the primal model may be set to a generic value (eg, first-fail) or a primal-specific value (eg, descending-weight-degree).
+
+Technically, model-specific options are Minizinc enumerations that extend generic enumerations. The various options are defined and documented in the following files
+
+- `heuristics.mzn` - generic restart strategies and selection heuristics for variables and values
+- `wvcp/wvcp_heuristics.mzn` - primal search and restart strategies, variable and value selection heuristics
+- `mwssp/wvcp_heuristics.mzn` - dual search and restart strategies, variable and value selection heuristics
+- `joint/wvcp_heuristics.mzn` - joint search and restart strategies, variable and value selection heuristics
 
 
-## MWSSP+WVCP specific flags
+---
 
-Search flags are cases of enumerations defined in `mwssp_wvcp/mwssp_wvcp__heuristics.mzn` (MWSSP-WVCP-specific heuristics).
+### Primal model: decision variables, search strategies and heuristics
 
-- enum: MWSSP_WVCP_SEARCH_STRATEGY - either branching on MWSSP variables or on WVCP variables
+The primal model exposes 3 types of variables:
+
+- the number of colors to open (a single variable)
+- the weight of each color
+- the color of each vertex.
+
+The following options set the search and restart strategies
+
+- `WVCP_SEARCH_STRATEGY` - the search strategy, 
+- `WVCP_SEARCH_RESTART`- the restart strategy
+
+See `wvcp/wvcp_heuristics.mzn` for the list of available search and restart strategies.
+
+The following options set the variable selection heuristics
+
+- `WVCP_SEARCH_VARIABLES_COLORS`- the de-facto selection of the single variable modeling the number of colors to open
+- `WVCP_SEARCH_VARIABLES_VERTICES`- the prioritization of vertices to color
+- `WVCP_SEARCH_VARIABLES_WEIGHTS`- the prioritization of colors to weigh
+
+The following options set the value selection heuristics
+
+- `WVCP_SEARCH_DOMAIN_COLORS`- the heuristics to set the number of colors to open
+- `WVCP_SEARCH_DOMAIN_VERTICES`- the prioritization of colors for vertices
+- `WVCP_SEARCH_DOMAIN_WEIGHTS`- the prioritization of weighs for colors
+ 
+ ---
+
+### Dual model: decision variables, search strategies and heuristics
+
+The dual model exposes a single type of variables:
+
+- the yes/no decision to include an arc for each arc of the dual graph.
+
+The following options set the search and restart strategies
+
+- `MWSSP_SEARCH_STRATEGY` - the search strategy
+- `WVCP_SEARCH_RESTART`- the restart strategy
+
+See `mwssp/wvcp_heuristics.mzn` for the list of available search and restart strategies.
+
+The following option sets the variable selection heuristics
+
+- `MWSSP_SEARCH_VARIABLES_ARCS`- the prioritization of arcs to include (or exclude based on the value selection heuristics) 
+
+The following option sets the value selection heuristics
+
+- `MWSSP_SEARCH_DOMAIN_ARCS`- the prioritization of inclusion vs. exclusion decisions for arcs
+
+---
+
+### Joint model: decision variables, search strategies and heuristics
+
+In this version, the joint model exposes the same variables as the primal and dual models and supports the same variable and value selection heuristics.
+
+<!-- 
+, the joint model exposes its own type of variables:
+
+- the yes/no decision to make a vertex dominant in its color.
+-->
+
+The following option sets the search strategy <!-- TODO and restart strategies -->
+
+- `MWSSP_WVCP_SEARCH_STRATEGY` - the search strategy
+<!-- TODO `MWSSP_WVCP_SEARCH_RESTART`- the restart strategy -->
+
+In this version, this option allows to switch for a primal search strategy or a dual search strategy. That is, the search will be either branching on primal variables or branching on dual variables. See `joint/mwssp_wvcp_heuristics.mzn` for the list of available search strategies.
 
 
-# COMMAND LINE EXAMPLES
+---
 
-The commands given below must be launched from the minizinc source code directory `src`.
+# Running the models from the command line
 
-Remarks
+We provide below samples of commands for each model then discuss additional options to extract results from the output. Each command must be launched from the source code directory `src`.
 
-1. For minizinc option `solver`, use either `com.google.or-tools`, `org.gecode.gecode` or `org.chuffed.chuffed`
-2. For minizinc option `time-limit`, the timeout value should be given in milliseconds
-3. In parameter files, heuristic flags (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) must be coerced with `WVCPSV` (e.g. `"WVCPSV(INPUT_ORDER)"`) if they are WVCP flags or with `MWSSPSV` if they are MWSSP flags. They must NOT be coerced if they are WVCP- or MWSSP-specific flags (e.g. `DESC_WEIGHT_DEGREE`).
+Notes
+
+1. For the Minizinc option `solver`, use either `com.google.or-tools`, `org.gecode.gecode` or `org.chuffed.chuffed`
+2. Time-out values for the Minizinc option `time-limit` should be given in milliseconds
+
+---
+
+## Running the primal model
+
+This command
+
+```bash
+minizinc \
+--solver or-tools \
+--time-limit 300000 \
+--parallel 8 \
+--compiler-statistics --solver-statistics \
+--intermediate \
+-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
+-D "WVCP_SEARCH_RESTART=RESTART_NONE" \
+-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
+-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" \
+-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" \
+-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
+-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
+-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
+-D "WVCP_B={UB_COLORS,UB_SCORE}" \
+-D "WVCP_M={M_SORT,M_SR1,M_DR1,M_DR2,M_SR2}" \
+-d default_ub_colors.dzn \
+-d default_ub_score.dzn \
+-d no_cliques.dzn \
+-d ../reduced_wvcp_dzn/p06.dzn \
+-m ./wvcp/wvcp_solve.mzn
+```
+
+- runs the primal model [`-m wvcp/wvcp_solve.mzn`]
+- on reduced instance `p06`  [`-d ../reduced_wvcp_dzn/p06.dzn`]
+- using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
+- using a 5 minutes timeout [`--time-limit 300000`]
+- enforcing upper bound constraints on
+    - the number of colors [flag `UB_COLORS`] using the default upper-bound value [`-d defaut_ub_colors.dzn`]
+    - the score [flag `UB_SCORE`] using the default upper-bound value [`-d defaut_ub_score.dzn`]
+- not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d no_cliques.dzn`]
+- leveraging the ordering of vertices, if any [flag `M_SORT`]
+- enforcing symmetry breaking rules SR1 [flag `M_SR1`], DR1 [flag `M_DR1`], SR2 [flag `M_SR2`] and DR2 [flag `M_DR2`]
+- using 
+    -- the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`] 
+    -- the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
+    -- the domain bisection value selection heuristics [`-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT"`]
+- displaying flattener [--compiler-statistics] and solver [--solver-statistics] statistics
+- and displaying intermediate solutions [--intermediate]
+
+Note
+
+- All heuristic options supported in the primal model have to be set but some be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command will not be used by the search process.
+
+- Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command). They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `wvcp/wvcp_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
 
 
-## Running the WVCP model
+---
 
-USING parameter (dzn) files on original instance p06
+## Extracting results
 
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate wvcp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn ../no_cliques.dzn ../parameters.dzn wvcp_parameters.dzn ../../original_wvcp_dzn/p06.dzn ; beep`
+To disable the output of intermediate solution, use option `--no-intermediate`.
 
-NOT USING parameter (dzn) files on original instance p06
+To output results as json objects, use option `--output-mode json`
 
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" -D "WVCP_SEARCH_RESTART=RESTART_NONE" -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_MIN" -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" wvcp_solve.mzn ../no_cliques.dzn ../no_ub_colors.dzn ../no_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={M_SORT}" ../../original_wvcp_dzn/p40.dzn ; beep`
+To output a stream of json objects rather than unstructured text, use option `--json-stream`.
 
-USING parameter (dzn) files on reduced instance p06 with cliques
+To extract the score of the optimal solution (if found) and the solver run time (excludes minzinc flattening time), use `jq` by piping the output of the above command as follows:
 
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate wvcp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn ../parameters.dzn wvcp_parameters.dzn ../../reduced_wvcp_dzn/p06.dzn ../../reduced_wvcp_dzn/p06.clq.dzn ; beep`
+```bash
+minizinc --solver or-tools ... -m ./wvcp/wvcp_solve.mzn \
+--no-intermediate \
+--output-mode json \
+--json-stream \
+ | tail -n 1 | jq '.statistics.objective, .statistics.solveTime'
+```
+
+---
+
+## Tuning the solver
+
+Default solver configurations and options set in the files `wvcp/wvcp.mpc`, `mwssp/mwssp.mpc` and `joint/mwssp_wvcp.mpc` may be adapted and passed on the command line or used from the commmand-line.
+
+---
+
+## Using the IDE
+
+Minizinc project files to launch from the IDE are available for each model: `wvcp/wvcp.mzp`, `mwssp/mwssp.mzp` and `joint/mwssp_wvcp.mzp`.
 
 
-## Running the MWSSP model
+---
 
-USING parameter (dzn) files on original instance p06
+## Running the dual model
 
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate mwssp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn ../no_cliques.dzn ../parameters.dzn mwssp_parameters.dzn ../../original_wvcp_dzn/p06.dzn ; beep`
+Running the dual model on original instance `p40`
 
-NOT USING parameter (dzn) files on original instance p06
+```bash
+minizinc --solver or-tools --time-limit 3600000 --parallel 8 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" -m mwssp/mwssp_solve.mzn -d no_cliques.dzn -d default_ub_colors.dzn -d default_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={}" -d ../original_wvcp_dzn/p40.dzn
+```
 
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" mwssp_solve.mzn ../no_cliques.dzn ../no_ub_colors.dzn ../no_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={}" ../../original_wvcp_dzn/p40.dzn ; beep`
-
-NOT USING parameter (dzn) files on reduced instance p06 with cliques
-
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" mwssp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={}" ../../reduced_wvcp_dzn/p40.dzn ../../reduced_wvcp_dzn/p40.clq.dzn ; beep`
-
+---
 
 ## Running the joint model
 
-USING parameter (dzn) files on original instance p06
+Running the dual model on original instance `p06`
 
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate mwssp_wvcp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn ../no_cliques.dzn ../parameters.dzn mwssp_wvcp_parameters.dzn ../../original_wvcp_dzn/p06.dzn ; beep`
-
-NOT USING parameter (dzn) files on original instance p06
-
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_WVCP_SEARCH_STRATEGY=MWSSP" -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" -D "WVCP_SEARCH_RESTART=RESTART_NONE" -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_MIN" -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" mwssp_wvcp_solve.mzn ../no_cliques.dzn ../no_ub_colors.dzn ../no_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={M_SORT}" ../../original_wvcp_dzn/p40.dzn ; beep`
-
-USING parameter (dzn) files on reduced instance p06 with cliques
-
-`date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate mwssp_wvcp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn ../parameters.dzn mwssp_wvcp_parameters.dzn ../../reduced_wvcp_dzn/p06.dzn ../../reduced_wvcp_dzn/p06.clq.dzn ; beep`
+```bash
+minizinc --solver or-tools --time-limit 3600000 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_WVCP_SEARCH_STRATEGY=MWSSP" -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" -D "WVCP_SEARCH_RESTART=RESTART_NONE" -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_MIN" -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" -m joint/mwssp_wvcp_solve.mzn -d no_cliques.dzn -d default_ub_colors.dzn -d default_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={M_SORT}" ../original_wvcp_dzn/p06.dzn
+```

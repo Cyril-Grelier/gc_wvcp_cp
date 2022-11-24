@@ -1,4 +1,74 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% RUNNING FROM THE COMMAND LINE - EXAMPLE
+% 
+% This command
+%
+% minizinc \
+% --solver or-tools \
+% --time-limit 300000 \
+% --parallel 8 \
+% --compiler-statistics --solver-statistics \
+% --intermediate \
+% -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
+% -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
+% -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
+% -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" \
+% -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" \
+% -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
+% -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
+% -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
+% -D "WVCP_B={UB_COLORS,UB_SCORE}" \
+% -D "WVCP_M={M_SORT,M_SR1,M_DR1,M_DR2,M_SR2}" \
+% -d default_ub_colors.dzn \
+% -d default_ub_score.dzn \
+% -d no_cliques.dzn \
+% -d ../reduced_wvcp_dzn/p06.dzn \
+% -m ./wvcp/wvcp_solve.mzn
+% ```
+
+% - runs the primal model [`-m wvcp/wvcp_solve.mzn`]
+% - on reduced instance `p06`  [`-d ../reduced_wvcp_dzn/p06.dzn`]
+% - using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
+% - using a 5 minutes timeout [`--time-limit 300000`]
+% - enforcing upper bound constraints on
+%     - the number of colors [flag `UB_COLORS`] using the default upper-bound value [`-d defaut_ub_colors.dzn`]
+%     - the score [flag `UB_SCORE`] using the default upper-bound value [`-d defaut_ub_score.dzn`]
+% - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d no_cliques.dzn`]
+% - leveraging the ordering of vertices, if any [flag `M_SORT`]
+% - enforcing symmetry breaking rules SR1 [flag `M_SR1`], DR1 [flag `M_DR1`], SR2 [flag `M_SR2`] and DR2 [flag `M_DR2`]
+% - using 
+%     -- the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`] 
+%     -- the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
+%     -- the domain bisection value selection heuristics [`-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT"`]
+% - displaying flattener [--compiler-statistics] and solver [--solver-statistics] statistics
+% - and displaying intermediate solutions [--intermediate]
+
+% Note
+
+% - All heuristic options supported in the primal model have to be set but some be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command will not be used by the search process.
+
+% - Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command). They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `wvcp/wvcp_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
+
+
+
+% To disable the output of intermediate solution, use option `--no-intermediate`.
+
+% To output results as json objects, use option `--output-mode json`
+
+% To output a stream of json objects rather than unstructured text, use option `--json-stream`.
+
+% To extract the score of the optimal solution (if found) and the solver run time (excludes minzinc flattening time), use `jq` by piping the output of the above command as follows:
+
+% minizinc --solver or-tools ... -m ./wvcp/wvcp_solve.mzn \
+% --no-intermediate \
+% --output-mode json \
+% --json-stream \
+%  | tail -n 1 | jq '.statistics.objective, .statistics.solveTime'
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FILE INCLUSION
 
 include "../data.mzn";
@@ -280,7 +350,12 @@ constraint if (M_SR2 in WVCP_M) then SGDC() endif;
 predicate SGDC() =
 	forall(v in R_VERTEX) (
 		(x_color[v] <= card(neighbours[v]) + 1)
-	);
+	)
+% 	/\
+% 	% !! redundant/alternative
+% 	% empties max(card(neighbours[v]) + 1) | v) + 1 -th color (restricts it to its virtual vertex) and successive colors due to symmetry breaking constraint
+% 	card(x_vertices[max([card(neighbours[v]) + 1 | v in R_VERTEX]) + 1]) == 1
+ 	;
 
 % for output only: measures application rate of rule SGDC in a solution
 function array[int] of int: count_SGDC() =
@@ -346,9 +421,8 @@ constraint
 x_score = sum(x_weight);
 
 % input upper bound on the number of colors
-% !! this constraint is redundant since range COLOR is already built with this upper bound (see data.mzn)
 constraint
-if (UB_COLORS in WVCP_B /\ ub_colors<max(COLOR))
+if (UB_COLORS in WVCP_B /\ ub_colors<card(COLOR))
 % empties ub_colors+1-th color (restricts it to its virtual vertex) and successive colors due to symmetry breaking constraint
 then card(x_vertices[ub_colors+1]) == 1
 endif;

@@ -6,6 +6,7 @@
 
 
 % RESTART ANNOTATIONS
+% See https://www.minizinc.org/doc-2.6.4/en/lib-stdlib-annotations.html?highlight=restart#restart-annotations
 
 enum SEARCH_RESTART = {
   RESTART_NONE,
@@ -32,6 +33,7 @@ function ann: restart(SEARCH_RESTART: flag, int: scale, float: base) =
   
 
 % VARIABLE CHOICE ANNOTATIONS
+% See https://www.minizinc.org/doc-2.6.4/en/lib-stdlib-annotations.html?highlight=restart#variable-selection-annotations
 
 enum SEARCH_VARIABLES = {
   ANTI_FIRST_FAIL,
@@ -49,7 +51,6 @@ enum SEARCH_VARIABLES = {
 };
 
 
-% https://www.minizinc.org/doc-2.6.2/en/lib-stdlib-annotations.html#search-annotations
 % variables: anti_first_fail | dom_w_deg | first_fail | impact | input_order | largest | max_regret | most_constrained | occurrence | random (gecode) | random_order (chuffed) | smallest
 function ann: heuristic_variables(SEARCH_VARIABLES: flag) =
   if      flag=ANTI_FIRST_FAIL
@@ -81,6 +82,7 @@ function ann: heuristic_variables(SEARCH_VARIABLES: flag) =
 
 
 % VALUE CHOICE ANNOTATIONS
+% See https://www.minizinc.org/doc-2.6.4/en/lib-stdlib-annotations.html?highlight=restart#value-choice-annotations
 
 enum SEARCH_DOMAIN = {
   INDOMAIN,
@@ -100,7 +102,6 @@ enum SEARCH_DOMAIN = {
 };
 
 
-% https://www.minizinc.org/doc-2.6.2/en/lib-stdlib-annotations.html#search-annotations
 % values:    indomain | indomain_interval | indomain_max | indomain_median | indomain_middle | indomain_min | indomain_random | indomain_reverse_split | indomain_split | indomain_split_random | outdomain_max | outdomain_median | outdomain_min | outdomain_random
 function ann: heuristic_domain(SEARCH_DOMAIN: flag) =
   if      flag=INDOMAIN

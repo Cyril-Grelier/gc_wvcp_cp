@@ -26,7 +26,7 @@ int: ub_score;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ASSERTIONS AND FLAGS
+% ASSERTIONS
 
 constraint assert(nr_vertices>0, "assertion failed: at least one vertex");
 
@@ -48,12 +48,12 @@ constraint assert(ub_score in 0..sum(weights), "assertion failed: ub_score out o
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CONSTRAINT MODEL FLAGS
+% CONSTRAINT MODEL OPTIONS
 
 % Bounds
 % TODO generic flag -> rename to remove WVCP prefix
 enum WVCP_BOUNDS = {
-	UB_COLORS, % upper-bound on number of colors
+	UB_COLORS, % upper-bound on the number of colors
 	UB_SCORE, % upper-bound on score
 };
 
@@ -68,7 +68,7 @@ enum WVCP_MODEL = {
 	M_DR2, % enforces Dynamic Heaviest Dominating Color rule
 };
 
-% Instance flags
+% Instance options
 set of WVCP_BOUNDS: WVCP_B;
 set of WVCP_MODEL: WVCP_M;
 
@@ -79,7 +79,7 @@ set of WVCP_MODEL: WVCP_M;
 % range of *real vertices*
 set of int: R_VERTEX = 1..nr_vertices;
 % range of colors
-set of int: COLOR = 1..ub_colors;
+set of int: COLOR = 1..nr_vertices;
 % range of *virtual vertices*
 % one virtual vertex is defined per color
 % virtual vertex of i-th color identified by max(R_VERTEX)+i
