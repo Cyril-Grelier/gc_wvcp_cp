@@ -23,10 +23,10 @@
 % -d default_ub_score.dzn \
 % -d no_cliques.dzn \
 % -d ../reduced_wvcp_dzn/p06.dzn \
-% -m ./wvcp/wvcp_solve.mzn
+% -m ./primal/primal_solve.mzn
 % ```
 
-% - runs the primal model [`-m wvcp/wvcp_solve.mzn`]
+% - runs the primal model [`-m primal/primal_solve.mzn`]
 % - on reduced instance `p06`  [`-d ../reduced_wvcp_dzn/p06.dzn`]
 % - using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
 % - using a 5 minutes timeout [`--time-limit 300000`]
@@ -47,7 +47,7 @@
 
 % - All heuristic options supported in the primal model have to be set but some be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command will not be used by the search process.
 
-% - Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command). They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `wvcp/wvcp_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
+% - Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command). They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `primal/primal_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
 
 
 
@@ -59,7 +59,7 @@
 
 % To extract the score of the optimal solution (if found) and the solver run time (excludes minzinc flattening time), use `jq` by piping the output of the above command as follows:
 
-% minizinc --solver or-tools ... -m ./wvcp/wvcp_solve.mzn \
+% minizinc --solver or-tools ... -m ./primal/primal_solve.mzn \
 % --no-intermediate \
 % --output-mode json \
 % --json-stream \
@@ -71,7 +71,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FILE INCLUSION
 
-include "../data.mzn";
+include "../core/data.mzn";
 
 include "alldifferent.mzn";
 include "arg_min.mzn";

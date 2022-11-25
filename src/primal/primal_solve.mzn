@@ -1,6 +1,6 @@
-include "wvcp.mzn";
-include "wvcp_heuristics.mzn";
-include "wvcp_output.mzn";
+include "primal.mzn";
+include "primal_heuristics.mzn";
+include "primal_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

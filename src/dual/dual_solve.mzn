@@ -1,6 +1,6 @@
-include "mwssp.mzn";
-include "mwssp_heuristics.mzn";
-include "mwssp_output.mzn";
+include "dual.mzn";
+include "dual_heuristics.mzn";
+include "dual_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

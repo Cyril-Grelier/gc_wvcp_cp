@@ -1,8 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MWSSP HEURISTICS
 
-include "../heuristics.mzn";
-include "mwssp.mzn";
+include "../core/heuristics.mzn";
+include "dual.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -1,8 +1,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MWSSP+WVCP HEURISTICS
 
-include "../mwssp/mwssp_heuristics.mzn";
-include "../wvcp/wvcp_heuristics.mzn";
+include "../dual/dual_heuristics.mzn";
+include "../primal/primal_heuristics.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

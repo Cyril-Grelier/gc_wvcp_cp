@@ -1,6 +1,6 @@
-include "mwssp_wvcp.mzn";
-include "mwssp_wvcp_heuristics.mzn";
-include "mwssp_wvcp_output.mzn";
+include "joint.mzn";
+include "joint_heuristics.mzn";
+include "joint_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

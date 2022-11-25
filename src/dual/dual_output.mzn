@@ -1,7 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AFFICHAGE
 
-include "../instance_output.mzn";
+include "../core/instance_output.mzn";
 
 %%
 function array[int] of string: show_mwssp_heuristics() =

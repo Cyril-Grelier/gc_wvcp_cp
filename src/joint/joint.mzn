@@ -1,5 +1,5 @@
-include "../wvcp/wvcp.mzn";
-include "../mwssp/mwssp.mzn";
+include "../primal/primal.mzn";
+include "../dual/dual.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

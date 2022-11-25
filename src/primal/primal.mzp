@@ -1,0 +1,28 @@
+{
+    "openFiles": [
+        "primal_heuristics.mzn",
+        "primal_solve.mzn",
+        "primal.mzn"
+    ],
+    "openTab": 1,
+    "projectFiles": [
+        "../../original_wvcp_dzn/p06.dzn",
+        "../../reduced_wvcp_dzn/p06.clq.dzn",
+        "../../reduced_wvcp_dzn/p06.dzn",
+        "../core/data.mzn",
+        "../core/default_ub_colors.dzn",
+        "../core/default_ub_score.dzn",
+        "../core/heuristics.mzn",
+        "../core/instance_output.mzn",
+        "../core/no_cliques.dzn",
+        "../core/parameters.dzn",
+        "primal.mpc",
+        "primal.mzn",
+        "primal_heuristics.mzn",
+        "primal_output.mzn",
+        "primal_parameters.dzn",
+        "primal_solve.mzn"
+    ],
+    "selectedSolverConfigFile": "primal.mpc",
+    "version": 106
+}

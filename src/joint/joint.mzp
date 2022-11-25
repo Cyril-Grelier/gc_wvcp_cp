@@ -1,0 +1,31 @@
+{
+    "openFiles": [
+        "joint.mzn",
+        "joint_heuristics.mzn",
+        "joint_solve.mzn"
+    ],
+    "openTab": 2,
+    "projectFiles": [
+        "../../reduced_wvcp_dzn/p06.clq.dzn",
+        "../../reduced_wvcp_dzn/p06.dzn",
+        "../core/data.mzn",
+        "../core/default_ub_colors.dzn",
+        "../core/default_ub_score.dzn",
+        "../core/heuristics.mzn",
+        "../core/instance_output.mzn",
+        "joint.mpc",
+        "joint.mzn",
+        "joint_heuristics.mzn",
+        "joint_output.mzn",
+        "joint_parameters.dzn",
+        "joint_solve.mzn",
+        "../dual/dual.mzn",
+        "../dual/dual_heuristics.mzn",
+        "../core/no_cliques.dzn",
+        "../core/parameters.dzn",
+        "../primal/primal.mzn",
+        "../primal/primal_heuristics.mzn"
+    ],
+    "selectedSolverConfigFile": "joint.mpc",
+    "version": 106
+}

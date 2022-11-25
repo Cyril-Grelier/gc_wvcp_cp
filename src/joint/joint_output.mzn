@@ -1,6 +1,6 @@
-include "../instance_output.mzn";
-include "../wvcp/wvcp_output.mzn";
-include "../mwssp/mwssp_output.mzn";
+include "../core/instance_output.mzn";
+include "../primal/primal_output.mzn";
+include "../dual/dual_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
