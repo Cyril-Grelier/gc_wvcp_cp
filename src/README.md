@@ -45,7 +45,7 @@ To install the Minizinc distribution and IDE, visit [Minizinc](https://www.miniz
 
 ## OR-Tools
 
-To install the OR-Tools plugin for Flatzinc and adding it to Minizinc IDE:
+To install the OR-Tools plugin for Flatzinc and add it to Minizinc IDE:
 
 1. Download the [ORT v9.2 archive](https://github.com/google/or-tools/releases/tag/v9.2)
 2. Extract in the directory of your choosing
@@ -83,10 +83,10 @@ Note
 
 # Datasets
 
-Two variants of each WVCP instance are available: 
+Each WVCP instance may be reduced by removing redundant vertices using precomputed cliques. Instances and their reduced forms are provided in separate directories
 
-- the original instance located in `../original_wvcp_dzn`
-- the reduced instance obtained by generating cliques and removing redundant vertices and located in `../reduced_wvcp_dzn`.
+- `../original_wvcp_dzn` - contains the original instances
+- `../reduced_wvcp_dzn` - contains the reduced instances
 
 Each variant is encoded using one or two `dzn` files sharing the same instance name (eg. `C2000.5`) but having different extensions: 
 
@@ -146,9 +146,9 @@ The following data files *may* be used to enforce default values
 Options serve different purposes
 
 - to enforce upper bound constraints
-- to exploit a weight-based ordering of vertices
+- to take advantage of the weight-based ordering of vertices
 - to enforce additional coloring and symmetry breaking rules
-- to select the search strategy and variable and value selection heuristics.
+- to select the search and restart strategies and the variable and value selection heuristics.
 
 <!-- TODO - to exploit a precomputed set of cliques -->
 
@@ -167,7 +167,7 @@ Option `WVCP_B` indicates whether the user-defined upper bounds should be enforc
 
 Option `WVCP_M` regroups various flags that switch on or off different fragments of the model. Its value *must* be any subset of the following enumeration cases
 
-- `M_SORT` - if supplied, the model is adapted according to whether or not vertices are encoded in descending order of weights
+- `M_SORT` - if supplied, the model is adapted if vertices are sorted in descending order of weights
 - `M_CLIQUES` - if supplied, the modeling of each user-defined clique by a clique of binary disequality constraints is replaced with a single all-different constraint 
 - `M_SR1` - if supplied, enforces symmetry breaking rule SR1 (Static Greatest Dominating Vertex rule)
 - `M_DR1` - if supplied, enforces symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule)
@@ -274,8 +274,8 @@ We provide below samples of commands for each model then discuss additional opti
 
 Notes
 
-1. For the Minizinc option `solver`, use either `com.google.or-tools`, `org.gecode.gecode` or `org.chuffed.chuffed`
-2. Time-out values for the Minizinc option `time-limit` should be given in milliseconds
+1. For Minizinc option `solver`, use either `com.google.or-tools`, `org.gecode.gecode` or `org.chuffed.chuffed`
+2. Time-out values for Minizinc option `time-limit` should be given in milliseconds
 
 ---
 
@@ -318,17 +318,17 @@ minizinc \
 - leveraging the ordering of vertices, if any [flag `M_SORT`]
 - enforcing symmetry breaking rules SR1 [flag `M_SR1`], DR1 [flag `M_DR1`], SR2 [flag `M_SR2`] and DR2 [flag `M_DR2`]
 - using 
-    -- the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`] 
-    -- the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
-    -- the domain bisection value selection heuristics [`-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT"`]
-- displaying flattener [--compiler-statistics] and solver [--solver-statistics] statistics
-- and displaying intermediate solutions [--intermediate]
+    - the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`] 
+    - the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
+    - the domain bisection value selection heuristics [`-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT"`]
+- displaying flattener [`--compiler-statistics`] and solver [`--solver-statistics`] statistics
+- and displaying intermediate solutions [`--intermediate`]
 
 Note
 
-- All heuristic options supported in the primal model have to be set but some be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command will not be used by the search process.
+- All heuristic options supported in the primal model *have* to be set although some will be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command since the search strategy is to branch on vertices (`WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`).
 
-- Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command). They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `primal/primal_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
+- Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command. They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `primal/primal_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
 
 
 ---
@@ -402,7 +402,7 @@ To output results as json objects, use option `--output-mode json`.
 
 To output a stream of json objects rather than unstructured text, use option `--json-stream`.
 
-To extract the score of the optimal solution (if found) and the solver run time (excludes minzinc flattening time), use `jq` by piping the output of your command. For instance, extracting score and run time for a run with the primal model:
+To extract the score of the optimal solution (if found) and the solver run time (excludes minzinc flattening time), use `jq` by piping the output of your command. For instance, to extract score and run time for a run with the primal model, use
 
 ```bash
 minizinc --solver or-tools ... -m ./primal/primal_solve.mzn \
@@ -416,12 +416,12 @@ minizinc --solver or-tools ... -m ./primal/primal_solve.mzn \
 
 # Tuning the solver
 
-Default solver configurations and options set in the files `primal/primal.mpc`, `dual/dual.mpc` and `joint/joint.mpc` may be adapted and passed on the command line or used from the commmand-line.
+Default solver configurations and options set in the files `primal/primal.mpc`, `dual/dual.mpc` and `joint/joint.mpc` may be adapted and passed on the command line or used from the IDE.
 
 ---
 
 # Running models from the IDE
 
-Minizinc project files to launch from the IDE are available for each model: `primal/primal.mzp`, `dual/dual.mzp` and `joint/joint.mzp`.
+3 Minizinc project files to launch from the IDE are supplied for each model: `primal/primal.mzp`, `dual/dual.mzp` and `joint/joint.mzp`.
 
 
