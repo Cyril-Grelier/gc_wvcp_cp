@@ -178,8 +178,8 @@ class Graph:
         with open(output_file, "w", encoding="utf8") as file:
 
             file.write(f'name="{self.name}";\n')
-            file.write(f'nr_vertices={self.nb_vertices};\n')
-            file.write(f'nr_edges={self.nb_edges};\n')
+            file.write(f"nr_vertices={self.nb_vertices};\n")
+            file.write(f"nr_edges={self.nb_edges};\n")
 
             # add edges
             # file.write("edges=[")
