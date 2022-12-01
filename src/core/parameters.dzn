@@ -63,3 +63,9 @@ WVCP_M	= {M_SORT,                          M_SR2, M_DR2};
 % WVCP_M	= {M_SORT, M_CLIQUES,               M_SR2,      };
 % WVCP_M	= {M_SORT, M_CLIQUES,                      M_DR2};
 % WVCP_M	= {M_SORT, M_CLIQUES,               M_SR2, M_DR2};
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+% Fix model flags by uncommenting a single line (see data.mzn)
+
+WVCP_DR2 = M_DR2_GCC_ARGM % uses GCC + ARG_MIN
