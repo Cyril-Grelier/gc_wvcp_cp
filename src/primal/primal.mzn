@@ -3,27 +3,7 @@
 % 
 % This command
 %
-% minizinc \
-% --solver or-tools \
-% --time-limit 300000 \
-% --parallel 8 \
-% --compiler-statistics --solver-statistics \
-% --intermediate \
-% -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
-% -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
-% -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
-% -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" \
-% -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" \
-% -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
-% -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
-% -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
-% -D "WVCP_B={UB_COLORS,UB_SCORE}" \
-% -D "WVCP_M={M_SORT,M_SR1,M_DR1,M_DR2,M_SR2}" \
-% -d default_ub_colors.dzn \
-% -d default_ub_score.dzn \
-% -d no_cliques.dzn \
-% -d ../reduced_wvcp_dzn/p06.dzn \
-% -m ./primal/primal_solve.mzn
+% minizinc --solver or-tools --time-limit 300000 --parallel 8 --compiler-statistics --solver-statistics --intermediate -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" -D "WVCP_SEARCH_RESTART=RESTART_NONE" -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" -D "WVCP_B={UB_COLORS,UB_SCORE}" -D "WVCP_M={M_SORT,M_SR1,M_DR1,M_DR2,M_SR2}" -D "WVCP_DR2=M_DR2_GCC_ARGM" -d ./core/default_ub_colors.dzn -d ./core/default_ub_score.dzn -d ./core/no_cliques.dzn -d ../reduced_wvcp_dzn/p06.dzn -m ./primal/primal_solve.mzn
 % ```
 
 % - runs the primal model [`-m primal/primal_solve.mzn`]
