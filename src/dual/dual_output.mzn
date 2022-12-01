@@ -21,6 +21,6 @@ function array[int] of string: show_mwssp_solution() =
 
 %%
 function array[int] of string: show_mwssp_score() =
-			["MWSSP scores"]
+			["MWSSP score + WVCP score = Sum(weights)"]
 	++		STAB
-	++		[show(y_score) ++  " <= " ++  show(ub_score) ++  " <= " ++  show(sum(weight))];
+	++		[show(y_score) ++  " + " ++  show(sum(weight) - y_score) ++  " = " ++  show(sum(weight))];
