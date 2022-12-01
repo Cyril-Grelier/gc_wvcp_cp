@@ -26,7 +26,7 @@ int: ub_score;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ASSERTIONS
+% DATA ASSERTIONS
 
 constraint assert(nr_vertices>0, "assertion failed: at least one vertex");
 
@@ -68,9 +68,21 @@ enum WVCP_MODEL = {
 	M_DR2, % enforces Dynamic Heaviest Dominating Color rule
 };
 
+% DR2 model
+enum DR2_MODEL = {
+	M_DR2_GCC_ARGM % uses GCC + ARG_MIN
+};
+
 % Instance options
 set of WVCP_BOUNDS: WVCP_B;
 set of WVCP_MODEL: WVCP_M;
+DR2_MODEL: WVCP_DR2;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% META-MODEL ASSERTIONS
+
+constraint assert(I_SORT -> (M_SORT in WVCP_MODEL), "assertion failed: sorted intance requires M_SORT flag");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
