@@ -265,8 +265,7 @@ The following data files _may_ be used to enforce default values
 Options serve different purposes
 
 - to enforce upper bound constraints
-- to take advantage of the weight-based ordering of vertices
-- to enforce additional coloring and symmetry breaking rules
+- to enforce coloring and symmetry breaking rules
 - to select the search and restart strategies and the variable and value selection heuristics.
 
 <!-- TODO - to exploit a precomputed set of cliques -->
@@ -286,7 +285,6 @@ Option `WVCP_B` indicates whether the user-defined upper bounds should be enforc
 
 Option `WVCP_M` regroups various flags that switch on or off different fragments of the model. Its value _must_ be any subset of the following enumeration cases
 
-- `M_SORT` - if supplied, the model is adapted if vertices are sorted in descending order of weights
 - `M_CLIQUES` - if supplied, the modeling of each user-defined clique by a clique of binary disequality constraints is replaced with a single all-different constraint
 - `M_SR1` - if supplied, enforces symmetry breaking rule SR1 (Static Greatest Dominating Vertex rule)
 - `M_DR1` - if supplied, enforces symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule)
@@ -295,7 +293,9 @@ Option `WVCP_M` regroups various flags that switch on or off different fragments
 
 Notes
 
-- The model systematically checks whether vertices are readily sorted in the instance but does not perform any sort itself. Constraints are adapted based on the result and whether `M_SORT` is set or not, effectively leading to 4 different model variants.
+- The model systematically checks whether vertices are readily sorted in the instance and adapts constraint formulations accordingly.
+
+- The dynamic variant of each rule subsumes its static variant (eg. `DR1` is stronger than `SR1`). For this reason, the model only allows one of them to be checked and exits otherwise. 
 
 - The symmetry breaking rules are implemented in the primal model and documented in file `primal/primal.mzn`.
 
@@ -416,7 +416,7 @@ minizinc \
 -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
 -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
 -D "WVCP_B={UB_COLORS,UB_SCORE}" \
--D "WVCP_M={M_SORT,M_SR1,M_DR1,M_SR2,M_DR2}" \
+-D "WVCP_M={M_SR1,M_DR2}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
@@ -432,8 +432,7 @@ minizinc \
   - the number of colors [flag `UB_COLORS`] using the default upper-bound value [`-d core/defaut_ub_colors.dzn`]
   - the score [flag `UB_SCORE`] using the default upper-bound value [`-d core/defaut_ub_score.dzn`]
 - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d core/no_cliques.dzn`]
-- leveraging the ordering of vertices, if any [flag `M_SORT`]
-- enforcing symmetry breaking rules SR1 [flag `M_SR1`], DR1 [flag `M_DR1`], SR2 [flag `M_SR2`] and DR2 [flag `M_DR2`]
+- enforcing symmetry breaking rules SR1 [flag `M_SR1`] and DR2 [flag `M_DR2`]
 - using
   - the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`]
   - the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
@@ -465,7 +464,7 @@ minizinc \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
 -D "WVCP_B={UB_COLORS,UB_SCORE}" \
--D "WVCP_M={M_SORT}" \
+-D "WVCP_M={}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
@@ -500,7 +499,7 @@ minizinc \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
 -D "WVCP_B={UB_COLORS,UB_SCORE}" \
--D "WVCP_M={M_SORT}" \
+-D "WVCP_M={}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
