@@ -1,74 +1,4 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% RUNNING FROM THE COMMAND LINE - EXAMPLE
-% 
-% This command
-%
-% minizinc \
-% --solver or-tools \
-% --time-limit 300000 \
-% --parallel 8 \
-% --compiler-statistics --solver-statistics \
-% --intermediate \
-% -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
-% -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
-% -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
-% -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" \
-% -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" \
-% -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
-% -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
-% -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
-% -D "WVCP_B={UB_COLORS,UB_SCORE}" \
-% -D "WVCP_M={M_SORT,M_SR1,M_DR1,M_DR2,M_SR2}" \
-% -d default_ub_colors.dzn \
-% -d default_ub_score.dzn \
-% -d no_cliques.dzn \
-% -d ../reduced_wvcp_dzn/p06.dzn \
-% -m ./primal/primal_solve.mzn
-% ```
-
-% - runs the primal model [`-m primal/primal_solve.mzn`]
-% - on reduced instance `p06`  [`-d ../reduced_wvcp_dzn/p06.dzn`]
-% - using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
-% - using a 5 minutes timeout [`--time-limit 300000`]
-% - enforcing upper bound constraints on
-%     - the number of colors [flag `UB_COLORS`] using the default upper-bound value [`-d defaut_ub_colors.dzn`]
-%     - the score [flag `UB_SCORE`] using the default upper-bound value [`-d defaut_ub_score.dzn`]
-% - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d no_cliques.dzn`]
-% - leveraging the ordering of vertices, if any [flag `M_SORT`]
-% - enforcing symmetry breaking rules SR1 [flag `M_SR1`], DR1 [flag `M_DR1`], SR2 [flag `M_SR2`] and DR2 [flag `M_DR2`]
-% - using 
-%     -- the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`] 
-%     -- the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
-%     -- the domain bisection value selection heuristics [`-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT"`]
-% - displaying flattener [--compiler-statistics] and solver [--solver-statistics] statistics
-% - and displaying intermediate solutions [--intermediate]
-
-% Note
-
-% - All heuristic options supported in the primal model have to be set but some be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command will not be used by the search process.
-
-% - Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) *must* be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command). They *must not* be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `primal/primal_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
-
-
-
-% To disable the output of intermediate solution, use option `--no-intermediate`.
-
-% To output results as json objects, use option `--output-mode json`
-
-% To output a stream of json objects rather than unstructured text, use option `--json-stream`.
-
-% To extract the score of the optimal solution (if found) and the solver run time (excludes minzinc flattening time), use `jq` by piping the output of the above command as follows:
-
-% minizinc --solver or-tools ... -m ./primal/primal_solve.mzn \
-% --no-intermediate \
-% --output-mode json \
-% --json-stream \
-%  | tail -n 1 | jq '.statistics.objective, .statistics.solveTime'
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % FILE INCLUSION
 
 include "../core/data.mzn";
@@ -82,7 +12,6 @@ include "global_cardinality_fn.mzn";
 include "int_set_channel.mzn";
 include "lex_chain_greater.mzn";
 % include "member.mzn";
-include "strictly_decreasing.mzn";
 include "strictly_increasing.mzn";
 
 
@@ -254,6 +183,7 @@ if not(M_SORT in WVCP_M)
 then
 lex_chain_greater(array2d(1..2, COLOR, x_weight ++ [max(VERTEX) - min(x_vertices[c]) | c in COLOR]))
 % alternative custom formulation
+% include "strictly_decreasing.mzn";
 % strictly_decreasing([max(VERTEX)*x_weight[c] - min(x_vertices[c] | c in COLOR]);
 endif;
 
