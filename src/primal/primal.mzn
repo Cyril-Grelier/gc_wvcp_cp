@@ -4,10 +4,10 @@
 include "../core/data.mzn";
 
 include "alldifferent.mzn";
+include "arg_max.mzn"; % !! required by arg_min only!!
 include "arg_min.mzn";
-include "arg_max.mzn";
 include "arg_sort.mzn";
-% include "decreasing.mzn";
+include "decreasing.mzn";
 include "global_cardinality_fn.mzn";
 include "int_set_channel.mzn";
 include "lex_chain_greater.mzn";
@@ -57,51 +57,60 @@ include "strictly_increasing.mzn";
 
 % sorts the set of (real) vertices U in descending order of weight with >_{w}
 array[int] of R_VERTEX: sort_by_desc_weight(set of R_VERTEX: U) =
-	let {
-	array[int] of R_VERTEX: s2a = set2array(U);
-	% only used for "unsorted" models
-	array[int] of R_VERTEX: as = if (M_SORT in WVCP_M) /\ I_SORT then [] else arg_sort([-weight[s2a[i]] | i in index_set(s2a)]) endif;
-	} in
-	if (M_SORT in WVCP_M) /\ I_SORT
-	then s2a	
-	else	[s2a[as[i]] | i in index_set(as) ]
+	if I_SORT
+	then
+		set2array(U)
+	else
+		let {
+			array[int] of R_VERTEX: s2a = set2array(U);
+			% sort in descending order of weights
+			array[index_set(s2a)] of R_VERTEX: as = arg_sort([-weight[s2a[i]] | i in index_set(s2a)]);
+		} in
+			array1d(index_set(s2a), [s2a[as[i]] | i in index_set(as)])
 	endif;
 
 % checks whether u is greater than v (u>_{w}v)
 function bool: greater(VERTEX: u, VERTEX: v) =
-	if (M_SORT in WVCP_M) /\ I_SORT
-	then	u<v
-	else	not(weight[u]>weight[v]) -> (weight[u]=weight[v] /\ u<v)
+	if I_SORT
+	then
+		u<v
+	else
+		(weight[u]>weight[v]) \/ (weight[u]=weight[v] /\ u<v)
 	endif;
 
 % returns greatest of (real) vertices in U with >_{w}
 %% par version
 R_VERTEX: greatest(set of R_VERTEX: U) =
-	if	(M_SORT in WVCP_M) /\ I_SORT
-	then	min(U)
-	else	sort_by_desc_weight(U)[1]
+	if	I_SORT
+	then
+		min(U)
+	else
+		sort_by_desc_weight(U)[1]
 	endif;
 
 %% var version
+array[VERTEX] of VERTEX: sorted_vertices =
+if I_SORT
+then
+	set2array(VERTEX)
+else
+	sort_by_desc_weight(R_VERTEX) ++ set2array(V_VERTEX)
+endif;
+	
 var VERTEX: greatest(var set of VERTEX: U) =
-	if 			(M_SORT in WVCP_M) /\ I_SORT
-	% (a) constraint formulation when vertices are readily sorted in descending order of weights using >_{w}
-	then	min(U)
-	elseif	(M_SORT in WVCP_M) /\ not(I_SORT)
-	% (b) constraint formulation when the model has sorted vertices in descending order of weights using >_{w}
-	then	vertices[arg_max(i in index_set(vertices))(vertices[i] in U)]
-	%	(c) constraint formulation that assumes no vertex ordering
-	else	arg_max(u in VERTEX)((u in U)*(1+weight[u])) % 1+weight not to nullify virtual vertices
+	if I_SORT
+	then
+		min(U)
+	else
+		sorted_vertices[arg_min(i in index_set(sorted_vertices))(not(sorted_vertices[i] in U))]
 	endif;
 
-% V sorted in descending order of weights with >_{w}
-array[VERTEX] of VERTEX: vertices = array1d(VERTEX, sort_by_desc_weight(R_VERTEX) ++ set2array(V_VERTEX));
 
 % the non-adjacent vertices of a vertex
-array[R_VERTEX] of set of R_VERTEX: NA = array1d(R_VERTEX, [R_VERTEX diff ({v} union neighbours[v]) | v in R_VERTEX]);
+array[R_VERTEX] of set of R_VERTEX: NA = [R_VERTEX diff ({v} union neighbours[v]) | v in R_VERTEX];
 
 % amongst the non-adjacent vertices of a vertex, the vertices greater than the vertex
-array[R_VERTEX] of set of R_VERTEX: GNA = array1d(R_VERTEX, [{u | u in NA[v] where greater(u,v)} | v in R_VERTEX]);
+array[R_VERTEX] of set of R_VERTEX: GNA = [{u | u in NA[v] where greater(u,v)} | v in R_VERTEX];
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -121,7 +130,7 @@ array[COLOR] of var set of VERTEX: x_vertices;
 array[COLOR] of var WEIGHT: x_weight;
 
 % whether a color is used or not
-array[COLOR] of var bool: x_used = array1d(COLOR, [card(x_vertices[c])!=1 | c in COLOR]);
+array[COLOR] of var bool: x_used = [card(x_vertices[c])!=1 | c in COLOR];
 
 % the number of used colors
 var COLOR: x_nr_used = sum(x_used);
@@ -159,17 +168,17 @@ forall(k in CLIQUE where (M_CLIQUES in WVCP_M)) ( % /\ not(M_DR2 in WVCP_M))(
 %%%%%%%%%%%%
 % weights of colors
 
-%	(a) generic constraint formulation that assumes no vertex ordering
+% (a) optimized constraint formulation when vertices are sorted in descending order of weights using >_{w}
 constraint
-forall(c in COLOR where not(M_SORT in WVCP_M))(
-	x_weight[c] = max(u in x_vertices[c])(weight[u])
-);
-% (b) optimized constraint formulation when vertices are sorted in descending order of weights using >_{w}
-constraint
-forall(c in COLOR where M_SORT in WVCP_M)(
+forall(c in COLOR where I_SORT)(
 	x_weight[c] = weight[greatest(x_vertices[c])]
 );
 
+%	(b) generic constraint formulation that assumes no vertex ordering
+constraint
+forall(c in COLOR where not(I_SORT))(
+	x_weight[c] = max(u in x_vertices[c])(weight[u])
+);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SYMMETRY BREAKING RULES
@@ -179,19 +188,19 @@ forall(c in COLOR where M_SORT in WVCP_M)(
 
 % (a) generic constraint formulation that assumes no existing ordering of vertices - uses global constraint lex_chain_greater
 constraint
-if not(M_SORT in WVCP_M)
+if not(I_SORT)
 then
-lex_chain_greater(array2d(1..2, COLOR, x_weight ++ [max(VERTEX) - min(x_vertices[c]) | c in COLOR]))
-% alternative custom formulation
-% include "strictly_decreasing.mzn";
-% strictly_decreasing([max(VERTEX)*x_weight[c] - min(x_vertices[c] | c in COLOR]);
+	lex_chain_greater(array2d(1..2, COLOR, x_weight ++ [max(VERTEX) - greatest(x_vertices[c]) | c in COLOR]))
+	% alternative custom formulation
+	% include "strictly_decreasing.mzn";
+	% strictly_decreasing([max(VERTEX)*x_weight[c] - greatest(x_vertices[c] | c in COLOR]);
 endif;
 
 % (b) optimized constraint formulation when vertices are sorted in descending order of weights using >>_{w} (check speedup factor against generic formulation on R100_1g.dzn!)
 constraint
-if (M_SORT in WVCP_M)
+if I_SORT
 then
-strictly_increasing([greatest(x_vertices[c]) | c in COLOR])
+	strictly_increasing([greatest(x_vertices[c]) | c in COLOR])
 endif;
 
 
@@ -315,8 +324,8 @@ predicate DGDC() =
 % Returns s-GDC of vertex v
 function var COLOR: GDC(R_VERTEX: v) =
 	let {
-	% the neighbours of each vertex sorted in descending order of weight (>_{w})
-	array[int] of R_VERTEX: SN = sort_by_desc_weight(neighbours[v]);
+	% the neighbours of each vertex
+	array[int] of R_VERTEX: SN = neighbours[v];
 	% candidate colors for GDC of v
 	set of COLOR: C = 1..min(max(COLOR),card(index_set(SN))+1);
 	% number of neighbours of v in each color of C
@@ -337,7 +346,7 @@ function array[int] of int: count_DGDC() =
 	
 function COLOR: fix_GDC(R_VERTEX: v) =
 	let {
-	array[int] of R_VERTEX: SN = sort_by_desc_weight(neighbours[v]);
+	array[int] of R_VERTEX: SN = neighbours[v];
 	set of COLOR: C = 1..min(max(COLOR),card(index_set(SN))+1);
 	}
 	in arg_min(c in C)(exists(i in index_set(SN))(fix(x_color[SN[i]]) = c));

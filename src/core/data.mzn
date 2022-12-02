@@ -26,7 +26,7 @@ int: ub_score;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% ASSERTIONS
+% DATA ASSERTIONS
 
 constraint assert(nr_vertices>0, "assertion failed: at least one vertex");
 
@@ -60,7 +60,6 @@ enum WVCP_BOUNDS = {
 % Model features
 % TODO WVCP-specific flags (?) -> move elsewhere
 enum WVCP_MODEL = {
-	M_SORT, % indicates if models sorts vertices in descending order of weight
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1, % enforces Dynamic Greatest Dominating Vertex rule
@@ -71,6 +70,13 @@ enum WVCP_MODEL = {
 % Instance options
 set of WVCP_BOUNDS: WVCP_B;
 set of WVCP_MODEL: WVCP_M;
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% META-MODEL ASSERTIONS
+
+constraint assert(not({M_SR1, M_DR1} subset WVCP_M), "assertion failed: M_SR1 => not(M_DR1)");
+constraint assert(not({M_SR2, M_DR2} subset WVCP_M), "assertion failed: M_SR2 => not(M_DR2)");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -7,8 +7,8 @@ include "dual_output.mzn";
 % RESOLUTION
 
 solve :: mwssp_search() :: mwssp_restart()
-  maximize(y_score);
-
+%   maximize(y_score);
+	minimize sum(weight) - y_score;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AFFICHAGE
