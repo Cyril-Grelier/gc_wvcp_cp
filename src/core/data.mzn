@@ -32,8 +32,7 @@ constraint assert(nr_vertices>0, "assertion failed: at least one vertex");
 
 constraint assert(2*nr_edges = sum(i in index_set(neighborhoods))(card(neighborhoods[i])), "assertion failed: nr_edges inconsistent with total size of neighborhoods");
 constraint assert(forall(i in index_set(neighborhoods))(neighborhoods[i] subset 0..nr_vertices-1), "assertion failed: neighbor out of bounds");
-% not required in current instance format version
-% constraint assert(forall(i in index_set(neighborhoods))(i < min(neighborhoods[i])), "assertion failed: lower ranked neighbor");
+% constraint assert(forall(i in index_set(neighborhoods))(neighborhoods[i] != {}), "assertion failed: empty neighborhood");
 
 constraint assert(forall(i in index_set(weights))(weights[i]>=0), "assertion failed: negative vertex weight");
 % setting flag to indicate whether vertices are readily sorted in descending order of weight
@@ -111,7 +110,7 @@ array[VERTEX] of WEIGHT: weight = [weights[i] | i in index_set(weights)] ++ [0 |
 array[CLIQUE] of set of VERTEX: clique = [{min(R_VERTEX)+v | v in cliques[i]} | i in index_set(cliques)];
 
 % range of WVCP objective function
-set of int: SCORE = max(weights)..sum(weights);
+set of int: SCORE = max(weight)..sum(weight);
 
 % graph density
 float: density = sum(v in R_VERTEX)(card(neighbours[v])) / max({1,(card(R_VERTEX)*(card(R_VERTEX)-1))});
