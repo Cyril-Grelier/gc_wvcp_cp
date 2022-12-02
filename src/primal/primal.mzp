@@ -1,14 +1,18 @@
 {
     "openFiles": [
         "primal_heuristics.mzn",
-        "primal_solve.mzn",
-        "primal.mzn"
+        "primal.mzn",
+        "primal_solve.mzn"
     ],
-    "openTab": 1,
+    "openTab": 2,
     "projectFiles": [
         "../../original_wvcp_dzn/p06.dzn",
         "../../reduced_wvcp_dzn/p06.clq.dzn",
         "../../reduced_wvcp_dzn/p06.dzn",
+        "../_instances/g1.dzn",
+        "../_instances/g2.dzn",
+        "../_instances/g3.dzn",
+        "../_instances/g4.dzn",
         "../core/data.mzn",
         "../core/default_ub_colors.dzn",
         "../core/default_ub_score.dzn",

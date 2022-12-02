@@ -111,7 +111,7 @@ array[VERTEX] of WEIGHT: weight = [weights[i] | i in index_set(weights)] ++ [0 |
 array[CLIQUE] of set of VERTEX: clique = [{min(R_VERTEX)+v | v in cliques[i]} | i in index_set(cliques)];
 
 % range of WVCP objective function
-set of int: SCORE = max(weight)..sum(weight);
+set of int: SCORE = max(weights)..sum(weights);
 
 % graph density
 float: density = sum(v in R_VERTEX)(card(neighbours[v])) / max({1,(card(R_VERTEX)*(card(R_VERTEX)-1))});
