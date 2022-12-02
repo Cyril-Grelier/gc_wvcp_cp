@@ -2,9 +2,10 @@
     "openFiles": [
         "primal_heuristics.mzn",
         "primal.mzn",
-        "primal_solve.mzn"
+        "primal_solve.mzn",
+        "../core/data.mzn"
     ],
-    "openTab": 2,
+    "openTab": 1,
     "projectFiles": [
         "../../original_wvcp_dzn/p06.dzn",
         "../../reduced_wvcp_dzn/p06.clq.dzn",
@@ -28,6 +29,8 @@
         "primal_objective.mzn",
         "primal_output.mzn",
         "primal_parameters.dzn",
+        "primal_rule_R1.mzn",
+        "primal_rule_R2.mzn",
         "primal_rules.mzn",
         "primal_solve.mzn",
         "primal_variables.mzn"
