@@ -3,3 +3,6 @@ black
 flake8
 pylint
 mypy
+plotly
+igraph
+pandas
