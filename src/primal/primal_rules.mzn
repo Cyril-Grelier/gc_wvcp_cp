@@ -1,6 +1,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SYMMETRY BREAKING RULES
 
+include "lex_chain_greater.mzn";
+include "strictly_increasing.mzn";
+
+
 %%%%%%%%%%%%
 % lexicographic ordering constraint that sorts colors using >>_{c}
 

@@ -41,10 +41,11 @@ function array[int] of string: show_wvcp_score() =
 function array[int] of string: show_wvcp_rules() =
 			["WVCP rules"]
 	++		STAB
-	++		["S-GDV="] ++ [show(count_SGDV())]
+	++		["S-GDV (SR1)="] ++ [show(count_SGDV())]
 	++		STAB
-	++  ["D-GDV="] ++ [show(count_DGDV())]
+	++  ["D-GDV (DR1)="] ++ [show(count_DGDV())]
 	++		STAB
-	++  ["S-HDC="] ++ [show(count_SGDC())]
+	++  [if(M_SR2 in WVCP_M) then show(M_SR2) else "S-GDC" endif ++ "="] ++ [show(count_SGDC())]
 	++		STAB
-	++  ["D-HDC="] ++ [show(count_DGDC())];
+	++  [if(M_DR2_v1 in WVCP_M) then show(M_DR2_v1) elseif(M_DR2_v2 in WVCP_M) then show(M_DR2_v2) else "D-GDC" endif ++ "="] ++ [show(count_DGDC())]
+	;

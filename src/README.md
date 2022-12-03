@@ -289,13 +289,16 @@ Option `WVCP_M` regroups various flags that switch on or off different fragments
 - `M_SR1` - if supplied, enforces symmetry breaking rule SR1 (Static Greatest Dominating Vertex rule)
 - `M_DR1` - if supplied, enforces symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule)
 - `M_SR2` - if supplied, enforces symmetry breaking rule SR2 (Static Greatest Dominating Color rule)
-- `M_DR2` - if supplied, enforces symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
+- `M_DR2_v1` - if supplied, enforces variant 1 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
+- `M_DR2_v2` - if supplied, enforces variant 2 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
 
 Notes
 
 - The model systematically checks whether vertices are readily sorted in the instance and adapts constraint formulations accordingly.
 
-- The dynamic variant of each rule subsumes its static variant (eg. `DR1` is stronger than `SR1`). For this reason, the model only allows one of them to be checked and exits otherwise. 
+- The dynamic variant of each rule entails its static variant (eg. `DR1` is stronger than `SR1`). For this reason, the model only allows one of them to be checked and exits otherwise. 
+
+- The model checks whether redundant or entailed options are requested (eg. `DR2_v1` and `DR2_v2`) and if so exits. 
 
 - The symmetry breaking rules are implemented in the primal model and documented in file `primal/primal.mzn`.
 
@@ -416,7 +419,7 @@ minizinc \
 -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
 -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
 -D "WVCP_B={UB_COLORS,UB_SCORE}" \
--D "WVCP_M={M_SR1,M_DR2}" \
+-D "WVCP_M={M_SR1,M_DR2_v2}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
@@ -432,7 +435,7 @@ minizinc \
   - the number of colors [flag `UB_COLORS`] using the default upper-bound value [`-d core/defaut_ub_colors.dzn`]
   - the score [flag `UB_SCORE`] using the default upper-bound value [`-d core/defaut_ub_score.dzn`]
 - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d core/no_cliques.dzn`]
-- enforcing symmetry breaking rules SR1 [flag `M_SR1`] and DR2 [flag `M_DR2`]
+- enforcing symmetry breaking rules SR1 [flag `M_SR1`] and DR2_v2 [flag `M_DR2_v2`]
 - using
   - the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`]
   - the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]

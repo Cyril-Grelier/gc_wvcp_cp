@@ -63,7 +63,8 @@ enum WVCP_MODEL = {
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1, % enforces Dynamic Greatest Dominating Vertex rule
 	M_SR2, % enforces Static Heaviest Dominating Color rule
-	M_DR2, % enforces Dynamic Heaviest Dominating Color rule
+	M_DR2_v1, % enforces Dynamic Heaviest Dominating Color rule variant 1
+	M_DR2_v2, % enforces Dynamic Heaviest Dominating Color rule variant 2
 };
 
 % Instance options
@@ -75,7 +76,9 @@ set of WVCP_MODEL: WVCP_M;
 % META-MODEL ASSERTIONS
 
 constraint assert(not({M_SR1, M_DR1} subset WVCP_M), "assertion failed: M_SR1 => not(M_DR1)");
-constraint assert(not({M_SR2, M_DR2} subset WVCP_M), "assertion failed: M_SR2 => not(M_DR2)");
+constraint assert(not({M_SR2, M_DR2_v1} subset WVCP_M), "assertion failed: M_SR2 => not(M_DR2_v1)");
+constraint assert(not({M_SR2, M_DR2_v2} subset WVCP_M), "assertion failed: M_SR2 => not(M_DR2_v2)");
+constraint assert(not({M_DR2_v1, M_DR2_v2} subset WVCP_M), "assertion failed: M_DR2_v1 => not(M_DR2_v2)");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

@@ -4,6 +4,9 @@
 % - Rule SR1 assigns to every vertex v the color of its greatest dominating vertex (GDV) if it exists.
 % - Rule DR1 assigns to every vertex v the color of its greatest s-dominating vertex (s-GDV) if it exists.
 
+include "arg_max.mzn"; % !! required by arg_min only!!
+include "arg_min.mzn";
+
 
 %%%%%%%%%%%%
 % Rule SR1 (Static Greatest Dominating Vertex)
