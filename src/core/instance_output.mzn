@@ -11,6 +11,8 @@ function array[int] of string: show_size() =
 	++		["colors=" ++ show(card(COLOR))]
 	++  STAB
 	++  ["vertices=" ++ show(card(R_VERTEX))]
+% 	++  STAB
+% 	++  ["virtuals=" ++ show(V_VERTEX)]
 	++  STAB
 	++		["density=" ++ show(round(100*density)) ++ "%"]
 	++		STAB
