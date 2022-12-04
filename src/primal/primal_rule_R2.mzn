@@ -95,6 +95,7 @@ function var int: wvcp_gdc_2(array[int] of var int: x)
 	in y	;
 
 % predicative GDC2
+% y is uniquely defined and satisfies x[i]!=y for all i in 1..y_ub
 predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
 	if length(x)=0
 	then y = 1
@@ -104,19 +105,30 @@ predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
 			int: u = max(index_set(x));
 			int: n = length(x);
 			int: x_ub = ub_array(x);
-			array[1..n+1] of var 0..x_ub: z;
-			var 1..n+1: y_ub;
+% 			var 1..n+1: y_ub;
+% 			array[l..u,1..n+1] of var 0..1: z;			
+			array[1..n+1] of var 0..x_ub: z_ub;
+% 			array[1..n+1] of var 0..1: z_lb;
 		} in
-				z = [(x[i]<y_ub) * x[i] | i in l..u] ++ [0]
-		/\		y_ub = nvalue(z)
-		/\		y <= y_ub % y is uniquely defined and satisfies x[i]!=y for all i in 1..y_ub
+% 				y >= y_lb
+% 				y <= y_ub
+% 		/\
+				forall(j in 1..n) (z_ub[j] = (x[l+j-1] < y) * x[l+j-1])
+		/\		z_ub[n+1] = 0
+		/\		y = sum(i in 0..x_ub)(exists(j in 1..n+1)(z_ub[j] == i)) % <-> y = nvalue(z_ub)
 	endif;
 	
 
-% for output only: measures application rate of rule DGDC in a solution
+% for output only: measures solution gap with DGDC-based solution for input vertex
+function 0..max(COLOR): count_DGDC_vertex_gap(R_VERTEX: v) =
+	if fix(x_color[v])=1
+	then		0
+	else		arg_min(i in 1..fix(x_color[v])-1)(exists(u in neighbours[v])(fix(x_color[u]) == i))
+	endif;
+
+% for output only: measures solution gap with DGDC-based solution
 function array[int] of int: count_DGDC() =
-	[	count(v in R_VERTEX)
-			(fix(x_color[v]) = arg_min(c in 1..min(max(COLOR),card(neighbours[v])+1))
-													(exists(u in neighbours[v])(fix(x_color[u]) = c))),
-		card(R_VERTEX)
-	];
+	let {
+		array[int] of 0..max(COLOR): gaps = [count_DGDC_vertex_gap(v) | v in R_VERTEX];
+	} in
+	[max(gaps), count(v in R_VERTEX)(gaps[v]>1)];
