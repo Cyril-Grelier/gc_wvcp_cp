@@ -5,9 +5,12 @@ include "alldifferent.mzn";
 include "int_set_channel.mzn";
 
 
-% channeling constraint
+% channeling constraint between color and vertex variables
 constraint
 int_set_channel(x_color, x_vertices);
+
+
+%% COLLORING CONSTRAINTS
 
 % fixed coloring of virtual vertices based on vertex id
 constraint
@@ -15,17 +18,31 @@ forall(v in V_VERTEX)(
   x_color[v] = v - min(V_VERTEX) + 1
 );
 
-% (1) binary coloring constraint between adjacent vertices unless they are part of a clique and clique-specific coloring constraints are enforced 
-constraint
-forall(v in VERTEX, u in neighbours[v] where u<v /\ (exists(k in CLIQUE)({u,v} subset clique[k]) -> not(M_CLIQUES in WVCP_M)) ) (% /\ not(M_DR2_v1 in WVCP_M) )(
-  (x_color[u] != x_color[v])
-);
 
-% (2) clique-specific coloring constraints
+% binary coloring constraint between adjacent vertices
 constraint
-forall(k in CLIQUE where (M_CLIQUES in WVCP_M)) ( % /\ not(M_DR2_v1 in WVCP_M))( 
-  alldifferent([x_color[u] | u in clique[k]]) 
-);
+	if (M_DR2_v3 in WVCP_M)
+	then
+		true % coloring constraints subsume DR2_v3
+	elseif (M_CLIQUES in WVCP_M)
+	then
+		% coloring constraints disabled for edges part of cliques
+		forall(v in VERTEX, u in neighbours[v] where u<v /\ not(exists(k in CLIQUE)({u,v} subset clique[k])))(
+			(x_color[u] != x_color[v])
+		)
+		/\
+		% clique-specific coloring constraints
+		forall(k in CLIQUE)(
+		  alldifferent([x_color[u] | u in clique[k]]) 
+		)
+	else % not(M_DR2_v3 in WVCP_M \/ M_CLIQUES in WVCP_M)
+		% default coloring constraints
+		forall(v in VERTEX, u in neighbours[v] where u<v)(
+			(x_color[u] != x_color[v])
+		)
+	endif;
+
+
 
 %%%%%%%%%%%%
 % weights of colors
