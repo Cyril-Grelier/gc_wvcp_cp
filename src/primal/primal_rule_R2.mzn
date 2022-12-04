@@ -9,17 +9,14 @@
 % - `DR2` assigns to each vertex `v` its greatest s-dominating color.
 
 % `DR2` has alternative formulations:
-% - variant `v1` combines global cardinality and arg_min constraints
-% - variant `v2` uses global constraint `nvalue`.
-
-include "arg_max.mzn"; % !! required by arg_min only!!
-include "arg_min.mzn";
-include "global_cardinality_fn.mzn"; % for DR2_v1
-include "nvalue_fn.mzn"; % for DR2_v2
+% - variant `v1` combines global cardinality and arg_min constraints. Does not entail coloring constraints !
+% - variant `v2` uses reformulation of global constraint `nvalue`. Does not entail coloring constraints !
+% - variant `v3` uses global constraint `nvalue`. Does entail coloring constraints !
 
 	
 %%%%%%%%%%%%
 % Rule SR2
+
 constraint if (M_SR2 in WVCP_M) then SGDC() endif;
 
 predicate SGDC() =
@@ -44,33 +41,48 @@ function array[int] of int: count_SGDC() =
 
 
 %%%%%%%%%%%%
-% Rule DGDC: every vertex is colored by its s-GDC
+% Rule DR2: every vertex is colored by its s-GDC
 
+% rule GDC
 constraint
-	if (M_DR2_v1 in WVCP_M)
+	if ({M_DR2_v1, M_DR2_v2, M_DR2_v3} intersect WVCP_M != {})
 	then
 		forall(v in R_VERTEX) (
-			x_color[v] = wvcp_gdc_1([x_color[u] | u in neighbours[v]])
+			x_color[v] = wvcp_gdc([x_color[u] | u in neighbours[v]])
 		)
-	elseif (M_DR2_v2 in WVCP_M)
-	then
-		forall(v in R_VERTEX) (
-			x_color[v] = wvcp_gdc_2([x_color[u] | u in neighbours[v]])
-		)
-	else true
+	else
+		true
 	endif;
 
-
-% functional GDC1
-function var int: wvcp_gdc_1(array[int] of var int: x)
+% functional constraint GDC
+function var int: wvcp_gdc(array[int] of var int: x)
 	::promise_total =
 	let {
 		var 1..length(x)+1: y::is_defined_var;
-		constraint wvcp_gdc_1(x, y)::defines_var(y);
+		constraint
+			if			(M_DR2_v1 in WVCP_M)
+			then
+				wvcp_gdc_1(x, y)::defines_var(y)
+			elseif	(M_DR2_v2 in WVCP_M)
+			then
+				wvcp_gdc_2(x, y)::defines_var(y)
+			elseif	(M_DR2_v3 in WVCP_M)
+			then
+				wvcp_gdc_3(x, y)::defines_var(y)
+			else true
+			endif;
 	}
 	in y	;
 
-% predicative GDC1
+
+
+%%%%%%%%%%%%
+% GDC constraint - variant 1
+
+include "arg_max.mzn"; % !! required by arg_min only!!
+include "arg_min.mzn";
+include "global_cardinality_fn.mzn";
+
 predicate wvcp_gdc_1(array[int] of var int: x, var int: y) =
 	if length(x)=0
 	then y = 1
@@ -82,20 +94,16 @@ predicate wvcp_gdc_1(array[int] of var int: x, var int: y) =
 			array[l..u] of int: y_dom = [i | i in 1..n+1];
 			array[l..u] of var 0..n: z = global_cardinality(x, y_dom); % !! do not close counting with gcc_closed
 		} in
-		y = arg_min(z) % will return the first available slot `y` which necessarily satisfies z[y]=0
+		y = arg_min(z) % y is the smallest slot in l..u satisfying z[y]=0
 	endif;
 
-% functional GDC2
-function var int: wvcp_gdc_2(array[int] of var int: x)
-	::promise_total =
-	let {
-		var 1..length(x)+1: y::is_defined_var;
-		constraint wvcp_gdc_2(x, y)::defines_var(y);
-	}
-	in y	;
 
-% predicative GDC2
-% y is uniquely defined and satisfies x[i]!=y for all i in 1..y_ub
+%%%%%%%%%%%%
+% GDC constraint - variant 2
+
+include "nvalue_fn.mzn";
+
+% y is uniquely defined and satisfies y = 1 + count(i in index_set(x))(x[i]<y)
 predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
 	if length(x)=0
 	then y = 1
@@ -104,29 +112,51 @@ predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
 			int: l = min(index_set(x));
 			int: u = max(index_set(x));
 			int: n = length(x);
-			int: x_ub = ub_array(x);
-% 			var 1..n+1: y_ub;
-% 			array[l..u,1..n+1] of var 0..1: z;			
-			array[1..n+1] of var 0..x_ub: z_ub;
-% 			array[1..n+1] of var 0..1: z_lb;
+			int: x_ub = ub_array(x);			
+			array[1..n+1] of var 0..x_ub: z;
 		} in
-% 				y >= y_lb
-% 				y <= y_ub
-% 		/\
-				forall(j in 1..n) (z_ub[j] = (x[l+j-1] < y) * x[l+j-1])
-		/\		z_ub[n+1] = 0
-		/\		y = sum(i in 0..x_ub)(exists(j in 1..n+1)(z_ub[j] == i)) % <-> y = nvalue(z_ub)
+				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
+		/\		z[n+1] = 0
+		/\		y = nvalue(z) % <-> y = sum(i in 0..x_ub)(exists(j in 1..n+1)(z[j] == i))
+	endif;
+
+
+%%%%%%%%%%%%
+% GDC constraint - variant 3
+
+include "nvalue_fn.mzn";
+
+% y is uniquely defined and satisfies y = 1 + count(i in index_set(x))(x[i]<y)
+predicate wvcp_gdc_3(array[int] of var int: x, var int: y) =
+	if length(x)=0
+	then y = 1
+	else
+		let {
+			int: l = min(index_set(x));
+			int: u = max(index_set(x));
+			int: n = length(x);
+			int: x_ub = ub_array(x);
+			array[1..n+1] of var 0..x_ub: z;
+		} in
+				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
+		/\		z[n+1] = 0
+% 		/\		forall(j in 1..n) (x[l+j-1] >= y -> x[l+j-1] > y)
+		/\		forall(j in 1..n) (x[l+j-1] != y)
+		/\		y = nvalue(z) % <-> y = sum(i in 0..x_ub)(exists(j in 1..n+1)(z[j] == i))
 	endif;
 	
 
-% for output only: measures solution gap with DGDC-based solution for input vertex
+%%%%%%%%%%%%
+% GDC metrics
+
+% GDC-gap of input vertex in solution
 function 0..max(COLOR): count_DGDC_vertex_gap(R_VERTEX: v) =
 	if fix(x_color[v])=1
 	then		0
 	else		arg_min(i in 1..fix(x_color[v])-1)(exists(u in neighbours[v])(fix(x_color[u]) == i))
 	endif;
 
-% for output only: measures solution gap with DGDC-based solution
+% GDC-gaps in solution
 function array[int] of int: count_DGDC() =
 	let {
 		array[int] of 0..max(COLOR): gaps = [count_DGDC_vertex_gap(v) | v in R_VERTEX];
