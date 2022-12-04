@@ -1,10 +1,11 @@
 %% Command
 %
-% minizinc --solver or-tools --time-limit 3600000 --parallel 8 --compiler-statistics --solver-statistics --intermediate \
+% minizinc --solver or-tools --time-limit 3600000 --parallel 1 --compiler-statistics --solver-statistics --intermediate \
 % -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 % -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
 % -D "WVCP_B={UB_COLORS,UB_SCORE}" -D "WVCP_M={}" \
-% -m dual/dual_solve.mzn -d core/default_ub_colors.dzn -d core/default_ub_score.dzn -d core/no_cliques.dzn -d ../original_wvcp_dzn/p40.dzn
+% -m dual/dual_solve.mzn \
+% -d core/default_ub_colors.dzn -d core/default_ub_score.dzn -d core/no_cliques.dzn -d ../original_wvcp_dzn/p40.dzn
 
 
 include "dual.mzn";

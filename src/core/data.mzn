@@ -66,6 +66,7 @@ enum WVCP_MODEL = {
 	M_DR2_v1, % enforces Dynamic Heaviest Dominating Color rule variant 1
 	M_DR2_v2, % enforces Dynamic Heaviest Dominating Color rule variant 2
 	M_DR2_v3, % enforces Dynamic Heaviest Dominating Color rule variant 3
+	M_DR2_v4, % enforces Dynamic Heaviest Dominating Color rule variant 4
 };
 
 % Instance options

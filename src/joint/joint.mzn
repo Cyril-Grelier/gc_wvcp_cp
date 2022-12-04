@@ -19,36 +19,40 @@ array[R_VERTEX] of var 0..1: y_dominated;
 %   y_dominated[u] = bool2int(u != greatest(x_vertices[x_color[u]]))
 % );
 
+% primal/dual channeling constraint
+
+include "global_cardinality.mzn";
+
 constraint
 global_cardinality([greatest(x_vertices[c]) | c in COLOR], R_VERTEX,[1 - y_dominated[i] | i in R_VERTEX]);
 
-% backward and forward incompatible vertices are necessarily dominant
+% disconnected vertices are dominant
 constraint
 forall(i in R_VERTEX where ins[i]={} /\ outs[i]={})( 
   y_dominated[i] = 0
 ); 
 
-% backward incompatible vertices are necessarily dominant (this constraint may be merged with above constraint)
+% backward vertices are dominant (this constraint may be merged with above constraint)
 constraint
 forall(i in R_VERTEX where ins[i]={} /\ outs[i]!={})( 
   y_dominated[i] = 0
 ); 
 
-% forward incompatible vertices are dominated iff backward dominated
+% forward vertices are dominated iff backward dominated
 constraint
 forall(i in R_VERTEX where ins[i]!={} /\ outs[i]={})(
-  y_dominated[i] = sum(hi in ins[i])(y_arc[hi]) % check if sum=0 when ins[i]={}
+  y_dominated[i] = sum(hi in ins[i])(y_arc[hi])
 ); 
 
-% backward and forward compatible vertices
+% backward and forward vertices
 constraint
 forall(i in R_VERTEX where ins[i]!={} /\ outs[i]!={})( 
-	(		1 - y_dominated[i] >= max(ij in outs[i])(y_arc[ij]) % check if max=1 when outs[i]={}
+	(		1 - y_dominated[i] >= max(ij in outs[i])(y_arc[ij])
   	/\		y_dominated[i] >= sum(hi in ins[i])(y_arc[hi])
   	)
 );
 
-% backward and forward compatible vertices are assumed dominant if not grouped
+% backward and forward vertices are assumed dominant if not grouped
 constraint
 forall(i in R_VERTEX where ins[i]!={} /\ outs[i]!={})(
 	1 - y_dominated[i] >= (1 - max(ij in outs[i])(y_arc[ij])) * (1 - sum(hi in ins[i])(y_arc[hi]))
@@ -61,6 +65,6 @@ forall(ij in ARC)(
 ); 
 
 
-% 
+% TODO already encoded in dual since MWSSP objective function reduced to WVCP's
 constraint
 x_score + y_score = sum(weight);
