@@ -131,6 +131,7 @@ predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
 
 include "nvalue_fn.mzn";
 
+% !! disables coloring constraints twice
 % y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
 predicate wvcp_gdc_3(array[int] of var int: x, var int: y) =
 	if length(x)=0
@@ -157,6 +158,7 @@ predicate wvcp_gdc_3(array[int] of var int: x, var int: y) =
 include "nvalue_fn.mzn";
 include "global_cardinality_closed_fn.mzn";
 
+% !! disables coloring constraints once
 % y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
 predicate wvcp_gdc_4(int: v, array[int] of int: U, array[int] of var int: x, var int: y) =
 	assert(index_set(U) = index_set(x), "error: inconsistent index sets for U and y")

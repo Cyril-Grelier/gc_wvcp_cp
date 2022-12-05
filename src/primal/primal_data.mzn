@@ -1,16 +1,16 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 
 
-% sorts the set of (real) vertices U in descending order of weight with >_{w}
-array[int] of R_VERTEX: sort_by_desc_weight(set of R_VERTEX: U) =
+% sorts the set of vertices U in descending order of weight with >_{w}
+array[int] of VERTEX: sort_by_desc_weight(set of VERTEX: U) =
 	if I_SORT
 	then
 		set2array(U)
 	else
 		let {
-			array[int] of R_VERTEX: s2a = set2array(U);
+			array[int] of VERTEX: s2a = set2array(U);
 			% sort in descending order of weights
-			array[index_set(s2a)] of R_VERTEX: as = arg_sort([-weight[s2a[i]] | i in index_set(s2a)]);
+			array[index_set(s2a)] of VERTEX: as = arg_sort([-weight[s2a[i]] | i in index_set(s2a)]);
 		} in
 			array1d(index_set(s2a), [s2a[as[i]] | i in index_set(as)])
 	endif;
@@ -28,7 +28,7 @@ function bool: greater(VERTEX: u, VERTEX: v) =
 
 % returns greatest of (real) vertices in U with >_{w}
 %% par version
-R_VERTEX: greatest(set of R_VERTEX: U) =
+R_VERTEX: greatest(set of VERTEX: U) =
 	if	I_SORT
 	then
 		min(U)
@@ -53,10 +53,3 @@ var VERTEX: greatest(var set of VERTEX: U) =
 	else
 		sorted_vertices[arg_min(i in index_set(sorted_vertices))(not(sorted_vertices[i] in U))]
 	endif;
-
-
-% the non-adjacent vertices of a vertex
-array[R_VERTEX] of set of R_VERTEX: NA = [R_VERTEX diff ({v} union neighbours[v]) | v in R_VERTEX];
-
-% amongst the non-adjacent vertices of a vertex, the vertices greater than the vertex
-array[R_VERTEX] of set of R_VERTEX: GNA = [{u | u in NA[v] where greater(u,v)} | v in R_VERTEX];

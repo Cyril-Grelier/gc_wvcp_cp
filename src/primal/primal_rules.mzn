@@ -12,7 +12,7 @@ include "strictly_increasing.mzn";
 constraint
 if not(I_SORT)
 then
-	lex_chain_greater(array2d(1..2, COLOR, x_weight ++ [max(VERTEX) - greatest(x_vertices[c]) | c in COLOR]))
+	lex_chain_greater(array2d(1..2, COLOR, x_weight ++ [max(VERTEX) - x_dominant[c] | c in COLOR]))
 	% alternative custom formulation
 	% include "strictly_decreasing.mzn";
 	% strictly_decreasing([max(VERTEX)*x_weight[c] - greatest(x_vertices[c] | c in COLOR]);
@@ -22,5 +22,5 @@ endif;
 constraint
 if I_SORT
 then
-	strictly_increasing([greatest(x_vertices[c]) | c in COLOR])
+	strictly_increasing([x_dominant[c] | c in COLOR])
 endif;
