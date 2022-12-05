@@ -287,10 +287,12 @@ Option `WVCP_M` regroups various flags that switch on or off different fragments
 
 - `M_CLIQUES` - if supplied, the modeling of each user-defined clique by a clique of binary disequality constraints is replaced with a single all-different constraint
 - `M_SR1` - if supplied, enforces symmetry breaking rule SR1 (Static Greatest Dominating Vertex rule)
-- `M_DR1` - if supplied, enforces symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule)
+- `M_DR1_v1` - if supplied, enforces variant 1 of symmetry breaking rule DR1 (Dynamic Greatest Dominating Vertex rule)
 - `M_SR2` - if supplied, enforces symmetry breaking rule SR2 (Static Greatest Dominating Color rule)
 - `M_DR2_v1` - if supplied, enforces variant 1 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
 - `M_DR2_v2` - if supplied, enforces variant 2 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
+- `M_DR2_v3` - if supplied, enforces variant 3 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
+- `M_DR2_v4` - if supplied, enforces variant 4 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
 
 Notes
 
