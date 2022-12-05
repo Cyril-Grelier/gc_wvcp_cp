@@ -8,6 +8,14 @@ include "arg_max.mzn"; % !! required by arg_min only!!
 include "arg_min.mzn";
 
 
+% the non-adjacent vertices of a vertex
+array[R_VERTEX] of set of R_VERTEX: NA = [R_VERTEX diff ({v} union neighbours[v]) | v in R_VERTEX];
+
+% amongst the non-adjacent vertices of a vertex, the vertices greater than the vertex
+array[R_VERTEX] of set of R_VERTEX: GNA = [{u | u in NA[v] where greater(u,v)} | v in R_VERTEX];
+
+
+
 %%%%%%%%%%%%
 % Rule SR1 (Static Greatest Dominating Vertex)
 constraint if (M_SR1 in WVCP_M) then SGDV() endif;

@@ -47,14 +47,15 @@ constraint
 %%%%%%%%%%%%
 % weights of colors
 
-% (a) optimized constraint formulation when vertices are sorted in descending order of weights using >_{w}
+% dominant vertex of a color (wrt. >_{w})
 constraint
-forall(c in COLOR where I_SORT)(
-	x_weight[c] = weight[greatest(x_vertices[c])]
+forall(c in COLOR)(
+	x_dominant[c] = greatest(x_vertices[c])
 );
 
-%	(b) generic constraint formulation that assumes no vertex ordering
+% weight of a color
 constraint
-forall(c in COLOR where not(I_SORT))(
-	x_weight[c] = max(u in x_vertices[c])(weight[u])
+forall(c in COLOR where I_SORT)(
+	x_weight[c] = weight[x_dominant[c]]
 );
+

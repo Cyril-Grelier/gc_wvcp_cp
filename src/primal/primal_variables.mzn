@@ -9,8 +9,12 @@ array[VERTEX] of var COLOR: x_color;
 %% every unused color includes exactly one vertex which is its virtual vertex
 array[COLOR] of var set of VERTEX: x_vertices;
 
+% the dominant vertex of each color
+%% is the maximum vertex of the color wrt. >_{w}
+array[COLOR] of var VERTEX: x_dominant;
+
 % the weight of each color
-%% the weight of a color is the maximum weight of its vertices
+%% the weight of a color is the maximum weight of its vertices or, equivalently, the weight of its dominant vertex
 %% the weight of an unused color is 0 since all virtual vertices have weight 0
 array[COLOR] of var WEIGHT: x_weight;
 
