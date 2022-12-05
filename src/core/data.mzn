@@ -61,7 +61,7 @@ enum WVCP_BOUNDS = {
 enum WVCP_MODEL = {
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
-	M_DR1, % enforces Dynamic Greatest Dominating Vertex rule
+	M_DR1_v1, % enforces Dynamic Greatest Dominating Vertex rule variant 1
 	M_SR2, % enforces Static Heaviest Dominating Color rule
 	M_DR2_v1, % enforces Dynamic Heaviest Dominating Color rule variant 1
 	M_DR2_v2, % enforces Dynamic Heaviest Dominating Color rule variant 2
@@ -77,10 +77,8 @@ set of WVCP_MODEL: WVCP_M;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % META-MODEL ASSERTIONS
 
-constraint assert(not({M_SR1, M_DR1} subset WVCP_M), "assertion failed: M_SR1 => not(M_DR1)");
-constraint assert(not({M_SR2, M_DR2_v1} subset WVCP_M), "assertion failed: M_SR2 => not(M_DR2_v1)");
-constraint assert(not({M_SR2, M_DR2_v2} subset WVCP_M), "assertion failed: M_SR2 => not(M_DR2_v2)");
-constraint assert(not({M_DR2_v1, M_DR2_v2} subset WVCP_M), "assertion failed: M_DR2_v1 => not(M_DR2_v2)");
+constraint assert(card({M_SR1, M_DR1_v1} intersect WVCP_M) <= 1, "assertion failed: M_SR1 and M_DR1_v* mutually incompatible");
+constraint assert(card({M_SR2, M_DR2_v1, M_DR2_v2, M_DR2_v3, M_DR2_v4} intersect WVCP_M) <= 1, "assertion failed: M_SR2, M_DR2_v* mutually incompatible");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

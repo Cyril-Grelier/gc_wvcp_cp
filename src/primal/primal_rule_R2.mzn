@@ -30,19 +30,29 @@ predicate SGDC() =
 % 	card(x_vertices[max([card(neighbours[v]) + 1 | v in R_VERTEX]) + 1]) == 1
  	;
 
-% for output only: measures application rate of rule SGDC in a solution
-function array[int] of int: count_SGDC() =
+
+%%%%%%%%%%%%
+% SGDC metrics
+
+% SGDC gap of input vertex in solution
+function 0..max(COLOR): count_SGDC_vertex_gap(R_VERTEX: v) =
+	if fix(x_color[v]) <= card(neighbours[v]) + 1
+	then
+		0
+	else
+		fix(x_color[v]) - (card(neighbours[v]) + 1)
+	endif;
+
+% SGDC gaps in solution
+function array[1..2] of int: count_SGDC() =
 	let {
-	array[R_VERTEX] of 0..card(R_VERTEX): d = array1d(R_VERTEX, [card(neighbours[v]) | v in R_VERTEX]);
-	} in 
-	[	%count(v in R_VERTEX where d[v]<max(COLOR))(fix(x_color[v]) <= d[v] + 1),
-		card({v | v in R_VERTEX where d[v]<max(COLOR)}),
-		card(R_VERTEX)
-	];
+		array[R_VERTEX] of 0..max(COLOR): gaps = [count_SGDC_vertex_gap(v) | v in R_VERTEX];
+	} in
+	[max(gaps), count(v in R_VERTEX)(gaps[v]>0)];
 
 
 %%%%%%%%%%%%
-% Rule DR2: every vertex is colored by its s-GDC
+% Rule DR2
 
 % rule GDC
 constraint
@@ -73,7 +83,8 @@ function var int: wvcp_gdc(R_VERTEX: v, array[int] of R_VERTEX: U, array[int] of
 			elseif	(M_DR2_v4 in WVCP_M)
 			then
 				wvcp_gdc_4(v, U, x, y)::defines_var(y) % !! only variant depending on graph (neighborhoods)
-			else true
+			else
+				true
 			endif;
 	}
 	in y	;
@@ -161,7 +172,7 @@ include "global_cardinality_closed_fn.mzn";
 % !! disables coloring constraints once
 % y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
 predicate wvcp_gdc_4(int: v, array[int] of int: U, array[int] of var int: x, var int: y) =
-	assert(index_set(U) = index_set(x), "error: inconsistent index sets for U and y")
+	assert(index_set(U) = index_set(x), "error: inconsistent index sets for U and x")
 	/\
 	if length(x)=0
 	then y = 1
@@ -181,18 +192,18 @@ predicate wvcp_gdc_4(int: v, array[int] of int: U, array[int] of var int: x, var
 	
 
 %%%%%%%%%%%%
-% GDC metrics
+% DGDC metrics
 
-% GDC-gap of input vertex in solution
+% DGDC gap of input vertex in solution
 function 0..max(COLOR): count_DGDC_vertex_gap(R_VERTEX: v) =
 	if fix(x_color[v])=1
 	then		0
 	else		arg_min(i in 1..fix(x_color[v])-1)(exists(u in neighbours[v])(fix(x_color[u]) == i))
 	endif;
 
-% GDC-gaps in solution
-function array[int] of int: count_DGDC() =
+% DGDC gaps in solution
+function array[1..2] of int: count_DGDC() =
 	let {
-		array[int] of 0..max(COLOR): gaps = [count_DGDC_vertex_gap(v) | v in R_VERTEX];
+		array[R_VERTEX] of 0..max(COLOR): gaps = [count_DGDC_vertex_gap(v) | v in R_VERTEX];
 	} in
 	[max(gaps), count(v in R_VERTEX)(gaps[v]>1)];
