@@ -5,34 +5,57 @@ The clique is computed with fast cliques, at least one clique per vertex
 Cai, Shaowei, and Jinkun Lin. “Fast Solving Maximum Weight Clique Problem in Massive Graphs”
 """
 from __future__ import annotations
+from dataclasses import dataclass, field
+from joblib import Parallel, delayed
+
+
+def conversion_reduced(problem: str, instance_name: str):
+    """convert instance reduced version"""
+    repertory_red: str = f"reduced_{problem}_dzn"
+    instance_file: str = f"instances/reduced_{problem}/{instance_name}.col"
+    weights_file: str = "" if problem == "gcp" else instance_file + ".w"
+    graph: Graph = Graph(instance_file, weights_file, to_sort=False)
+    graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
+    graph.save_cliques_dzn(f"{repertory_red}/{instance_name}.clq.dzn")
+    graph.save_graph_dzn(f"{repertory_red}/{instance_name}.dzn")
+
+
+def conversion_original(problem: str, instance_name: str):
+    """convert instance original version"""
+    repertory_or: str = f"original_{problem}_dzn/"
+    instance_file: str = f"instances/original_graphs/{instance_name}.col"
+    weights_file: str = "" if problem == "gcp" else instance_file + ".w"
+    graph: Graph = Graph(instance_file, weights_file, to_sort=True)
+    graph.save_cliques(f"{repertory_or}/{instance_name}.clq")
+    graph.save_cliques_dzn(f"{repertory_or}/{instance_name}.clq.dzn")
+    graph.save_graph_dzn_sort_vertices(f"{repertory_or}/{instance_name}.dzn")
+
+
+def conversion(problem: str, instance_name: str, i: int, nb_instances: int):
+    """convert instance"""
+    if i < nb_instances:
+        print(instance_name, "reduced")
+        conversion_reduced(problem, instance_name)
+    else:
+        print(instance_name, "original")
+        conversion_original(problem, instance_name)
 
 
 def main():
     """for each instance of the problem, compute the cliques"""
     problem = "wvcp"
     instances_names: list[str] = []
-    with open(
-        f"instances/instance_list_{problem}.txt", "r", encoding="utf8"
-    ) as instances_file:
+    # with open(
+    #     f"instances/instance_list_{problem}.txt", "r", encoding="utf8"
+    # ) as instances_file:
+    #     instances_names = instances_file.read().splitlines()
+    with open("instance_feasible.txt", "r", encoding="utf8") as instances_file:
         instances_names = instances_file.read().splitlines()
-    for instance_name in instances_names:
-        print(instance_name)
-        # Reduced version
-        repertory_red: str = f"reduced_{problem}_dzn"
-        instance_file: str = f"instances/reduced_{problem}/{instance_name}.col"
-        weights_file: str = "" if problem == "gcp" else instance_file + ".w"
-        graph: Graph = Graph(instance_file, weights_file)
-        graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
-        graph.save_cliques_dzn(f"{repertory_red}/{instance_name}.clq.dzn")
-        graph.save_graph_dzn(f"{repertory_red}/{instance_name}.dzn")
-        # Original version
-        repertory_or: str = f"original_{problem}_dzn/"
-        instance_file: str = f"instances/original_graphs/{instance_name}.col"
-        weights_file: str = "" if problem == "gcp" else instance_file + ".w"
-        graph: Graph = Graph(instance_file, weights_file)
-        graph.save_cliques(f"{repertory_or}/{instance_name}.clq")
-        graph.save_cliques_dzn(f"{repertory_or}/{instance_name}.clq.dzn")
-        graph.save_graph_dzn(f"{repertory_or}/{instance_name}.dzn")
+
+    Parallel(n_jobs=15)(
+        delayed(conversion)(problem, instance_name, i, len(instances_names))
+        for i, instance_name in enumerate(instances_names + instances_names)
+    )
 
 
 def read_col_files(instance_file: str) -> tuple[int, list[tuple[int, int]]]:
@@ -69,10 +92,21 @@ def read_weights_file(weights_file: str, nb_vertices: int) -> list[int]:
     return weights
 
 
+@dataclass
+class Node:
+    """Representation of a Node for graph"""
+
+    old_number: int = -1
+    new_number: int = -1
+    weight: int = -1
+    neighbors_int: list[int] = field(default_factory=list)
+    neighbors_nodes: list[Node] = field(default_factory=list)
+
+
 class Graph:
     """Representation of a graph"""
 
-    def __init__(self, instance_file: str, weights_file: str) -> None:
+    def __init__(self, instance_file: str, weights_file: str, to_sort: bool) -> None:
         """Load graph from file
 
         Args:
@@ -91,6 +125,7 @@ class Graph:
         self.cliques: list[list[int]]
         self.sorted_vertices: list[int]
         self.heaviest_vertex_weight: int
+        self.nodes_sorted: list[Node] = []
 
         # load instance
         self.name = instance_file.split("/")[-1][:-4]
@@ -112,12 +147,48 @@ class Graph:
         # load weights
         self.weights = read_weights_file(weights_file, self.nb_vertices)
 
-        # compute cliques
-        self.cliques = [
-            self.compute_clique_vertex(vertex) for vertex in range(self.nb_vertices)
-        ]
-
+        if to_sort:
+            self.init_sorted_nodes()
+            # compute cliques
+            self.cliques = [
+                self.compute_clique_vertex_sorted(vertex)
+                for vertex in range(self.nb_vertices)
+            ]
+        else:
+            self.cliques = [
+                self.compute_clique_vertex(vertex) for vertex in range(self.nb_vertices)
+            ]
         self.reduced_vertices = []
+
+    def init_sorted_nodes(self):
+        """sort the nodes"""
+        # Create the nodes
+        nodes: list[Node] = [
+            Node(
+                old_number=vertex,
+                new_number=-1,
+                weight=self.weights[vertex],
+                neighbors_int=self.neighborhood[vertex][:],
+                neighbors_nodes=[],
+            )
+            for vertex in range(self.nb_vertices)
+        ]
+        # Add the neighbors to the nodes
+        for node in nodes:
+            node.neighbors_nodes = [nodes[neighbor] for neighbor in node.neighbors_int]
+        # Sort the nodes by weights and degree
+        self.nodes_sorted = sorted(
+            nodes,
+            key=lambda n: (
+                n.weight,
+                len(n.neighbors_int),
+                sum(ne.weight for ne in n.neighbors_nodes),
+            ),
+            reverse=True,
+        )
+        # Gives the new numbers to the nodes
+        for i, node in enumerate(self.nodes_sorted):
+            node.new_number = i
 
     def compute_clique_vertex(self, vertex) -> list[int]:
         """compute a clique for the vertex"""
@@ -138,12 +209,57 @@ class Graph:
             current_clique.append(best_vertex)
             candidates.remove(best_vertex)
             candidates = candidates.intersection(self.neighborhood[best_vertex])
+        # if len(current_clique) < 3:
+        #     return []
+
+        current_clique.sort(
+            key=lambda v: (
+                self.weights[v],
+                len(self.neighborhood[v]),
+            ),
+            reverse=True,
+        )
+        return current_clique
+
+    def compute_clique_vertex_sorted(self, vertex) -> list[int]:
+        """compute a clique for the vertex"""
+        current_clique = [vertex]
+        candidates = set(
+            n.new_number for n in self.nodes_sorted[vertex].neighbors_nodes
+        )
+        while candidates:
+            # // choose next vertex than maximize
+            # // b(v) = w(v) + (w(N(v) inter candidate) )/2
+            best_vertex: int = -1
+            best_benefit: float = -1
+            for neighbor in candidates:
+                commun_neighbors = candidates.intersection(
+                    nn.new_number for nn in self.nodes_sorted[neighbor].neighbors_nodes
+                )
+                potential_weight = sum(
+                    self.nodes_sorted[n].weight for n in commun_neighbors
+                )
+                benefit: float = self.nodes_sorted[neighbor].weight + (
+                    potential_weight / 2
+                )
+                if benefit > best_benefit:
+                    best_benefit = benefit
+                    best_vertex = neighbor
+            current_clique.append(best_vertex)
+            candidates.remove(best_vertex)
+            candidates = candidates.intersection(
+                n.new_number for n in self.nodes_sorted[best_vertex].neighbors_nodes
+            )
 
         # if len(current_clique) < 3:
         #     return []
 
         current_clique.sort(
-            key=lambda v: (self.weights[v], len(self.neighborhood[v])), reverse=True
+            key=lambda v: (
+                self.nodes_sorted[v].weight,
+                len(self.nodes_sorted[v].neighbors_int),
+            ),
+            reverse=True,
         )
         return current_clique
 
@@ -214,6 +330,28 @@ class Graph:
             # add weights
             file.write("weights=[")
             file.write(",".join(str(w) for w in self.weights))
+            file.write("];\n")
+
+    def save_graph_dzn_sort_vertices(self, output_file: str):
+        """For original graphs, sort vertices per weight and degree before converting it"""
+        with open(output_file, "w", encoding="utf8") as file:
+            file.write(f'name="{self.name}";\n')
+            file.write(f"nr_vertices={self.nb_vertices};\n")
+            file.write(f"nr_edges={self.nb_edges};\n")
+
+            # add neighborhood
+            file.write("neighborhoods=[")
+            for i, node in enumerate(self.nodes_sorted):
+                file.write("{")
+                file.write(",".join(str(n.new_number) for n in node.neighbors_nodes))
+                file.write("}")
+                if i != self.nb_vertices - 1:
+                    file.write(",")
+            file.write("];\n")
+
+            # add weights
+            file.write("weights=[")
+            file.write(",".join(str(node.weight) for node in self.nodes_sorted))
             file.write("];\n")
 
 

@@ -13,6 +13,7 @@ instances_set = ("DIMACS_optimal", "dimacs_o")
 instances_set = ("../instances_coeff", "hard_wvcp_coeff")
 instances_set = ("../instances_hard_wvcp", "hard_wvcp")
 instances_set = ("instance_list_wvcp", "all")
+instances_set = ("../instance_feasible", "feasible")
 
 # i,instance
 with open(f"instances/{instances_set[0]}.txt", "r", encoding="utf8") as file:
@@ -20,13 +21,14 @@ with open(f"instances/{instances_set[0]}.txt", "r", encoding="utf8") as file:
 
 time_limit = 3600 * 1000 * 10
 
-output_directory = f"/scratch/LERIA/grelier_c/cp_{instances_set[1]}"
 output_directory = f"outputs/cp_10h_{instances_set[1]}"
+output_directory = f"/scratch/LERIA/grelier_c/cp_10h{instances_set[1]}"
 
 os.mkdir(f"{output_directory}")
 
+# primal base
 command_primal = Template(
-    "minizinc --solver or-tools --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --no-intermediate --output-mode json --json-stream "
+    "minizinc --solver or-tools --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --intermediate --output-mode json --json-stream "
     '-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" '
     '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
     '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
@@ -36,17 +38,18 @@ command_primal = Template(
     '-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" '
     '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
     '-D "WVCP_B={UB_COLORS,UB_SCORE}" '
-    '-D "WVCP_M={M_SR1,M_DR2_v2}" '
+    '-D "WVCP_M={M_DR2_v3}" '
     "-d core/default_ub_colors.dzn "
     "-d core/default_ub_score.dzn "
     "-d core/no_cliques.dzn "
     "-m ./primal/primal_solve.mzn "
     "-d ../${instance_type}_wvcp_dzn/${instance}.dzn "
-    "> ../${output_dir}/primal_${instance_type}_${instance}.json\n"
+    "> ${output_dir}/primal_${instance_type}_${instance}_ortools.json\n"
 )
 
+# dual base
 command_dual = Template(
-    "minizinc --solver or-tools --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --no-intermediate --output-mode json --json-stream "
+    "minizinc --solver or-tools --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --intermediate --output-mode json --json-stream "
     '-D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" '
     '-D "MWSSP_SEARCH_RESTART=RESTART_NONE" '
     '-D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" '
@@ -58,11 +61,28 @@ command_dual = Template(
     "-d core/no_cliques.dzn "
     "-m dual/dual_solve.mzn "
     "-d ../${instance_type}_wvcp_dzn/${instance}.dzn "
-    "> ../${output_dir}/dual_${instance_type}_${instance}.json\n"
+    "> ${output_dir}/dual_${instance_type}_${instance}_ortools.json\n"
 )
 
+command_dual_coin_bc = Template(
+    "minizinc --solver coin-bc --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --intermediate --output-mode json --json-stream "
+    '-D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" '
+    '-D "MWSSP_SEARCH_RESTART=RESTART_NONE" '
+    '-D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" '
+    '-D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" '
+    '-D "WVCP_B={UB_COLORS,UB_SCORE}" '
+    '-D "WVCP_M={}" '
+    "-d core/default_ub_colors.dzn "
+    "-d core/default_ub_score.dzn "
+    "-d core/no_cliques.dzn "
+    "-m dual/dual_solve.mzn "
+    "-d ../${instance_type}_wvcp_dzn/${instance}.dzn "
+    "> ${output_dir}/dual_${instance_type}_${instance}_coin_bc.json\n"
+)
+
+# joint base
 command_joint = Template(
-    "minizinc --solver or-tools --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --no-intermediate --output-mode json --json-stream "
+    "minizinc --solver or-tools --time-limit ${runtime} --parallel 0 --compiler-statistics --solver-statistics --intermediate --output-mode json --json-stream "
     '-D "MWSSP_WVCP_SEARCH_STRATEGY=MWSSP" '
     '-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" '
     '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
@@ -83,7 +103,7 @@ command_joint = Template(
     "-d core/no_cliques.dzn "
     "-m joint/joint_solve.mzn "
     "-d ../${instance_type}_wvcp_dzn/${instance}.dzn "
-    "> ../${output_dir}/joint_${instance_type}_${instance}.json\n"
+    "> ${output_dir}/joint_${instance_type}_${instance}_ortools.json\n"
 )
 
 
@@ -109,6 +129,15 @@ with open("to_eval_cp", "w", encoding="UTF8") as file:
                     runtime=time_limit,
                 )
             )
+            file.write(
+                command_dual_coin_bc.substitute(
+                    instance_type=instance_type,
+                    instance=instance,
+                    output_dir=output_directory,
+                    runtime=time_limit,
+                )
+            )
+
             file.write(
                 command_joint.substitute(
                     instance_type=instance_type,
