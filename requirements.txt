@@ -6,3 +6,4 @@ mypy
 plotly
 igraph
 pandas
+joblib
