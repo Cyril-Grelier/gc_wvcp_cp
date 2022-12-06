@@ -132,3 +132,8 @@ dmypy.json
 *.clq
 original_wvcp_dzn/
 reduced_wvcp_dzn/
+color_bounds/build
+outputs/
+xlsx_files/
+*.csv
+*.ods

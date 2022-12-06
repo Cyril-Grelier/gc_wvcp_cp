@@ -22,7 +22,7 @@ def conversion_reduced(problem: str, instance_name: str):
 
 def conversion_original(problem: str, instance_name: str):
     """convert instance original version"""
-    repertory_or: str = f"original_{problem}_dzn/"
+    repertory_or: str = f"original_{problem}_dzn"
     instance_file: str = f"instances/original_graphs/{instance_name}.col"
     weights_file: str = "" if problem == "gcp" else instance_file + ".w"
     graph: Graph = Graph(instance_file, weights_file, to_sort=True)
@@ -121,10 +121,7 @@ class Graph:
         self.adjacency_matrix: list[list[bool]]
         self.neighborhood: list[list[int]]
         self.weights: list[int]
-        self.reduced_vertices: list[int]
         self.cliques: list[list[int]]
-        self.sorted_vertices: list[int]
-        self.heaviest_vertex_weight: int
         self.nodes_sorted: list[Node] = []
 
         # load instance
@@ -158,7 +155,6 @@ class Graph:
             self.cliques = [
                 self.compute_clique_vertex(vertex) for vertex in range(self.nb_vertices)
             ]
-        self.reduced_vertices = []
 
     def init_sorted_nodes(self):
         """sort the nodes"""
