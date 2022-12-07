@@ -5,24 +5,30 @@
 constraint
 x_score = sum(x_weight);
 
+
+%%%%%%%%%%%%
+% STATIC FLAG-BASED BOUND CONSTRAINTS
+
 % input upper bound on the number of colors
 constraint
 if (UB_COLORS in WVCP_B /\ ub_colors<card(COLOR))
 % empties ub_colors+1-th color (restricts it to its virtual vertex) and successive colors due to symmetry breaking constraint
-then card(x_vertices[ub_colors+1]) == 1
+then
+	card(x_vertices[ub_colors+1]) == 1
 endif;
 
 % input upper bound on score
 constraint
 if (UB_SCORE in WVCP_B)
-then (x_score <= ub_score)
+then
+	(x_score <= ub_score)
 endif;
 
 % heaviest clique provides lower bound on score
 constraint
 if (M_CLIQUES in WVCP_M /\ CLIQUE!={})
 then
-x_score >= max(k in CLIQUE)(sum([weight[u] | u in clique[k]]))
+	x_score >= max(k in CLIQUE)(sum([weight[u] | u in clique[k]]))
 endif;
 
 % % upper bound on score derived on the number of colors from the score

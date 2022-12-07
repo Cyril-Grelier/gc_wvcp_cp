@@ -10,7 +10,8 @@ constraint
 int_set_channel(x_color, x_vertices);
 
 
-%% COLLORING CONSTRAINTS
+%%%%%%%%%%%%
+%% COLORING CONSTRAINTS
 
 % fixed coloring of virtual vertices based on vertex id
 constraint
@@ -45,7 +46,7 @@ constraint
 
 
 %%%%%%%%%%%%
-% weights of colors
+% WEIGHTING CONSTRAINTS
 
 % dominant vertex of a color (wrt. >_{w})
 constraint

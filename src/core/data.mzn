@@ -59,6 +59,7 @@ enum WVCP_BOUNDS = {
 % Model features
 % TODO WVCP-specific flags (?) -> move elsewhere
 enum WVCP_MODEL = {
+	M_UB_SCORE, % enforce upper-bound constraint on objective function
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1_v1, % enforces Dynamic Greatest Dominating Vertex rule variant 1
@@ -86,34 +87,54 @@ constraint assert(card({M_SR2, M_DR2_v1, M_DR2_v2, M_DR2_v3, M_DR2_v4} intersect
 
 % range of *real vertices*
 set of int: R_VERTEX = 1..nr_vertices;
+% count of *real vertices*
+set of int: W_R_VERTEX = 0..card(R_VERTEX);
 % range of colors
 set of int: COLOR = 1..nr_vertices;
+
 % range of *virtual vertices*
 % one virtual vertex is defined per color
 % virtual vertex of i-th color identified by max(R_VERTEX)+i
 set of int: V_VERTEX = max(R_VERTEX)+1..max(R_VERTEX)+ub_colors;
+
 % range of all vertices (real and virtual)
 set of int: VERTEX = min(R_VERTEX)..max(V_VERTEX);
-% range of weights
-set of int: WEIGHT = 0..max(weights);
-% set of weights
-set of int: WEIGHT_SCALE = array2set(weights);
-% range of cliques
-set of int: CLIQUE = 1..nr_cliques;
+% count of all vertices
+set of int: W_VERTEX = 0..card(VERTEX);
 
-% neighborhoods
+% NEIGHBORHOODS
 % !! vertices indexed from 0 in instance file -> re-indexed from min(R_VERTEX)
 % virtual vertices are disconnected
 array[VERTEX] of set of VERTEX: neighbours = [{min(R_VERTEX)+j | j in neighborhoods[i]} | i in index_set(neighborhoods)] ++ [{} | v in V_VERTEX];
-% weights
-% virtual vertices have weight 0
-array[VERTEX] of WEIGHT: weight = [weights[i] | i in index_set(weights)] ++ [0 | i in V_VERTEX];
-% cliques
+
+% WEIGHTS
+% !! renaming input `weights`
+array[R_VERTEX] of int: r_weight = weights;
+% range of real vertex weights
+set of int: R_WEIGHT_RANGE = min(r_weight)..max(r_weight);
+% scale of real vertex weights
+set of int: R_WEIGHT_SCALE = array2set(r_weight);
+% range of real/virtual vertex weights: virtual vertices have weight 0
+array[VERTEX] of int: weight = r_weight ++ [0 | i in V_VERTEX];
+% range of real/virtual vertex weights
+set of int: WEIGHT_RANGE = min(weight)..max(weight);
+% scale of real/virtual vertex weights
+set of int: WEIGHT_SCALE = array2set(weight);
+% scale of real/virtual vertex weights
+array[1..card(WEIGHT_SCALE)] of WEIGHT_SCALE: weight_scale = set2array(WEIGHT_SCALE);
+% weight-based count of real/virtual vertices
+array[index_set(weight_scale)] of W_VERTEX: weight_vertex_count = [count(v in VERTEX)(weight[v]=weight_scale[i]) | i in index_set(weight_scale)];
+
+% CLIQUES
+% range of cliques
+set of int: CLIQUE = 1..nr_cliques;
 % !! clique vertices indexed from 0 in instance file -> re-indexed from min(R_VERTEX)
 array[CLIQUE] of set of VERTEX: clique = [{min(R_VERTEX)+v | v in cliques[i]} | i in index_set(cliques)];
 
+% SCORE
 % range of WVCP objective function
 set of int: SCORE = max(weight)..sum(weight);
 
+% GRAPH METRICS
 % graph density
 float: density = sum(v in R_VERTEX)(card(neighbours[v])) / max({1,(card(R_VERTEX)*(card(R_VERTEX)-1))});
