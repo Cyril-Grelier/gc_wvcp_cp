@@ -59,7 +59,7 @@ enum WVCP_BOUNDS = {
 % Model features
 % TODO WVCP-specific flags (?) -> move elsewhere
 enum WVCP_MODEL = {
-	M_UB_SCORE, % enforce upper-bound constraint on objective function
+	M_SB_SCORE, % enforce static lower/upper bound constraints on objective function
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1_v1, % enforces Dynamic Greatest Dominating Vertex rule variant 1
@@ -91,6 +91,8 @@ set of int: R_VERTEX = 1..nr_vertices;
 set of int: W_R_VERTEX = 0..card(R_VERTEX);
 % range of colors
 set of int: COLOR = 1..nr_vertices;
+% count of colors
+set of int: W_COLOR = 0..card(COLOR);
 
 % range of *virtual vertices*
 % one virtual vertex is defined per color
@@ -114,16 +116,21 @@ array[R_VERTEX] of int: r_weight = weights;
 set of int: R_WEIGHT_RANGE = min(r_weight)..max(r_weight);
 % scale of real vertex weights
 set of int: R_WEIGHT_SCALE = array2set(r_weight);
+% range of scale of real vertex weights
+set of int: R_WEIGHT_SCALE_RANGE = 1..card(R_WEIGHT_SCALE);
+% scale of real vertex weights
+array[R_WEIGHT_SCALE_RANGE] of R_WEIGHT_SCALE: r_weight_scale = reverse(set2array(R_WEIGHT_SCALE)); % !! sorting weights in descending order
+% weight-based distribution of real vertices
+array[R_WEIGHT_SCALE_RANGE] of set of R_VERTEX: r_weight_vertices = [{ v | v in R_VERTEX where r_weight[v]=r_weight_scale[i]} | i in R_WEIGHT_SCALE_RANGE];
+% weight-based count of real vertices
+array[R_WEIGHT_SCALE_RANGE] of W_R_VERTEX: r_weight_nr_vertices = [card(r_weight_vertices[i]) | i in R_WEIGHT_SCALE_RANGE];
+
 % range of real/virtual vertex weights: virtual vertices have weight 0
 array[VERTEX] of int: weight = r_weight ++ [0 | i in V_VERTEX];
 % range of real/virtual vertex weights
 set of int: WEIGHT_RANGE = min(weight)..max(weight);
 % scale of real/virtual vertex weights
 set of int: WEIGHT_SCALE = array2set(weight);
-% scale of real/virtual vertex weights
-array[1..card(WEIGHT_SCALE)] of WEIGHT_SCALE: weight_scale = set2array(WEIGHT_SCALE);
-% weight-based count of real/virtual vertices
-array[index_set(weight_scale)] of W_VERTEX: weight_vertex_count = [count(v in VERTEX)(weight[v]=weight_scale[i]) | i in index_set(weight_scale)];
 
 % CLIQUES
 % range of cliques

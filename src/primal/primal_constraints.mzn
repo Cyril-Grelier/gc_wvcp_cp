@@ -60,3 +60,12 @@ forall(c in COLOR where I_SORT)(
 	x_weight[c] = weight[x_dominant[c]]
 );
 
+
+%%%%%%%%%%%%
+% COLOR METRICS
+
+%
+constraint x_used = [card(x_vertices[c])!=1 | c in COLOR];
+
+%
+constraint x_nr_used = sum(x_used);
