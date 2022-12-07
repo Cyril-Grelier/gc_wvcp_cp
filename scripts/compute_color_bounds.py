@@ -8,6 +8,23 @@ import os
 from joblib import Parallel, delayed
 
 
+def main():
+    """for each instance of the problem, find the bound"""
+    problem = "wvcp"
+    instances_names: list[str] = []
+    # with open(
+    #     f"instances/instance_list_{problem}.txt", "r", encoding="utf8"
+    # ) as instances_file:
+    #     instances_names = instances_file.read().splitlines()
+    with open("instance_feasible.txt", "r", encoding="utf8") as instances_file:
+        instances_names = instances_file.read().splitlines()
+    find_nb_color_reduced(problem, "queen11_11")
+    # Parallel(n_jobs=15)(
+    #     delayed(find_nb_colors)(problem, instance_name, i, len(instances_names))
+    #     for i, instance_name in enumerate(instances_names + instances_names)
+    # )
+
+
 def run_tabu(subgraph_file: str, subgraph_file_out: str):
     subprocess.run(
         ["color_bounds/build/tabucol", subgraph_file, subgraph_file_out],
@@ -31,7 +48,7 @@ def find_nb_color_reduced(problem: str, instance_name: str):
             nb_color += int(file.readline())
         os.remove(subgraph_file)
         os.remove(subgraph_file_out)
-    color_file = f"{repertory_red}/{instance_name}.k"
+    color_file = f"{repertory_red}/{instance_name}_k.dnz"
     with open(color_file, "w", encoding="utf8") as file:
         file.write(f"nb_max_color={nb_color}")
 
@@ -52,7 +69,7 @@ def find_nb_color_original(problem: str, instance_name: str):
             nb_color += int(file.readline())
         os.remove(subgraph_file)
         os.remove(subgraph_file_out)
-    color_file = f"{repertory_ori}/{instance_name}.k"
+    color_file = f"{repertory_ori}/{instance_name}_k.dnz"
     with open(color_file, "w", encoding="utf8") as file:
         file.write(f"nb_max_color={nb_color}")
 
@@ -65,22 +82,6 @@ def find_nb_colors(problem: str, instance_name: str, i: int, nb_instances: int):
     else:
         print(instance_name, "original")
         find_nb_color_original(problem, instance_name)
-
-
-def main():
-    """for each instance of the problem, find the bound"""
-    problem = "wvcp"
-    instances_names: list[str] = []
-    # with open(
-    #     f"instances/instance_list_{problem}.txt", "r", encoding="utf8"
-    # ) as instances_file:
-    #     instances_names = instances_file.read().splitlines()
-    with open("instance_feasible.txt", "r", encoding="utf8") as instances_file:
-        instances_names = instances_file.read().splitlines()
-    Parallel(n_jobs=15)(
-        delayed(find_nb_colors)(problem, instance_name, i, len(instances_names))
-        for i, instance_name in enumerate(instances_names + instances_names)
-    )
 
 
 def read_col_files(instance_file: str) -> tuple[int, list[tuple[int, int]]]:
