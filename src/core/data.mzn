@@ -19,8 +19,8 @@ int: nr_cliques;
 % cliques
 % !! vertices indexed from 0 in `cliques` -> re-indexed from 1 in `clique`
 array[CLIQUE] of set of int: cliques;
-% upper bound on colors
-int: ub_colors;
+% number of colors - this may be any precomputed upper bound on the number of colors
+int: nr_colors;
 % upper bound on score
 int: ub_score;
 
@@ -42,7 +42,7 @@ constraint assert(nr_cliques = card(index_set(cliques)), "assertion failed: nr_c
 constraint assert(forall(i in index_set(cliques))(cliques[i] subset 0..nr_vertices-1), "assertion failed: clique vertices out of bounds");
 constraint assert(forall(i in index_set(cliques))(i-min(index_set(cliques)) in cliques[i]), "assertion failed: i-th vertex must belong to i-th clique");
 
-constraint assert(ub_colors in 1..nr_vertices, "assertion failed: ub_colors out of bounds");
+constraint assert(nr_colors in 1..nr_vertices, "assertion failed: nr_colors out of bounds");
 constraint assert(ub_score in 0..sum(weights), "assertion failed: ub_score out of bounds");
 
 
@@ -52,7 +52,6 @@ constraint assert(ub_score in 0..sum(weights), "assertion failed: ub_score out o
 % Bounds
 % TODO generic flag -> rename to remove WVCP prefix
 enum WVCP_BOUNDS = {
-	UB_COLORS, % upper-bound on the number of colors
 	UB_SCORE, % upper-bound on score
 };
 
@@ -90,14 +89,14 @@ set of int: R_VERTEX = 1..nr_vertices;
 % count of *real vertices*
 set of int: W_R_VERTEX = 0..card(R_VERTEX);
 % range of colors
-set of int: COLOR = 1..nr_vertices;
+set of int: COLOR = 1..nr_colors;
 % count of colors
 set of int: W_COLOR = 0..card(COLOR);
 
 % range of *virtual vertices*
 % one virtual vertex is defined per color
 % virtual vertex of i-th color identified by max(R_VERTEX)+i
-set of int: V_VERTEX = max(R_VERTEX)+1..max(R_VERTEX)+ub_colors;
+set of int: V_VERTEX = max(R_VERTEX)+1..max(R_VERTEX)+nr_colors;
 
 % range of all vertices (real and virtual)
 set of int: VERTEX = min(R_VERTEX)..max(V_VERTEX);

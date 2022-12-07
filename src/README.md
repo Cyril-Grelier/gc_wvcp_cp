@@ -247,14 +247,14 @@ Each model is customizable using parameters and options to switch between equiva
 
 The following parameters _must_ be defined for each model
 
-- `ub_colors (int)`- upper bound on the number of colors
+- `nr_colors (int)`- the number of colors
 - `ub_score (int)`- upper bound on the score
 - `nr_cliques (int)`- the number of pre-computed cliques
 - `cliques (array of set of ints)`- the precomputed set of cliques
 
 The following data files _may_ be used to enforce default values
 
-- `core/default_ub_colors.dzn` sets `ub_colors` to the number of vertices
+- `core/default_ub_colors.dzn` sets `nr_colors` to the number of vertices (the worst-case value)
 - `core/default_ub_score.dzn` sets `ub_score` to the sum of the weights of the vertices
 - `core/no_cliques.dzn` sets `nr_cliques` to 0 and `cliques` to the empty array
 
@@ -274,9 +274,8 @@ Options serve different purposes
 
 ### Upper bounds
 
-Option `WVCP_B` indicates whether the user-defined upper bounds should be enforced. Its value _must_ be any subset of the following enumeration cases
+Option `WVCP_B` indicates whether the user-defined bounds should be enforced. Its value _must_ be any subset of the following enumeration cases
 
-- `UB_COLORS` - if supplied, the user-defined upper bound on the number of colors is enforced
 - `UB_SCORE` - if supplied, the user-defined upper bound on the score is enforced
 
 ---
@@ -420,7 +419,7 @@ minizinc \
 -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
 -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
 -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
--D "WVCP_B={UB_COLORS,UB_SCORE}" \
+-D "WVCP_B={UB_SCORE}" \
 -D "WVCP_M={M_SR1,M_DR2_v2}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
@@ -434,7 +433,6 @@ minizinc \
 - using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
 - using a 5 minutes timeout [`--time-limit 300000`]
 - enforcing upper bound constraints on
-  - the number of colors [flag `UB_COLORS`] using the default upper-bound value [`-d core/defaut_ub_colors.dzn`]
   - the score [flag `UB_SCORE`] using the default upper-bound value [`-d core/defaut_ub_score.dzn`]
 - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d core/no_cliques.dzn`]
 - enforcing symmetry breaking rules SR1 [flag `M_SR1`] and DR2_v2 [flag `M_DR2_v2`]
@@ -468,7 +466,7 @@ minizinc \
 -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
--D "WVCP_B={UB_COLORS,UB_SCORE}" \
+-D "WVCP_B={UB_SCORE}" \
 -D "WVCP_M={}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
@@ -503,7 +501,7 @@ minizinc \
 -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
--D "WVCP_B={UB_COLORS,UB_SCORE}" \
+-D "WVCP_B={UB_SCORE}" \
 -D "WVCP_M={}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
