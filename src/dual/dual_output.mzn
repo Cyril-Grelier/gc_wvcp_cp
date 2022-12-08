@@ -9,7 +9,8 @@ function array[int] of string: show_mwssp_heuristics() =
 	++		STAB
 	++	["MWSSP_SEARCH_STRATEGY\t\t=" ++ show(MWSSP_SEARCH_STRATEGY) ++ "\t+\t" ++ "MWSSP_SEARCH_RESTART\t\t=" ++ show(MWSSP_SEARCH_RESTART)]
 	++		SNL
-	++		STAB	++	STAB	++			["MWSSP_SEARCH_VARIABLES_ARCS\t=" ++ show(MWSSP_SEARCH_VARIABLES_ARCS) ++ "\t+\t" ++ "MWSSP_SEARCH_DOMAIN_ARCS\t=" ++ show(MWSSP_SEARCH_DOMAIN_ARCS)];
+	++		STAB	++	STAB	++			["MWSSP_SEARCH_VARIABLES_ARCS\t=" ++ show(MWSSP_SEARCH_VARIABLES_ARCS) ++ "\t+\t" ++ "MWSSP_SEARCH_DOMAIN_ARCS\t=" ++ show(MWSSP_SEARCH_DOMAIN_ARCS)]
+	;
 
 %%
 function array[int] of string: show_mwssp_solution() =
@@ -24,7 +25,10 @@ function array[int] of string: show_mwssp_solution() =
 
 %%
 function array[int] of string: show_mwssp_score() =
-	["MWSSP / WVCP / Weights"]
+			["MWSSP->WVCP scores"]
 	++		STAB
-	++		[show(y_score) ++  " / " ++  show(yx_score) ++  " / " ++  show(sum(weights))]
+	++		[show(lb_score) ++ " <= " ++ show(yx_score) ++ " (" ++ show(y_score) ++ ") <= " ++ show(ub_score) ++ " <= " ++ show(sum(r_weight))]
+	++  SNL
+	++		STAB	++	STAB
+	++		["colors\t"] ++ [show(lb_colors) ++ " <= " ++ show(yx_opened_colors) ++ " <= " ++ show(ub_colors) ++ " <= " ++ show(card(R_VERTEX))]
 	;

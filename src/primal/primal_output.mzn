@@ -11,7 +11,8 @@ function array[int] of string: show_wvcp_heuristics() =
 	++		SNL
 	++		STAB	++	STAB	++	["WVCP_SEARCH_VARIABLES_WEIGHTS\t=" ++ show(WVCP_SEARCH_VARIABLES_WEIGHTS) ++ "\t+\t" ++ "WVCP_SEARCH_DOMAIN_WEIGHTS\t=" ++ show(WVCP_SEARCH_DOMAIN_WEIGHTS)]
 	++		SNL
-	++		STAB	++	STAB	++	["WVCP_SEARCH_VARIABLES_COLORS\t=" ++ show(WVCP_SEARCH_VARIABLES_COLORS) ++ "\t+\t" ++ "WVCP_SEARCH_DOMAIN_COLORS\t=" ++ show(WVCP_SEARCH_DOMAIN_COLORS)];
+	++		STAB	++	STAB	++	["WVCP_SEARCH_VARIABLES_COLORS\t=" ++ show(WVCP_SEARCH_VARIABLES_COLORS) ++ "\t+\t" ++ "WVCP_SEARCH_DOMAIN_COLORS\t=" ++ show(WVCP_SEARCH_DOMAIN_COLORS)]
+	;
 
 %%
 function array[int] of string: show_wvcp_solution() =
@@ -23,7 +24,8 @@ function array[int] of string: show_wvcp_solution() =
 	++  ["Partitioning\t"] ++ [show(c) ++ "=" ++ show(x_vertices[c]) ++ " " | c in COLOR where fix(x_opened[c])]
 	++  SNL
 	++		STAB	++	STAB
-	++  ["Weighting\t"] ++ [show(c) ++ "=" ++ show(x_weight[c]) ++ " " | c in COLOR where fix(x_opened[c])];
+	++  ["Weighting\t"] ++ [show(c) ++ "=" ++ show(x_weight[c]) ++ " " | c in COLOR where fix(x_opened[c])]
+	;
 
 %%
 function array[int] of string: show_wvcp_score() =
@@ -32,7 +34,8 @@ function array[int] of string: show_wvcp_score() =
 	++		[show(lb_score) ++ " <= " ++ show(x_score) ++ " <= " ++ show(ub_score) ++ " <= " ++ show(sum(r_weight))]
 	++  SNL
 	++		STAB	++	STAB
-	++		["Colors\t"] ++ [show(lb_colors) ++ " <= " ++ show(x_opened_colors) ++ " <= " ++ show(ub_colors) ++ " <= " ++ show(card(R_VERTEX))];
+	++		["colors\t"] ++ [show(lb_colors) ++ " <= " ++ show(x_opened_colors) ++ " <= " ++ show(ub_colors) ++ " <= " ++ show(card(R_VERTEX))]
+	;
 
 %%
 function array[int] of string: show_wvcp_rules() =

@@ -49,6 +49,12 @@ var 0..sum(weights): y_score;
 % (auxilliary) WVCP score inferred from the MWSSP solution
 var 0..sum(weights): yx_score;
 
+% (auxilliary) number of stars (excludes stand-alone nodes) 
+var W_R_VERTEX: y_stars;
+
+% (auxilliary) number of opened colors
+var W_COLOR: yx_opened_colors;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSTRAINTS
@@ -112,6 +118,14 @@ y_score = sum(a in ARC)(weights[head[a]] * y_arc[a]);% + sum(j in NODE)(x_d[j] *
 constraint
 yx_score = sum(weights) - y_score;
 
+% Stars
+constraint
+y_stars = count(u in NODE where outs[u]!={})(exists(a in outs[u])(y_arc[a] != 0));
+
+% Opened colors
+constraint
+yx_opened_colors = y_stars + length(cliqued) + count(u in NODE diff array2set(cliqued))(forall(a in ins[u] union outs[u])(y_arc[a] = 0));
+
 
 
 % %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -134,13 +148,13 @@ yx_score = sum(weights) - y_score;
 
 % % (auxilliary) Every disconnected node is disabled.
 % constraint
-% forall(i in index_set(fully_connected) where trace("DISCO-"++show(i)++" ", i in index_set(fully_connected)))(
-% 	x_node[fully_connected[i]] = 0
+% forall(i in index_set(cliqued) where trace("DISCO-"++show(i)++" ", i in index_set(cliqued)))(
+% 	x_node[cliqued[i]] = 0
 % );
 
 % % (auxilliary) A connected node is active iff at least one of its arcs is active
 % constraint
-% forall(u in NODE where not(v in fully_connected))(
+% forall(u in NODE where not(v in cliqued))(
 % 	x_node[u] = max(a in ins[u] union outs[u])(y_arc[a])
 % );
 
@@ -152,13 +166,13 @@ yx_score = sum(weights) - y_score;
 
 % % (auxilliary) disconnected nodes
 % constraint
-% forall(i in index_set(fully_connected))(
-% 	x_d[fully_connected[i]] = 1 - x_node[fully_connected[i]]
+% forall(i in index_set(cliqued))(
+% 	x_d[cliqued[i]] = 1 - x_node[cliqued[i]]
 % );
 
 % % (auxilliary) connected inactive nodes
 % constraint
-% forall(u in NODE where not(u in fully_connected))(
+% forall(u in NODE where not(u in cliqued))(
 % 	x_ci[u] = 1 - x_node[u]
 % );
 

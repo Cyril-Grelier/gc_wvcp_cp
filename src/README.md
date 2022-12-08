@@ -352,7 +352,9 @@ The dual model exposes the following variables:
 
 - the decision to include or exclude an arc for each arc of the dual graph
 - the score of the MWSSP solution (the weighted sum of the heads of all included arcs)
-- the score of a corresponding WVCP solution (derived by subtracting the MWSSP score from the sum of the vertex weights)
+- the score of an equivalent WVCP solution (derived by subtracting the MWSSP score from the sum of the vertex weights)
+- the number of stars (excludes stand-alone nodes)
+- the number of opened colors in an equivalent WVCP solution
 
 
 The following options set the search and restart strategies

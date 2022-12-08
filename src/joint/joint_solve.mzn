@@ -56,9 +56,7 @@ output
 % 	++	
 % 			show_mwssp_solution()
 % 	++  SNL ++ ["**************************"] ++ SNL
-	++	
-			show_wvcp_score()
-	++  SNL
-	++	
-			show_mwssp_score()
+	++		show_wvcp_score()
+% 	++  SNL
+% 	++		show_mwssp_score()
 ;

@@ -10,7 +10,7 @@ function array[int] of string: show_size() =
 	++  STAB
 	++  ["vertices=" ++ show(card(R_VERTEX))]
 	++  STAB
-	++		["density=" ++ show(round(100*density)) ++ "%" ++ "disconnected/cliqued=" ++ show(length(disconnected)) ++ "/" ++ show(length(cliqued))]
+	++		["density=" ++ show(round(100*density)) ++ "% " ++ "disconnected/cliqued=" ++ show(length(disconnected)) ++ "/" ++ show(length(cliqued))]
 	++		STAB
 	++		["colors=" ++ show(lb_colors..ub_colors)]
 	++  STAB
