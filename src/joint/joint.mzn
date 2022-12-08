@@ -45,8 +45,8 @@ constraint
 x_score = yx_score;
 
 % stars
-constraint
-x_opened_colors = yx_opened_colors;
+% constraint
+% x_opened_colors = yx_opened_colors;
 
 
 %%%%%%%%%%%
