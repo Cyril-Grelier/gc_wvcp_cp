@@ -1,2 +1,2 @@
-% default worst-case value to use for the number of colors
-nr_colors = nr_vertices;
+% default upper bound on the number of colors
+ub_colors = nr_vertices;

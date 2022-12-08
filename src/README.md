@@ -247,15 +247,19 @@ Each model is customizable using parameters and options to switch between equiva
 
 The following parameters _must_ be defined for each model
 
-- `nr_colors (int)`- the number of colors
+- `lb_colors (int)`- lower bound on the number of colors
+- `nr_colors (int)`- upper bound on the number of colors
+- `lb_score (int)`- lower bound on the score
 - `ub_score (int)`- upper bound on the score
 - `nr_cliques (int)`- the number of pre-computed cliques
 - `cliques (array of set of ints)`- the precomputed set of cliques
 
 The following data files _may_ be used to enforce default values
 
-- `core/default_ub_colors.dzn` sets `nr_colors` to the number of vertices (the worst-case value)
-- `core/default_ub_score.dzn` sets `ub_score` to the sum of the weights of the vertices
+- `core/default_lb_colors.dzn` sets `lb_colors` to 1 (best-case value)
+- `core/default_ub_colors.dzn` sets `ub_colors` to the number of vertices (worst-case value)
+- `core/default_lb_score.dzn` sets `lb_score` to the maximum of the weights of the vertices (best-case value)
+- `core/default_ub_score.dzn` sets `ub_score` to the sum of the weights of the vertices (worst-case value)
 - `core/no_cliques.dzn` sets `nr_cliques` to 0 and `cliques` to the empty array
 
 ---
@@ -264,19 +268,12 @@ The following data files _may_ be used to enforce default values
 
 Options serve different purposes
 
-- to enforce upper bound constraints
+<!-- to enforce bound constraints on colors or score -->
+
 - to enforce coloring and symmetry breaking rules
 - to select the search and restart strategies and the variable and value selection heuristics.
 
 <!-- TODO - to exploit a precomputed set of cliques -->
-
----
-
-### Upper bounds
-
-Option `WVCP_B` indicates whether the user-defined bounds should be enforced. Its value _must_ be any subset of the following enumeration cases
-
-- `UB_SCORE` - if supplied, the user-defined upper bound on the score is enforced
 
 ---
 
@@ -297,9 +294,9 @@ Notes
 
 - The model systematically checks whether vertices are readily sorted in the instance and adapts constraint formulations accordingly.
 
-- The dynamic variant of each rule entails its static variant (eg. `DR1` is stronger than `SR1`). For this reason, the model only allows one of them to be checked and exits otherwise. 
+- The dynamic variant of each rule entails its static variant (eg. `DR1` is stronger than `SR1`). <!-- For this reason, the model only allows one of them to be checked and exits otherwise. -->
 
-- The model checks whether redundant or entailed options are requested (eg. `DR2_v1` and `DR2_v2`) and if so exits. 
+- The model checks whether redundant options are requested (eg. `DR2_v1` and `DR2_v2`) and if so exits. 
 
 - The symmetry breaking rules are implemented in the primal model and documented in file `primal/primal.mzn`.
 
@@ -320,11 +317,13 @@ Technically, model-specific options are Minizinc enumerations that extend generi
 
 ### Primal model: decision variables, search strategies and heuristics
 
-The primal model exposes 3 types of variables:
+The primal model exposes the following variables:
 
-- the number of colors to open (a single variable)
+- the color of each vertex
+- the number of opened colors (colors including at least one vertex)
 - the weight of each color
-- the color of each vertex.
+- the dominant vertex of each color (the heaviest vertex of the color with smallest id)
+- the score of the coloring
 
 The following options set the search and restart strategies
 
@@ -349,9 +348,12 @@ The following options set the value selection heuristics
 
 ### Dual model: decision variables, search strategies and heuristics
 
-The dual model exposes a single type of variables:
+The dual model exposes the following variables:
 
-- the yes/no decision to include an arc for each arc of the dual graph.
+- the decision to include or exclude an arc for each arc of the dual graph
+- the score of the MWSSP solution (the weighted sum of the heads of all included arcs)
+- the score of a corresponding WVCP solution (derived by subtracting the MWSSP score from the sum of the vertex weights)
+
 
 The following options set the search and restart strategies
 
@@ -372,20 +374,16 @@ The following option sets the value selection heuristics
 
 ### Joint model: decision variables, search strategies and heuristics
 
-In this version, the joint model exposes the same variables as the primal and dual models and supports the same variable and value selection heuristics.
+The joint model inherits the sets of variables from the primal and dual models to which it adds the following variables:
 
-<!--
-, the joint model exposes its own type of variables:
+- whether or not a vertex is dominated in its color.
 
-- the yes/no decision to make a vertex dominant in its color.
--->
-
-The following option sets the search strategy <!-- TODO and restart strategies -->
+The joint model supports the same variable and value selection heuristics as the dual and primal models. The following option sets the search strategy <!-- TODO and restart strategies -->
 
 - `MWSSP_WVCP_SEARCH_STRATEGY` - the search strategy
 <!-- TODO `MWSSP_WVCP_SEARCH_RESTART`- the restart strategy -->
 
-In this version, this option allows to switch for a primal search strategy or a dual search strategy. That is, the search will be either branching on primal variables or branching on dual variables. See `joint/joint_heuristics.mzn` for the list of available search strategies.
+In this version, this option allows to switch for a primal search strategy or a dual search strategy. The search will either be branching on primal variables or branching on dual variables. See `joint/joint_heuristics.mzn` for the list of available search strategies.
 
 ---
 
@@ -419,9 +417,10 @@ minizinc \
 -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
 -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
 -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
--D "WVCP_B={UB_SCORE}" \
--D "WVCP_M={M_SR1,M_DR2_v2}" \
+-D "WVCP_M={M_SR2,M_DR2_v2}" \
+-d core/default_lb_colors.dzn \
 -d core/default_ub_colors.dzn \
+-d core/default_lb_score.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
 -d ../reduced_wvcp_dzn/p06.dzn \
@@ -432,10 +431,13 @@ minizinc \
 - on reduced instance `p06` [`-d ../reduced_wvcp_dzn/p06.dzn`]
 - using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
 - using a 5 minutes timeout [`--time-limit 300000`]
-- enforcing upper bound constraints on
+<!--
+- enforcing bound constraints on
+  - the number of colors [flags `LB_COLORS` and `UB_COLORS`] using the default upper-bound value [`-d core/defaut_ub_score.dzn`]
   - the score [flag `UB_SCORE`] using the default upper-bound value [`-d core/defaut_ub_score.dzn`]
+-->
 - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d core/no_cliques.dzn`]
-- enforcing symmetry breaking rules SR1 [flag `M_SR1`] and DR2_v2 [flag `M_DR2_v2`]
+- enforcing symmetry breaking rules SR2 [flag `M_SR2`] and DR2_v2 [flag `M_DR2_v2`]
 - using
   - the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`]
   - the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
@@ -466,7 +468,6 @@ minizinc \
 -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
--D "WVCP_B={UB_SCORE}" \
 -D "WVCP_M={}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
@@ -501,8 +502,7 @@ minizinc \
 -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
--D "WVCP_B={UB_SCORE}" \
--D "WVCP_M={}" \
+-D "WVCP_M={M_SR2,M_DR2_v2}" \
 -d core/default_ub_colors.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \

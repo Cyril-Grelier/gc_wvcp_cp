@@ -1,0 +1,2 @@
+% default lower bound on the score
+lb_score = max(weights);

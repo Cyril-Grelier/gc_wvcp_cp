@@ -32,7 +32,7 @@ function array[int] of string: show_wvcp_solution() =
 function array[int] of string: show_wvcp_score() =
 			["WVCP scores"]
 	++		STAB
-	++		[show(x_score) ++ " <= " ++ show(ub_score) ++ " <= " ++ show(sum(weight))]
+	++		[show(lb_score) ++ " <= " ++ show(x_score) ++ " <= " ++ show(ub_score) ++ " <= " ++ show(sum(weight))]
 	++  SNL
 	++		STAB	++	STAB
 	++		["Colors\t"] ++ [show(x_nr_used) ++ " <= " ++ show(card(R_VERTEX))];

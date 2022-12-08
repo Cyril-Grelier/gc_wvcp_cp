@@ -9,12 +9,19 @@ x_score = sum(x_weight);
 %%%%%%%%%%%%
 % STATIC FLAG-BASED BOUND CONSTRAINTS
 
-% input upper bound on score
-constraint
-if (UB_SCORE in WVCP_B)
-then
-	(x_score <= ub_score)
-endif;
+% % input lower bound on score
+% constraint
+% if (LB_SCORE in WVCP_B)
+% then
+% 	(x_score >= lb_score)
+% endif;
+
+% % input upper bound on score
+% constraint
+% if (UB_SCORE in WVCP_B)
+% then
+% 	(x_score <= ub_score)
+% endif;
 
 % heaviest clique provides lower bound on score
 constraint
@@ -24,14 +31,12 @@ then
 endif;
 
 % % upper bound on score derived on the number of colors from the score
-% % TODO review
-% var R_VERTEX: x_ub_used;
 % constraint
 % x_nr_used <= x_ub_used
 % /\
-% x_score > sum(i in R_VERTEX)(bool2int(i<x_ub_used)*(weight[max(R_VERTEX)-i+1]))
+% x_score > sum(i in R_VERTEX)((i<x_ub_used)*(weight[max(R_VERTEX)-i+1]))
 % /\
-% x_score <= sum(i in R_VERTEX)(bool2int(i<=x_ub_used)*(weight[max(R_VERTEX)-i+1]))
+% x_score <= sum(i in R_VERTEX)((i<=x_ub_used)*(weight[max(R_VERTEX)-i+1]))
 % ;
 
 

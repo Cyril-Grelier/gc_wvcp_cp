@@ -56,13 +56,13 @@ forall(c in COLOR)(
 
 % weight of a color
 constraint
-forall(c in COLOR where I_SORT)(
+forall(c in COLOR)(
 	x_weight[c] = weight[x_dominant[c]]
 );
 
 
 %%%%%%%%%%%%
-% COLOR METRICS
+% BOUND CONSTRAINTS ON COLORS
 
 %
 constraint x_used = [card(x_vertices[c])!=1 | c in COLOR];
