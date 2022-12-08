@@ -1,5 +1,11 @@
-include "../primal/primal.mzn";
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE INCLUSION
+
 include "../dual/dual.mzn";
+include "../primal/primal.mzn";
+
+include "../joint/joint_heuristics.mzn";
+include "../joint/joint_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

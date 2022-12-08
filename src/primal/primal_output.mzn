@@ -1,9 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AFFICHAGE
 
-include "../core/instance_output.mzn";
-
-
 %%
 function array[int] of string: show_wvcp_heuristics() =
 			["WVCP heuristics"]
@@ -23,19 +20,19 @@ function array[int] of string: show_wvcp_solution() =
 	++		["Coloring\t"] ++ [show(v) ++ "=" ++ show(x_color[v]) ++ " " | v in R_VERTEX]
 	++		SNL
 	++		STAB	++	STAB
-	++  ["Partitioning\t"] ++ [show(c) ++ "=" ++ show(x_vertices[c]) ++ " " | c in COLOR where fix(x_used[c])]
+	++  ["Partitioning\t"] ++ [show(c) ++ "=" ++ show(x_vertices[c]) ++ " " | c in COLOR where fix(x_opened[c])]
 	++  SNL
 	++		STAB	++	STAB
-	++  ["Weighting\t"] ++ [show(c) ++ "=" ++ show(x_weight[c]) ++ " " | c in COLOR where fix(x_used[c])];
+	++  ["Weighting\t"] ++ [show(c) ++ "=" ++ show(x_weight[c]) ++ " " | c in COLOR where fix(x_opened[c])];
 
 %%
 function array[int] of string: show_wvcp_score() =
 			["WVCP scores"]
 	++		STAB
-	++		[show(lb_score) ++ " <= " ++ show(x_score) ++ " <= " ++ show(ub_score) ++ " <= " ++ show(sum(weight))]
+	++		[show(lb_score) ++ " <= " ++ show(x_score) ++ " <= " ++ show(ub_score) ++ " <= " ++ show(sum(r_weight))]
 	++  SNL
 	++		STAB	++	STAB
-	++		["Colors\t"] ++ [show(x_nr_used) ++ " <= " ++ show(card(R_VERTEX))];
+	++		["Colors\t"] ++ [show(lb_colors) ++ " <= " ++ show(x_opened_colors) ++ " <= " ++ show(ub_colors) ++ " <= " ++ show(card(R_VERTEX))];
 
 %%
 function array[int] of string: show_wvcp_rules() =

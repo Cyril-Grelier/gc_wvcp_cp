@@ -9,6 +9,26 @@ x_score = sum(x_weight);
 %%%%%%%%%%%%
 % STATIC FLAG-BASED BOUND CONSTRAINTS
 
+
+% upper-bound constraint based on disconnected nodes
+constraint
+	if length(disconnected) != 0
+	then
+		let {
+			R_VERTEX: u = greatest(array2set(disconnected));
+		} in
+			x_score <= sum(r_weight) - sum(i in index_set(disconnected))(r_weight[disconnected[i]]) + r_weight[u]
+	endif;
+
+% lower-bound constraint based on disconnected nodes
+constraint
+	if length(cliqued) != 0
+	then
+		x_score >= sum(i in index_set(cliqued))(r_weight[cliqued[i]])
+	endif;
+
+
+
 % % input lower bound on score
 % constraint
 % if (LB_SCORE in WVCP_B)
@@ -32,7 +52,7 @@ endif;
 
 % % upper bound on score derived on the number of colors from the score
 % constraint
-% x_nr_used <= x_ub_used
+% x_opened_colors <= x_ub_used
 % /\
 % x_score > sum(i in R_VERTEX)((i<x_ub_used)*(weight[max(R_VERTEX)-i+1]))
 % /\

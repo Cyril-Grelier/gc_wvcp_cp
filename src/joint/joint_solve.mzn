@@ -1,20 +1,18 @@
 %% Command
 %
-% minizinc --solver or-tools --time-limit 3600000 --parallel 1 --compiler-statistics --solver-statistics --intermediate \
+% minizinc --solver or-tools --time-limit 300000 --parallel 1 --compiler-statistics --solver-statistics --intermediate \
 % -D "MWSSP_WVCP_SEARCH_STRATEGY=MWSSP" -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
 % -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_MIN" \
 % -D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
 % -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
 % -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 % -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
-% -D "WVCP_B={UB_SCORE}" -D "WVCP_M={}" \
+% -D "WVCP_M={M_SR2,M_DR2_v2}" \
 % -m joint/joint_solve.mzn \
 % -d core/default_lb_colors.dzn -d core/default_ub_colors.dzn -d core/default_lb_score.dzn -d core/default_ub_score.dzn -d core/no_cliques.dzn -d ../original_wvcp_dzn/p40.dzn
 
 
 include "joint.mzn";
-include "joint_heuristics.mzn";
-include "joint_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

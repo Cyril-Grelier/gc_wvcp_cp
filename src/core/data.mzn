@@ -141,3 +141,11 @@ set of int: SCORE = lb_score..ub_score;
 % GRAPH METRICS
 % graph density
 float: density = sum(v in R_VERTEX)(card(neighbours[v])) / max({1,(card(R_VERTEX)*(card(R_VERTEX)-1))});
+
+% GRAPH PROPERTIES
+% disconnected vertices (!! vertices with empty neighborhoods may all be placed in the heaviest color)
+array[int] of R_VERTEX: disconnected = [v | v in R_VERTEX where neighbours[v] = {}];
+
+% fully-connected vertices (!! any vertex connected to all other vertices is necessarily placed in a color of its own)
+array[int] of R_VERTEX: cliqued = [v | v in R_VERTEX where neighbours[v] = R_VERTEX diff {v}];
+

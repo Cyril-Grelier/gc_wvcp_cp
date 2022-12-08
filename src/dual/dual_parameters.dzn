@@ -1,19 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%
 % MWSSP parameter file that may be used in place of command line parameters
 
-% Examples of commands to launch from the minizinc source code directory
 
-%% USING parameter (dzn) files on original instance p06
-% date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate mwssp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn ../no_cliques.dzn ../parameters.dzn mwssp_parameters.dzn ../../original_wvcp_dzn/p06.dzn ; beep
-
-%% NOT USING parameter (dzn) files on original instance p06
-% date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" mwssp_solve.mzn ../no_cliques.dzn ../no_ub_colors.dzn ../no_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={}" ../../original_wvcp_dzn/p40.dzn ; beep
-
-%% NOT USING parameter (dzn) files on reduced instance p06 with cliques
-% date; minizinc --solver or-tools --time-limit 3600000 --random-seed 1 --parallel 1 --compiler-statistics --solver-statistics --intermediate -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" -D "MWSSP_SEARCH_RESTART=RESTART_NONE" -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" mwssp_solve.mzn ../no_ub_colors.dzn ../no_ub_score.dzn -D "WVCP_B={}" -D "WVCP_M={}" ../../reduced_wvcp_dzn/p40.dzn ../../reduced_wvcp_dzn/p40.clq.dzn ; beep
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
 % Fix heuristics here
 
 MWSSP_SEARCH_STRATEGY						=	ARCS_SPECIFIC;  % see enum MWSSP_SEARCH

@@ -2,15 +2,18 @@
 % FILE INCLUSION
 
 include "../core/data.mzn";
-include "../primal/primal_data.mzn";
-include "../primal/primal_variables.mzn";
+include "../core/heuristics.mzn";
+include "../core/instance_output.mzn";
+
 include "../primal/primal_constraints.mzn";
-include "../primal/primal_rules.mzn";
+include "../primal/primal_data.mzn";
+include "../primal/primal_heuristics.mzn";
+include "../primal/primal_objective.mzn";
+include "../primal/primal_output.mzn";
 include "../primal/primal_rule_R1.mzn";
 include "../primal/primal_rule_R2.mzn";
-include "../primal/primal_objective.mzn";
-include "primal_heuristics.mzn";
-include "primal_output.mzn";
+include "../primal/primal_rules.mzn";
+include "../primal/primal_variables.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

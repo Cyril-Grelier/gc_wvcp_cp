@@ -1,11 +1,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSTRAINTS
 
-include "alldifferent.mzn";
-include "int_set_channel.mzn";
-
+%%%%%%%%%%%%
+%% CHANNELING CONSTRAINTS
 
 % channeling constraint between color and vertex variables
+include "int_set_channel.mzn";
 constraint
 int_set_channel(x_color, x_vertices);
 
@@ -21,6 +21,7 @@ forall(v in V_VERTEX)(
 
 
 % binary coloring constraint between adjacent vertices
+include "alldifferent.mzn";
 constraint
 	if ({M_DR2_v3, M_DR2_v4} intersect WVCP_M != {})
 	then
@@ -65,7 +66,19 @@ forall(c in COLOR)(
 % BOUND CONSTRAINTS ON COLORS
 
 %
-constraint x_used = [card(x_vertices[c])!=1 | c in COLOR];
+constraint x_opened = [card(x_vertices[c]) != 1 | c in COLOR];
 
 %
-constraint x_nr_used = sum(x_used);
+constraint x_opened_colors = sum(x_opened);
+
+% upper-bound constraint based on disconnected nodes
+constraint	x_opened_colors <= max(COLOR) - length(disconnected) + 1;
+
+% lower-bound constraint based on cliqued nodes
+include "arg_max.mzn";
+constraint x_opened_colors >= length(cliqued);
+
+% (redundant) lower-bound constraint based on cliqued nodes
+include "alldifferent.mzn";
+constraint all_different([x_color[v] | v in array2set(cliqued)]);
+

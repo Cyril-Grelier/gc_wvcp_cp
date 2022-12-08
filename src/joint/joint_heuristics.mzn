@@ -1,9 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MWSSP+WVCP HEURISTICS
 
-include "../dual/dual_heuristics.mzn";
-include "../primal/primal_heuristics.mzn";
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SEARCH STRATEGIES

@@ -8,7 +8,7 @@
 
 - [Datasets](#datasets)
 
-- [CP models for WVCP](#cp_models)
+- [CP models for WVCP](#cpmodels)
 
 - [Customizing models](#model_configuration)
 
@@ -406,7 +406,7 @@ This command
 minizinc \
 --solver or-tools \
 --time-limit 300000 \
---parallel 8 \
+--parallel 1 \
 --compiler-statistics --solver-statistics \
 --intermediate \
 -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
@@ -423,12 +423,12 @@ minizinc \
 -d core/default_lb_score.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
--d ../reduced_wvcp_dzn/p06.dzn \
+-d ../original_wvcp_dzn/p06.dzn \
 -m ./primal/primal_solve.mzn
 ```
 
 - runs the primal model [`-m primal/primal_solve.mzn`]
-- on reduced instance `p06` [`-d ../reduced_wvcp_dzn/p06.dzn`]
+- on original instance `p06` [`-d ../original_wvcp_dzn/p06.dzn`]
 - using OR-Tools [`--solver or-tools`] with 8 threads [`--parallel 8`]
 - using a 5 minutes timeout [`--time-limit 300000`]
 <!--
@@ -460,8 +460,8 @@ Running the dual model on original instance `p40`
 ```bash
 minizinc \
 --solver or-tools \
---time-limit 3600000 \
---parallel 8 \
+--time-limit 300000 \
+--parallel 1 \
 --compiler-statistics --solver-statistics \
 --intermediate \
 -D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" \
@@ -469,7 +469,9 @@ minizinc \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
 -D "WVCP_M={}" \
+-d core/default_lb_colors.dzn \
 -d core/default_ub_colors.dzn \
+-d core/default_lb_score.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
 -d ../original_wvcp_dzn/p40.dzn \
@@ -485,11 +487,11 @@ Running the dual model on original instance `p06`
 ```bash
 minizinc \
 --solver or-tools \
---time-limit 3600000 \
---parallel 8 \
+--time-limit 300000 \
+--parallel 1 \
 --compiler-statistics --solver-statistics \
 --intermediate \
--D "MWSSP_WVCP_SEARCH_STRATEGY=MWSSP" \
+-D "MWSSP_WVCP_SEARCH_STRATEGY=WVCP" \
 -D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
 -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
 -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
@@ -503,7 +505,9 @@ minizinc \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
 -D "WVCP_M={M_SR2,M_DR2_v2}" \
+-d core/default_lb_colors.dzn \
 -d core/default_ub_colors.dzn \
+-d core/default_lb_score.dzn \
 -d core/default_ub_score.dzn \
 -d core/no_cliques.dzn \
 -d ../original_wvcp_dzn/p06.dzn \
