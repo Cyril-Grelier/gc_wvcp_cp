@@ -1,4 +1,12 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE INCLUSION
+
 include "../core/data.mzn";
+include "../core/heuristics.mzn";
+include "../core/instance_output.mzn";
+
+include "../dual/dual_heuristics.mzn";
+include "../dual/dual_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,10 +36,6 @@ array[ARC] of NODE: head = [j | i in NODE, j in successors[i]];
 array[NODE] of set of ARC: outs = [{a | a in ARC where i=tail[a]} | i in NODE];
 array[NODE] of set of ARC: ins = [{a | a in ARC where i=head[a]} | i in NODE];
 
-% disconnected nodes
-% !! disconnected nodes are necessarily connected to all vertices of G and individually contribute to the cost of any WVCP solution
-set of NODE: disconnected = {j | j in NODE where ins[j] union outs[j] = {}};
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % VARIABLES
@@ -44,6 +48,12 @@ var 0..sum(weights): y_score;
 
 % (auxilliary) WVCP score inferred from the MWSSP solution
 var 0..sum(weights): yx_score;
+
+% (auxilliary) number of stars (excludes stand-alone nodes) 
+var W_R_VERTEX: y_stars;
+
+% (auxilliary) number of opened colors
+var W_COLOR: yx_opened_colors;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -104,20 +114,22 @@ forall(j in NODE where ins[j]!={})(
 constraint
 y_score = sum(a in ARC)(weights[head[a]] * y_arc[a]);% + sum(j in NODE)(x_d[j] * weights[j]);
 
-% BKS for WVCP as LB for WSSP
-constraint
-if (UB_SCORE in WVCP_BOUNDS)
-then (y_score >= sum(weights) - ub_score)
-endif;
-
 % Cost of WVCP
 constraint
 yx_score = sum(weights) - y_score;
 
+% Stars
+constraint
+y_stars = count(u in NODE where outs[u]!={})(exists(a in outs[u])(y_arc[a] != 0));
+
+% Opened colors
+constraint
+yx_opened_colors = y_stars + length(cliqued) + count(u in NODE diff array2set(cliqued))(forall(a in ins[u] union outs[u])(y_arc[a] = 0));
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% AUXILLIARY
+
+% %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% % AUXILLIARY
 
 % % (auxilliary) a node j is active (x_node[j]=1) iff at least one of its arcs is active
 % array[NODE] of var 0..1: x_node;
@@ -136,47 +148,42 @@ yx_score = sum(weights) - y_score;
 
 % % (auxilliary) Every disconnected node is disabled.
 % constraint
-% forall(j in disconnected where trace("DISCO-"++show(j)++" ", j in disconnected))(
-% 	x_node[j] = 0
+% forall(i in index_set(cliqued) where trace("DISCO-"++show(i)++" ", i in index_set(cliqued)))(
+% 	x_node[cliqued[i]] = 0
 % );
 
 % % (auxilliary) A connected node is active iff at least one of its arcs is active
 % constraint
-% forall(j in NODE where not(j in disconnected))(
-% 	x_node[j] = max(a in ins[j] union outs[j])(y_arc[a])
+% forall(u in NODE where not(v in cliqued))(
+% 	x_node[u] = max(a in ins[u] union outs[u])(y_arc[a])
 % );
-
 
 % % (auxilliary) number of active dominated nodes
 % constraint
-% forall(j in NODE)(
-% 	x_d[j] + x_ci[j] + x_cal[j] + x_cac[j] = 1
+% forall(u in NODE)(
+% 	x_d[u] + x_ci[u] + x_cal[u] + x_cac[u] = 1
 % );
 
 % % (auxilliary) disconnected nodes
 % constraint
-% forall(j in disconnected)(
-% 	x_d[j] = 1 - x_node[j]
+% forall(i in index_set(cliqued))(
+% 	x_d[cliqued[i]] = 1 - x_node[cliqued[i]]
 % );
 
 % % (auxilliary) connected inactive nodes
 % constraint
-% forall(j in NODE where not(j in disconnected))(
-% 	x_ci[j] = 1 - x_node[j]
+% forall(u in NODE where not(u in cliqued))(
+% 	x_ci[u] = 1 - x_node[u]
 % );
 
 % % (auxilliary) connected active star leaf nodes
 % constraint
-% forall(j in NODE where ins[j] != {})(
-% 	x_cal[j] = x_node[j] * max(a in ins[j])(y_arc[a])
+% forall(u in NODE where ins[u] != {})(
+% 	x_cal[u] = x_node[u] * max(a in ins[u])(y_arc[a])
 % );
 
 % % (auxilliary) connected active star center nodes
 % constraint
-% forall(j in NODE where outs[j] != {})(
-% 	x_cac[j] = x_node[j] * max(a in outs[j])(y_arc[a])
+% forall(u in NODE where outs[u] != {})(
+% 	x_cac[u] = x_node[u] * max(a in outs[u])(y_arc[a])
 % );
-
-% % constraint
-% % assert(forall(j in NODE)(ins[j] union outs[j] != {}), "disconnected nodes ... "
-% %  ++ "\tNODE=" ++ show(NODE) ++ "\tARC=" ++ show(ARC) ++ "\tsuccessors=" ++ show(successors) ++ "\thead=" ++ show(head) ++ "\tins=" ++ show(ins) ++ "\touts=" ++ show(outs));

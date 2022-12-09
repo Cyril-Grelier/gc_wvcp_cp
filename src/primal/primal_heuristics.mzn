@@ -1,8 +1,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % WVCP HEURISTICS
 
-include "../core/heuristics.mzn";
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SEARCH STRATEGIES
@@ -28,14 +26,14 @@ function ann: wvcp_search() =
   elseif  WVCP_SEARCH_STRATEGY=WEIGHTS
   then    int_search(x_weight,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))
   elseif  WVCP_SEARCH_STRATEGY=COLORS
-  then    int_search([x_nr_used],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS))
+  then    int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS))
   elseif  WVCP_SEARCH_STRATEGY=COLORS_VERTICES
   then    seq_search(
-            [int_search([x_nr_used],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
+            [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
             int_search(x_color,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))])
   elseif  WVCP_SEARCH_STRATEGY=COLORS_WEIGHTS
   then    seq_search(
-            [int_search([x_nr_used],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
+            [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
             int_search(x_weight,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))])
   else    int_search(x_color,input_order,indomain)
   endif;

@@ -1,8 +1,3 @@
-include "../core/instance_output.mzn";
-include "../primal/primal_output.mzn";
-include "../dual/dual_output.mzn";
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % AFFICHAGE
 

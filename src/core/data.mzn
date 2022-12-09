@@ -7,20 +7,22 @@ string: name;
 int: nr_vertices;
 % number of edges
 int: nr_edges;
-% neighborhoods
-% !! vertices indexed from 0 in `neighborhoods` -> re-indexed from 1 in `neighbours`
+% neighborhoods (!! vertices indexed from 0 in `neighborhoods` -> re-indexed from 1 in `neighbours`)
 array[int] of set of int: neighborhoods;
-% weights
-% !! vertices may not be sorted in descending order of weight
-array[R_VERTEX] of int: weights;
+% weights (!! vertices may not be sorted in descending order of weights)
+array[int] of int: weights;
 
 % number of cliques
 int: nr_cliques;
-% cliques
-% !! vertices indexed from 0 in `cliques` -> re-indexed from 1 in `clique`
-array[CLIQUE] of set of int: cliques;
-% upper bound on colors
+% cliques (!! vertices indexed from 0 in `cliques` -> re-indexed from 1 in `clique`)
+array[int] of set of int: cliques;
+
+% lower bound on colors
+int: lb_colors;
+% number of colors (!! this may be any precomputed upper bound on the number of colors)
 int: ub_colors;
+% lower bound on score
+int: lb_score;
 % upper bound on score
 int: ub_score;
 
@@ -43,22 +45,18 @@ constraint assert(forall(i in index_set(cliques))(cliques[i] subset 0..nr_vertic
 constraint assert(forall(i in index_set(cliques))(i-min(index_set(cliques)) in cliques[i]), "assertion failed: i-th vertex must belong to i-th clique");
 
 constraint assert(ub_colors in 1..nr_vertices, "assertion failed: ub_colors out of bounds");
+constraint assert(lb_colors in 1..ub_colors, "assertion failed: lb_colors out of bounds");
 constraint assert(ub_score in 0..sum(weights), "assertion failed: ub_score out of bounds");
+constraint assert(lb_score in 0..ub_score, "assertion failed: lb_score out of bounds");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSTRAINT MODEL OPTIONS
 
-% Bounds
-% TODO generic flag -> rename to remove WVCP prefix
-enum WVCP_BOUNDS = {
-	UB_COLORS, % upper-bound on the number of colors
-	UB_SCORE, % upper-bound on score
-};
-
 % Model features
 % TODO WVCP-specific flags (?) -> move elsewhere
 enum WVCP_MODEL = {
+	M_SB_SCORE, % enforce static lower/upper bound constraints on objective function
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1_v1, % enforces Dynamic Greatest Dominating Vertex rule variant 1
@@ -70,50 +68,84 @@ enum WVCP_MODEL = {
 };
 
 % Instance options
-set of WVCP_BOUNDS: WVCP_B;
 set of WVCP_MODEL: WVCP_M;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % META-MODEL ASSERTIONS
 
-constraint assert(card({M_SR1, M_DR1_v1} intersect WVCP_M) <= 1, "assertion failed: M_SR1 and M_DR1_v* mutually incompatible");
-constraint assert(card({M_SR2, M_DR2_v1, M_DR2_v2, M_DR2_v3, M_DR2_v4} intersect WVCP_M) <= 1, "assertion failed: M_SR2, M_DR2_v* mutually incompatible");
+% constraint assert(card({M_DR1_v1} intersect WVCP_M) <= 1, "assertion failed: choose one of M_DR1_v*");
+constraint assert(card({M_DR2_v1, M_DR2_v2, M_DR2_v3, M_DR2_v4} intersect WVCP_M) <= 1, "assertion failed: choose one of M_DR2_v*");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % MODEL DATA
 
-% range of *real vertices*
+% range of real vertices
 set of int: R_VERTEX = 1..nr_vertices;
-% range of colors
-set of int: COLOR = 1..nr_vertices;
-% range of *virtual vertices*
+% count of real vertices
+set of int: W_R_VERTEX = 0..card(R_VERTEX);
+% range of colors (!! upper-bounded by ub_colors)
+set of int: COLOR = 1..ub_colors;
+% count of colors
+set of int: W_COLOR = 0..card(COLOR);
+
+% range of virtual vertices
 % one virtual vertex is defined per color
 % virtual vertex of i-th color identified by max(R_VERTEX)+i
-set of int: V_VERTEX = max(R_VERTEX)+1..max(R_VERTEX)+ub_colors;
+set of int: V_VERTEX = max(R_VERTEX)+1..max(R_VERTEX)+card(COLOR);
+
 % range of all vertices (real and virtual)
 set of int: VERTEX = min(R_VERTEX)..max(V_VERTEX);
-% range of weights
-set of int: WEIGHT = 0..max(weights);
-% set of weights
-set of int: WEIGHT_SCALE = array2set(weights);
-% range of cliques
-set of int: CLIQUE = 1..nr_cliques;
+% count of all vertices
+set of int: W_VERTEX = 0..card(VERTEX);
 
-% neighborhoods
+% NEIGHBORHOODS
 % !! vertices indexed from 0 in instance file -> re-indexed from min(R_VERTEX)
 % virtual vertices are disconnected
 array[VERTEX] of set of VERTEX: neighbours = [{min(R_VERTEX)+j | j in neighborhoods[i]} | i in index_set(neighborhoods)] ++ [{} | v in V_VERTEX];
-% weights
-% virtual vertices have weight 0
-array[VERTEX] of WEIGHT: weight = [weights[i] | i in index_set(weights)] ++ [0 | i in V_VERTEX];
-% cliques
+
+% WEIGHTS
+% real vertex weights
+array[R_VERTEX] of int: r_weight = weights;
+% range of real vertex weights
+set of int: R_WEIGHT_RANGE = min(r_weight)..max(r_weight);
+% scale of real vertex weights
+set of int: R_WEIGHT_SCALE = array2set(r_weight);
+% range of scale of real vertex weights
+set of int: R_WEIGHT_SCALE_RANGE = 1..card(R_WEIGHT_SCALE);
+% scale of real vertex weights
+array[R_WEIGHT_SCALE_RANGE] of R_WEIGHT_SCALE: r_weight_scale = reverse(set2array(R_WEIGHT_SCALE)); % !! sorting weights in descending order
+% weight-based distribution of real vertices
+array[R_WEIGHT_SCALE_RANGE] of set of R_VERTEX: r_weight_vertices = [{ v | v in R_VERTEX where r_weight[v]=r_weight_scale[i]} | i in R_WEIGHT_SCALE_RANGE];
+% weight-based count of real vertices
+array[R_WEIGHT_SCALE_RANGE] of W_R_VERTEX: r_weight_nr_vertices = [card(r_weight_vertices[i]) | i in R_WEIGHT_SCALE_RANGE];
+
+% range of real/virtual vertex weights: virtual vertices have weight 0
+array[VERTEX] of int: weight = r_weight ++ [0 | i in V_VERTEX];
+% range of real/virtual vertex weights
+set of int: WEIGHT_RANGE = min(weight)..max(weight);
+% scale of real/virtual vertex weights
+set of int: WEIGHT_SCALE = array2set(weight);
+
+% CLIQUES
+% range of cliques
+set of int: CLIQUE = 1..nr_cliques;
 % !! clique vertices indexed from 0 in instance file -> re-indexed from min(R_VERTEX)
 array[CLIQUE] of set of VERTEX: clique = [{min(R_VERTEX)+v | v in cliques[i]} | i in index_set(cliques)];
 
+% SCORE
 % range of WVCP objective function
-set of int: SCORE = max(weight)..sum(weight);
+set of int: SCORE = lb_score..ub_score;
 
+% GRAPH METRICS
 % graph density
 float: density = sum(v in R_VERTEX)(card(neighbours[v])) / max({1,(card(R_VERTEX)*(card(R_VERTEX)-1))});
+
+% GRAPH PROPERTIES
+% disconnected vertices (!! vertices with empty neighborhoods may all be placed in the heaviest color)
+array[int] of R_VERTEX: disconnected = [v | v in R_VERTEX where neighbours[v] = {}];
+
+% fully-connected vertices (!! any vertex connected to all other vertices is necessarily placed in a color of its own)
+array[int] of R_VERTEX: cliqued = [v | v in R_VERTEX where neighbours[v] = R_VERTEX diff {v}];
+

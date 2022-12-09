@@ -1,2 +1,2 @@
-% use this data file together with the basic instance data file when upper bound on colors is not used
+% default upper bound on the number of colors
 ub_colors = nr_vertices;

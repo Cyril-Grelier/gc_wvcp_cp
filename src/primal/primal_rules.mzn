@@ -1,14 +1,12 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % SYMMETRY BREAKING RULES
 
-include "lex_chain_greater.mzn";
-include "strictly_increasing.mzn";
-
 
 %%%%%%%%%%%%
 % lexicographic ordering constraint that sorts colors using >>_{c}
 
 % (a) generic constraint formulation that assumes no existing ordering of vertices - uses global constraint lex_chain_greater
+include "lex_chain_greater.mzn";
 constraint
 if not(I_SORT)
 then
@@ -19,6 +17,7 @@ then
 endif;
 
 % (b) optimized constraint formulation when vertices are sorted in descending order of weights using >>_{w} (check speedup factor against generic formulation on R100_1g.dzn!)
+include "strictly_increasing.mzn";
 constraint
 if I_SORT
 then

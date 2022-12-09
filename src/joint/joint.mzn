@@ -1,5 +1,11 @@
-include "../primal/primal.mzn";
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% FILE INCLUSION
+
 include "../dual/dual.mzn";
+include "../primal/primal.mzn";
+
+include "../joint/joint_heuristics.mzn";
+include "../joint/joint_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,6 +43,10 @@ forall(ij in ARC)(
 % objectives
 constraint
 x_score = yx_score;
+
+% stars
+% constraint
+% x_opened_colors = yx_opened_colors;
 
 
 %%%%%%%%%%%

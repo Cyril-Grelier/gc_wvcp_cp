@@ -33,19 +33,17 @@ R_VERTEX: greatest(set of VERTEX: U) =
 	then
 		min(U)
 	else
-		sort_by_desc_weight(U)[1]
+		let {
+			array[int] of VERTEX: V = sort_by_desc_weight(U);
+		} in
+		V[min(index_set(V))]
 	endif;
 
 
 %% var version
-array[VERTEX] of VERTEX: sorted_vertices =
-if I_SORT
-then
-	set2array(VERTEX)
-else
-	sort_by_desc_weight(R_VERTEX) ++ set2array(V_VERTEX)
-endif;
-	
+% !! this is made global to reduce overhead
+array[VERTEX] of VERTEX: sorted_vertices = array1d(VERTEX, sort_by_desc_weight(R_VERTEX) ++ set2array(V_VERTEX));
+
 var VERTEX: greatest(var set of VERTEX: U) =
 	if I_SORT
 	then

@@ -8,15 +8,15 @@ array[int] of string: SEP = ["**************************"];
 function array[int] of string: show_size() =
 			["Instance"]
 	++  STAB
-	++		["colors=" ++ show(card(COLOR))]
-	++  STAB
 	++  ["vertices=" ++ show(card(R_VERTEX))]
-% 	++  STAB
-% 	++  ["virtuals=" ++ show(V_VERTEX)]
 	++  STAB
-	++		["density=" ++ show(round(100*density)) ++ "%"]
+	++		["density=" ++ show(round(100*density)) ++ "% " ++ "disconnected/cliqued=" ++ show(length(disconnected)) ++ "/" ++ show(length(cliqued))]
 	++		STAB
-	++		["weights=" ++ "[" ++ show(min(WEIGHT_SCALE)) ++ "..." ++ show(max(WEIGHT_SCALE)) ++ "]" ++ " #weights=" ++ show(card(WEIGHT_SCALE)) ++ " mean=" ++ show(round(sum(weight)/card(R_VERTEX)))];
+	++		["colors=" ++ show(lb_colors..ub_colors)]
+	++  STAB
+	++		[%"weights in " ++ show(WEIGHT_SCALE)) ++ 
+			"weight scale=" ++ show(card(R_WEIGHT_SCALE)) ++ " (" ++ show(min(r_weight)) ++ "," ++ show(round(sum(r_weight)/card(R_VERTEX))) ++ "," ++ show(max(r_weight)) ++ ")"]
+	;
 
 function array[int] of string: show_weights() =
 	["Weights\t\t"] ++ [show(v) ++ "-" ++ show(weight[v]) ++ " " | v in R_VERTEX];
@@ -33,8 +33,6 @@ function array[int] of string: show_cliques() =
 function array[int] of string: show_flags() =
 			["Flags\t\t"]
 	++		["I_SORT=" ++ show(I_SORT)]
-	++  STAB
-	++		["WVCP_BOUNDS=" ++ show(WVCP_B)]
 	++  STAB
 	++		["WVCP_MODEL=" ++ show(WVCP_M)];
 

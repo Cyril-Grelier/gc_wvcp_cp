@@ -1,16 +1,17 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % CONSTRAINTS
 
-include "alldifferent.mzn";
-include "int_set_channel.mzn";
-
+%%%%%%%%%%%%
+%% CHANNELING CONSTRAINTS
 
 % channeling constraint between color and vertex variables
+include "int_set_channel.mzn";
 constraint
 int_set_channel(x_color, x_vertices);
 
 
-%% COLLORING CONSTRAINTS
+%%%%%%%%%%%%
+%% COLORING CONSTRAINTS
 
 % fixed coloring of virtual vertices based on vertex id
 constraint
@@ -20,6 +21,7 @@ forall(v in V_VERTEX)(
 
 
 % binary coloring constraint between adjacent vertices
+include "alldifferent.mzn";
 constraint
 	if ({M_DR2_v3, M_DR2_v4} intersect WVCP_M != {})
 	then
@@ -45,7 +47,7 @@ constraint
 
 
 %%%%%%%%%%%%
-% weights of colors
+% WEIGHTING CONSTRAINTS
 
 % dominant vertex of a color (wrt. >_{w})
 constraint
@@ -55,7 +57,28 @@ forall(c in COLOR)(
 
 % weight of a color
 constraint
-forall(c in COLOR where I_SORT)(
+forall(c in COLOR)(
 	x_weight[c] = weight[x_dominant[c]]
 );
+
+
+%%%%%%%%%%%%
+% BOUND CONSTRAINTS ON COLORS
+
+%
+constraint x_opened = [card(x_vertices[c]) != 1 | c in COLOR];
+
+%
+constraint x_opened_colors = sum(x_opened);
+
+% upper-bound constraint based on disconnected nodes
+constraint	x_opened_colors <= max(COLOR) - length(disconnected) + 1;
+
+% lower-bound constraint based on cliqued nodes
+include "arg_max.mzn";
+constraint x_opened_colors >= length(cliqued);
+
+% (redundant) lower-bound constraint based on cliqued nodes
+include "alldifferent.mzn";
+constraint all_different([x_color[v] | v in array2set(cliqued)]);
 
