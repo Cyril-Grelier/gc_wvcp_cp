@@ -18,11 +18,11 @@ def main():
     #     instances_names = instances_file.read().splitlines()
     with open("instance_feasible.txt", "r", encoding="utf8") as instances_file:
         instances_names = instances_file.read().splitlines()
-    find_nb_color_reduced(problem, "queen11_11")
-    # Parallel(n_jobs=15)(
-    #     delayed(find_nb_colors)(problem, instance_name, i, len(instances_names))
-    #     for i, instance_name in enumerate(instances_names + instances_names)
-    # )
+
+    Parallel(n_jobs=15)(
+        delayed(find_nb_colors)(problem, instance_name, i, len(instances_names))
+        for i, instance_name in enumerate(instances_names + instances_names)
+    )
 
 
 def run_tabu(subgraph_file: str, subgraph_file_out: str):
@@ -42,15 +42,17 @@ def find_nb_color_reduced(problem: str, instance_name: str):
     for weight in graph.set_of_weights:
         subgraph_file = f"{repertory_red}/{instance_name}_{weight}.col"
         subgraph_file_out = f"{repertory_red}/{instance_name}_{weight}.k"
-        graph.convert_graph(weight, subgraph_file)
+        graph.create_subgraph(weight, subgraph_file)
         run_tabu(subgraph_file, subgraph_file_out)
         with open(subgraph_file_out, "r", encoding="utf8") as file:
-            nb_color += int(file.readline())
+            # max between 1 and the number gave by tabucol as it need at least one color
+            # even if there is only one vertex with the weight
+            nb_color += max(int(file.readline()), 1)
         os.remove(subgraph_file)
         os.remove(subgraph_file_out)
     color_file = f"{repertory_red}/{instance_name}_k.dnz"
     with open(color_file, "w", encoding="utf8") as file:
-        file.write(f"nb_max_color={nb_color}")
+        file.write(f"ub_colors={nb_color};")
 
 
 def find_nb_color_original(problem: str, instance_name: str):
@@ -63,15 +65,15 @@ def find_nb_color_original(problem: str, instance_name: str):
     for weight in graph.set_of_weights:
         subgraph_file = f"{repertory_ori}/{instance_name}_{weight}.col"
         subgraph_file_out = f"{repertory_ori}/{instance_name}_{weight}.k"
-        graph.convert_graph(weight, subgraph_file)
+        graph.create_subgraph(weight, subgraph_file)
         run_tabu(subgraph_file, subgraph_file_out)
         with open(subgraph_file_out, "r", encoding="utf8") as file:
-            nb_color += int(file.readline())
+            nb_color += max(int(file.readline()), 1)
         os.remove(subgraph_file)
         os.remove(subgraph_file_out)
     color_file = f"{repertory_ori}/{instance_name}_k.dnz"
     with open(color_file, "w", encoding="utf8") as file:
-        file.write(f"nb_max_color={nb_color}")
+        file.write(f"ub_colors={nb_color};")
 
 
 def find_nb_colors(problem: str, instance_name: str, i: int, nb_instances: int):
@@ -159,7 +161,7 @@ class Graph:
 
         self.set_of_weights = sorted(list(set(self.weights)))
 
-    def convert_graph(self, weight: int, subgraph_file: str):
+    def create_subgraph(self, weight: int, subgraph_file: str):
         """create a subgraph with only vertices with weight weight"""
         vertices = [
             vertex
