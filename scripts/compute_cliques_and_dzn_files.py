@@ -1,61 +1,152 @@
 """
-Compute the cliques
+Create all dzn files see README for more informations
 
 The clique is computed with fast cliques, at least one clique per vertex
-Cai, Shaowei, and Jinkun Lin. “Fast Solving Maximum Weight Clique Problem in Massive Graphs”
+
+FastCliques from :
+Cai, Shaowei, and Jinkun Lin.
+Fast Solving Maximum Weight Clique Problem in Massive Graphs.
+In Proceedings of the
+Twenty-Fifth International Joint Conference on Artificial Intelligence, 568–74.
+IJCAI’16. New York, New York, USA: AAAI Press, 2016.
+
 """
 from __future__ import annotations
 from dataclasses import dataclass, field
+import subprocess
+import os
+
 from joblib import Parallel, delayed
 
 
-def conversion_reduced(problem: str, instance_name: str):
+def main():
+    """for each instance, compute the dzn files"""
+    instances_file = "instance_feasible.txt"
+    instances_file = "instances/instance_list_wvcp.txt"
+
+    instances_names: list[str] = []
+    with open(instances_file, "r", encoding="utf8") as file:
+        instances_names = file.read().splitlines()
+
+    Parallel(n_jobs=15)(
+        delayed(conversion_dzn)(instance_name, i, len(instances_names))
+        for i, instance_name in enumerate(instances_names + instances_names)
+    )
+
+
+def run_tabu(subgraph_file: str, subgraph_file_out: str):
+    """perform tabucol on the subgraph"""
+    subprocess.run(
+        ["color_bounds/build/tabucol", subgraph_file, subgraph_file_out],
+        check=True,
+    )
+
+
+def conversion_reduced(instance_name: str):
     """convert instance reduced version"""
-    repertory_red: str = f"reduced_{problem}_dzn"
-    instance_file: str = f"instances/reduced_{problem}/{instance_name}.col"
-    weights_file: str = "" if problem == "gcp" else instance_file + ".w"
+    repertory: str = "reduced_wvcp_dzn"
+    instance_file: str = f"instances/reduced_wvcp/{instance_name}.col"
+    weights_file: str = instance_file + ".w"
+
+    # load the graph
     graph: Graph = Graph(instance_file, weights_file, to_sort=False)
-    graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
-    graph.save_cliques_dzn(f"{repertory_red}/{instance_name}.clq.dzn")
-    graph.save_graph_dzn(f"{repertory_red}/{instance_name}.dzn")
+
+    instance_dzn = f"{repertory}/{instance_name}.dzn"
+    cliques_dzn = f"{repertory}/{instance_name}.clq.dzn"
+    lb_color_dzn = f"{repertory}/{instance_name}.lb_color.dzn"
+    ub_color_dzn = f"{repertory}/{instance_name}.ub_color.dzn"
+    color_degree_dzn = f"{repertory}/{instance_name}.nb_colors_degree.dzn"
+    color_chromatic_dzn = f"{repertory}/{instance_name}.nb_colors_chromatic.dzn"
+    lb_score_dzn = f"{repertory}/{instance_name}.lb_score.dzn"
+    ub_score_dzn = f"{repertory}/{instance_name}.ub_score.dzn"
+
+    # convert the graph to dzn
+    graph.save_graph_dzn(instance_dzn)
+
+    # convert the cliques to dzn
+    graph.save_cliques_dzn(cliques_dzn)
+    # graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
+
+    # convert the colors bounds to dzn
+    graph.compute_color_bounds(repertory)
+
+    with open(lb_color_dzn, "w", encoding="utf8") as file:
+        file.write(f"lb_colors={graph.lb_colors};")
+
+    with open(ub_color_dzn, "w", encoding="utf8") as file:
+        file.write(f"ub_colors={graph.ub_colors};")
+
+    with open(color_degree_dzn, "w", encoding="utf8") as file:
+        file.write(f"nr_colors={graph.nb_colors_degree};")
+
+    with open(color_chromatic_dzn, "w", encoding="utf8") as file:
+        file.write(f"nr_colors={graph.nb_colors_chromatic};")
+
+    # convert the score bounds to dzn
+    with open(lb_score_dzn, "w", encoding="utf8") as file:
+        file.write(f"lb_score={graph.lb_score};")
+
+    with open(ub_score_dzn, "w", encoding="utf8") as file:
+        file.write(f"ub_score={graph.ub_score};")
 
 
-def conversion_original(problem: str, instance_name: str):
+def conversion_original(instance_name: str):
     """convert instance original version"""
-    repertory_or: str = f"original_{problem}_dzn"
+
+    repertory: str = "original_wvcp_dzn"
     instance_file: str = f"instances/original_graphs/{instance_name}.col"
-    weights_file: str = "" if problem == "gcp" else instance_file + ".w"
+    weights_file: str = instance_file + ".w"
+
+    # load the graph
     graph: Graph = Graph(instance_file, weights_file, to_sort=True)
-    graph.save_cliques(f"{repertory_or}/{instance_name}.clq")
-    graph.save_cliques_dzn(f"{repertory_or}/{instance_name}.clq.dzn")
-    graph.save_graph_dzn_sort_vertices(f"{repertory_or}/{instance_name}.dzn")
+
+    instance_dzn = f"{repertory}/{instance_name}.dzn"
+    cliques_dzn = f"{repertory}/{instance_name}.clq.dzn"
+    lb_color_dzn = f"{repertory}/{instance_name}.lb_color.dzn"
+    ub_color_dzn = f"{repertory}/{instance_name}.ub_color.dzn"
+    color_degree_dzn = f"{repertory}/{instance_name}.nb_colors_degree.dzn"
+    color_chromatic_dzn = f"{repertory}/{instance_name}.nb_colors_chromatic.dzn"
+    lb_score_dzn = f"{repertory}/{instance_name}.lb_score.dzn"
+    ub_score_dzn = f"{repertory}/{instance_name}.ub_score.dzn"
+
+    # convert the graph to dzn
+    graph.save_graph_dzn_sort_vertices(instance_dzn)
+
+    # convert the cliques to dzn
+    graph.save_cliques_dzn(cliques_dzn)
+    # graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
+
+    # convert the colors bounds to dzn
+    graph.compute_color_bounds(repertory)
+
+    with open(lb_color_dzn, "w", encoding="utf8") as file:
+        file.write(f"lb_colors={graph.lb_colors};")
+
+    with open(ub_color_dzn, "w", encoding="utf8") as file:
+        file.write(f"ub_colors={graph.ub_colors};")
+
+    with open(color_degree_dzn, "w", encoding="utf8") as file:
+        file.write(f"nr_colors={graph.nb_colors_degree};")
+
+    with open(color_chromatic_dzn, "w", encoding="utf8") as file:
+        file.write(f"nr_colors={graph.nb_colors_chromatic};")
+
+    # convert the score bounds to dzn
+    with open(lb_score_dzn, "w", encoding="utf8") as file:
+        file.write(f"lb_score={graph.lb_score};")
+
+    with open(ub_score_dzn, "w", encoding="utf8") as file:
+        file.write(f"ub_score={graph.ub_score};")
 
 
-def conversion(problem: str, instance_name: str, i: int, nb_instances: int):
+def conversion_dzn(instance_name: str, i: int, nb_instances: int):
     """convert instance"""
     if i < nb_instances:
         print(instance_name, "reduced")
-        conversion_reduced(problem, instance_name)
+        conversion_reduced(instance_name)
     else:
         print(instance_name, "original")
-        conversion_original(problem, instance_name)
-
-
-def main():
-    """for each instance of the problem, compute the cliques"""
-    problem = "wvcp"
-    instances_names: list[str] = []
-    # with open(
-    #     f"instances/instance_list_{problem}.txt", "r", encoding="utf8"
-    # ) as instances_file:
-    #     instances_names = instances_file.read().splitlines()
-    with open("instance_feasible.txt", "r", encoding="utf8") as instances_file:
-        instances_names = instances_file.read().splitlines()
-
-    Parallel(n_jobs=15)(
-        delayed(conversion)(problem, instance_name, i, len(instances_names))
-        for i, instance_name in enumerate(instances_names + instances_names)
-    )
+        conversion_original(instance_name)
 
 
 def read_col_files(instance_file: str) -> tuple[int, list[tuple[int, int]]]:
@@ -92,6 +183,18 @@ def read_weights_file(weights_file: str, nb_vertices: int) -> list[int]:
     return weights
 
 
+def get_best_known_score(instance: str):
+    """read the best score file to find the best score"""
+    file = "instances/best_scores_wvcp.txt"
+    with open(file, "r", encoding="utf8") as file:
+        for line in file.readlines():
+            instance_, score, _ = line[:-1].split(" ")
+            if instance_ != instance:
+                continue
+            return int(score)
+    print(f"instance {instance} not found in instances/best_scores_wvcp.txt")
+
+
 @dataclass
 class Node:
     """Representation of a Node for graph"""
@@ -123,6 +226,12 @@ class Graph:
         self.weights: list[int]
         self.cliques: list[list[int]]
         self.nodes_sorted: list[Node] = []
+        self.lb_colors: int = 0
+        self.ub_colors: int = 0
+        self.nb_colors_degree: int = 0
+        self.nb_colors_chromatic: int = 0
+        self.lb_score: int = 0
+        self.ub_score: int = 0
 
         # load instance
         self.name = instance_file.split("/")[-1][:-4]
@@ -155,6 +264,9 @@ class Graph:
             self.cliques = [
                 self.compute_clique_vertex(vertex) for vertex in range(self.nb_vertices)
             ]
+
+        self.set_of_weights = sorted(list(set(self.weights)))
+        self.compute_score_bounds()
 
     def init_sorted_nodes(self):
         """sort the nodes"""
@@ -259,6 +371,38 @@ class Graph:
         )
         return current_clique
 
+    def compute_color_bounds(self, repertory: str):
+        """compute bound related to the number of colors"""
+        self.lb_colors = max(len(c) for c in self.cliques)
+        self.ub_colors = 0
+        for weight in self.set_of_weights:
+            subgraph_file = f"{repertory}/{self.name}_{weight}.col"
+            subgraph_file_out = f"{repertory}/{self.name}_{weight}.k"
+            self.create_subgraph(weight, subgraph_file)
+            run_tabu(subgraph_file, subgraph_file_out)
+            with open(subgraph_file_out, "r", encoding="utf8") as file:
+                # max between 1 and the number gave by tabucol as it need at least one color
+                # even if there is only one vertex with the weight
+                self.ub_colors += max(int(file.readline()), 1)
+            os.remove(subgraph_file)
+            os.remove(subgraph_file_out)
+        self.nb_colors_degree = (
+            max(len(self.neighborhood[v]) for v in range(self.nb_vertices)) + 1
+        )
+        self.nb_colors_chromatic = max(
+            min(len(self.neighborhood[v]) + 1, self.ub_colors)
+            for v in range(self.nb_vertices)
+        )
+
+    def compute_score_bounds(self):
+        """find the score bounds"""
+        max_len = max(len(clique) for clique in self.cliques)
+        self.lb_score = sum(
+            max(self.weights[clique[i]] for clique in self.cliques if len(clique) > i)
+            for i in range(max_len)
+        )
+        self.ub_score = get_best_known_score(self.name)
+
     def save_cliques(self, output_file: str):
         """save clique to a file, one line per clique"""
         with open(output_file, "w", encoding="utf8") as file:
@@ -349,6 +493,44 @@ class Graph:
             file.write("weights=[")
             file.write(",".join(str(node.weight) for node in self.nodes_sorted))
             file.write("];\n")
+
+    def create_subgraph(self, weight: int, subgraph_file: str):
+        """create a subgraph with only vertices with weight weight"""
+        vertices = [
+            vertex
+            for vertex in range(self.nb_vertices)
+            if self.weights[vertex] == weight
+        ]
+        neighbors = [
+            [
+                neighbor
+                for neighbor in self.neighborhood[vertex]
+                if self.weights[neighbor] == weight
+            ]
+            for vertex in vertices
+        ]
+        vertices_sorted = sorted(
+            vertices, key=lambda v: len(neighbors[vertices.index(v)]), reverse=True
+        )
+        neighbors_sorted = [
+            sorted(
+                [
+                    vertices_sorted.index(neighbor)
+                    for neighbor in neighbors[vertices.index(vertex)]
+                ]
+            )
+            for vertex in vertices_sorted
+            if neighbors[vertices.index(vertex)]
+        ]
+
+        with open(subgraph_file, "w", encoding="utf8") as file:
+            file.write(
+                f"p edge {len(neighbors_sorted)} {int(sum(len(n) for n in neighbors_sorted)/2)}\n"
+            )
+            for vertex, neighbors in enumerate(neighbors_sorted):
+                for neighbor in neighbors:
+                    if vertex < neighbor:
+                        file.write(f"e {vertex + 1} {neighbor + 1}\n")
 
 
 if __name__ == "__main__":
