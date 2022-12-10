@@ -15,6 +15,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import subprocess
 import os
+import time
 
 from joblib import Parallel, delayed
 
@@ -44,6 +45,8 @@ def run_tabu(subgraph_file: str, subgraph_file_out: str):
 
 def conversion_reduced(instance_name: str):
     """convert instance reduced version"""
+    print(instance_name, "reduced start")
+    start = time.time()
     repertory: str = "reduced_wvcp_dzn"
     instance_file: str = f"instances/reduced_wvcp/{instance_name}.col"
     weights_file: str = instance_file + ".w"
@@ -89,10 +92,13 @@ def conversion_reduced(instance_name: str):
     with open(ub_score_dzn, "w", encoding="utf8") as file:
         file.write(f"ub_score={graph.ub_score};")
 
+    print(instance_name, f"reduced done ({int(time.time() - start)}s)")
+
 
 def conversion_original(instance_name: str):
     """convert instance original version"""
-
+    print(instance_name, "original start")
+    start = time.time()
     repertory: str = "original_wvcp_dzn"
     instance_file: str = f"instances/original_graphs/{instance_name}.col"
     weights_file: str = instance_file + ".w"
@@ -137,15 +143,14 @@ def conversion_original(instance_name: str):
 
     with open(ub_score_dzn, "w", encoding="utf8") as file:
         file.write(f"ub_score={graph.ub_score};")
+    print(instance_name, f"original done ({int(time.time() - start)}s)")
 
 
 def conversion_dzn(instance_name: str, i: int, nb_instances: int):
     """convert instance"""
     if i < nb_instances:
-        print(instance_name, "reduced")
         conversion_reduced(instance_name)
     else:
-        print(instance_name, "original")
         conversion_original(instance_name)
 
 
