@@ -9,8 +9,6 @@ line=$(head -n "$1" "$2" | tail -n 1)
 # direc=$(echo "$line" | rev | cut -d" " -f1 | rev)
 # file=$(python scripts/get_file_name.py "$line")
 
-cd src || exit
-
 eval "$line"
 
 # # eval the command line
