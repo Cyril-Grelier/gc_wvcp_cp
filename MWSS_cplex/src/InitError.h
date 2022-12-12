@@ -6,23 +6,25 @@
  *      Author: bruno
  */
 
-namespace opt {
 
-class InitError : public std::exception {
+namespace opt
+{
 
-  public:
-    InitError(const std::string &err) : what_(ArgPack::ap().program_name + ": " + err) {
-    }
+class InitError : public std::exception
+{
 
-    virtual ~InitError() throw() {
-    }
+public:
 
-    virtual const char *what() const throw() {
-        return what_.c_str();
-    }
+	InitError(const std::string & err) : what_(ArgPack::ap().program_name + ": " + err) {}
 
-  private:
-    std::string what_;
+	virtual ~InitError() throw () {}
+
+	virtual const char * what() const throw () { return what_.c_str(); }
+
+private:
+
+	std::string what_;
+
 };
 
 } // namespace opt

@@ -9,83 +9,80 @@
 #ifndef GRAPH_H_
 #define GRAPH_H_
 
-#include <algorithm>
-#include <assert.h>
-#include <string>
 #include <vector>
+#include <string>
+#include <assert.h>
+#include <algorithm>
 
 namespace opt {
 
-class Graph {
+class Graph
+{
 
-  public:
-    int total_weight() const {
-        return total_weight_;
-    }
+public:
 
-    // return the number of edges
+	int total_weight() const { return total_weight_; }
 
-    int m() const {
-        return m_;
-    }
+	// return the number of edges
 
-    // return the number of vertices
+	int m() const { return m_; }
 
-    int n() const {
-        return n_;
-    }
+	// return the number of vertices
 
-    // return the weight of vertice v
+	int n() const { return n_; }
 
-    int weight(const int v) const {
-        return weights_[v];
-    }
+	// return the weight of vertice v
 
-    void weight(const int v, const int weight) {
-        total_weight_ -= weights_[v];
-        weights_[v] = weight;
-        total_weight_ += weights_[v];
-    }
+	int weight(const int v) const { return weights_[v]; }
 
-    // return the adjency list of vertex i
+	void weight(const int v, const int weight) { 
+		total_weight_ -= weights_[v];
+		weights_[v] = weight; 
+		total_weight_ += weights_[v];
+	}
 
-    const std::vector<int> &adj_l(const int i) const {
-        assert(i < n_);
+	// return the adjency list of vertex i
 
-        return adj_l_[i];
-    }
+	const std::vector<int>& adj_l(const int i) const
+	{
+		assert(i < n_);
 
-    Graph(const int n);
+		return adj_l_[i];
+	}
 
-    void addEdge(const int i, const int j);
+	Graph(const int n);
 
-    void removeEdge(const int i, const int j);
+	void addEdge(const int i, const int j);
 
-    // sort the adjacency lists
+	void removeEdge(const int i, const int j);
 
-    void sort();
+	// sort the adjacency lists
 
-    std::vector<int> VertexMap;
+	void sort();
 
-  private:
-    std::vector<int> weights_; // vertices weight
+	std::vector<int> VertexMap;
 
-    int total_weight_;
+private:
 
-    int n_; // number of vertices
+	std::vector<int> weights_; // vertices weight
 
-    int m_; // number of edges
+	int total_weight_;
 
-    std::vector<std::vector<int>> adj_l_; // adjaceny list
+	int n_; // number of vertices
 
-    void addNeighbor(const int i, const int j) {
-        adj_l_[i].push_back(j);
-    }
+	int m_; // number of edges
 
-    void removeNeighbor(const int i, const int j) {
-        adj_l_[i].erase(std::remove(adj_l_[i].begin(), adj_l_[i].end(), j),
-                        adj_l_[i].end());
-    }
+	std::vector< std::vector<int> > adj_l_; // adjaceny list
+
+	void addNeighbor(const int i, const int j)
+	{
+		adj_l_[i].push_back(j);
+	}
+
+	void removeNeighbor(const int i, const int j) 
+	{		
+		adj_l_[i].erase(std::remove(adj_l_[i].begin(), adj_l_[i].end(), j), adj_l_[i].end());
+	}
 
 }; // class Graph
 

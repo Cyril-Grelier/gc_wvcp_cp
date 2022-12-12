@@ -9,60 +9,57 @@
 #ifndef ARGPACK_H_
 #define ARGPACK_H_
 
-#include <assert.h>
 #include <string>
+#include <assert.h>
 
 namespace opt {
 
 class ArgPack {
 
-  public:
-    //------------
-    // program parameters
-    //------------
+public:
 
-    bool verbose;
+	//------------
+	// program parameters
+	//------------
 
-    long rand_seed;
+	bool verbose;
 
-    int target;
+	long rand_seed;
 
-    int complement;
+	int target;
 
-    std::string input_name1, input_name2, program_name;
+	int complement;
 
-    int iterations; // maximum iteration number
+	std::string input_name1, input_name2, program_name;
 
-    int time;
+	int iterations; // maximum iteration number
 
-    double p[4]; // intensification/exploration parameters
+	int time;
 
-    //------------
-    // singleton functions
-    //------------
+	double p[4]; // intensification/exploration parameters
 
-    static const ArgPack &ap() {
-        assert(def_ap_);
-        return *def_ap_;
-    }
+	//------------
+	// singleton functions
+	//------------
 
-    //	static ArgPack &write_ap() { assert(def_ap_); return *def_ap_; }
+	static const ArgPack &ap() { assert(def_ap_); return *def_ap_; }
 
-    ArgPack(int argc, char *const argv[]);
+//	static ArgPack &write_ap() { assert(def_ap_); return *def_ap_; }
 
-    ~ArgPack() {
-        assert(def_ap_);
-        def_ap_ = 0;
-    }
+	ArgPack(int argc, char * const argv []);
 
-  private:
-    //------------
-    // singleton instance
-    //------------
+	~ArgPack() { assert(def_ap_); def_ap_ = 0; }
 
-    static ArgPack *def_ap_;
+private:
+
+	//------------
+	// singleton instance
+	//------------
+
+	static ArgPack *def_ap_;
+
 };
 
-} // namespace opt
+}
 
 #endif /* ARGPACK_H_ */
