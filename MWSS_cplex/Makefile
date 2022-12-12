@@ -1,6 +1,6 @@
 CXX = g++ 
-CXXFLAGS = -c -O3 -DNDEBUG -std=c++0x -Wall -ldl -pipe -DIL_STD -I/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/cplex/include -I/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/concert/include
-LFFLAGS = -L/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/concert/lib/x86-64_linux/static_pic/ -L/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/cplex/lib/x86-64_linux/static_pic/ -lilocplex -lconcert -lcplex -lm -lpthread -ldl
+CXXFLAGS = -c -O3 -DNDEBUG -std=c++0x -Wall -pipe -DIL_STD -I/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/cplex/include -I/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/concert/include
+LFFLAGS = -L/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/concert/lib/x86-64_linux/static_pic -L/trinity/shared/apps/cv-standard/ibm/ILOG/CPLEX_Studio1210/cplex/lib/x86-64_linux/static_pic -lilocplex -lconcert -lcplex -lm -lpthread -ldl 
 
 SRC_REP = src
 
@@ -19,10 +19,9 @@ cplex: $(OBJ)
 	$(CXX) $^ -o cplex $(LFFLAGS)
 	rm -rf obj
 
-
 clean:
 	rm -rf obj
-	rm -f core	
+	rm -f core
 	rm -f cplex
 
 $(OBJ_REP)/%.o: $(SRC_REP)/%.cpp
