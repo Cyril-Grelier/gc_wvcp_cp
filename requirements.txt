@@ -7,3 +7,5 @@ plotly
 igraph
 pandas
 joblib
+openpyxl
+tqdm
