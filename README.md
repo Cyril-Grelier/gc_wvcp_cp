@@ -56,22 +56,22 @@ Once the scripts executed, the folders `original_wvcp_dzn` and `reduced_wvcp_dzn
   - data :
     - `cliques: list[list[int]]`
     - `nr_cliques: int`
-- `instance.lb_color.dzn` :
+- `instance.lb_colors.dzn` :
   - the lower bound on the number of colors to use (size of the largest clique)
   - data :
     - `lb_colors: int`
-- `instance.ub_color.dzn` :
+- `instance.ub_colors_min_degree_chromatic.dzn` :
   - the upper bound on the number of colors to use (sum of the chromatic number of each weight subgraph)
   - data :
     - `ub_colors: int`
-- `instance.nb_colors_degree.dzn` :
+- `instance.ub_colors_degree.dzn` :
   - the size of the domain of colors of each vertex based on the degrees (max(d(v)) + 1 | v in V)
   - data :
-    - `nr_colors: int`
-- `instance.nb_colors_chromatic.dzn` :
+    - `ub_colors: int`
+- `instance.ub_colors_chromatic.dzn` :
   - the size of the domain of colors of each vertex based on the ub_colors (max( min(d(v) + 1, ub_colors) ) | v in V)
   - data :
-    - `nr_colors: int`
+    - `ub_colors: int`
 - `instance.lb_score.dzn` :
   - the lower bound on the score (sum of the heaviest i^est vertex on each cliques)
   - data :

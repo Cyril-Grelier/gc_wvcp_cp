@@ -22,8 +22,8 @@ from joblib import Parallel, delayed
 
 def main():
     """for each instance, compute the dzn files"""
-    instances_file = "instance_feasible.txt"
     instances_file = "instances/instance_list_wvcp.txt"
+    instances_file = "instance_feasible.txt"
 
     instances_names: list[str] = []
     with open(instances_file, "r", encoding="utf8") as file:
@@ -56,10 +56,10 @@ def conversion_reduced(instance_name: str):
 
     instance_dzn = f"{repertory}/{instance_name}.dzn"
     cliques_dzn = f"{repertory}/{instance_name}.clq.dzn"
-    lb_color_dzn = f"{repertory}/{instance_name}.lb_color.dzn"
-    ub_color_dzn = f"{repertory}/{instance_name}.ub_color.dzn"
-    color_degree_dzn = f"{repertory}/{instance_name}.nb_colors_degree.dzn"
-    color_chromatic_dzn = f"{repertory}/{instance_name}.nb_colors_chromatic.dzn"
+    lb_color_dzn = f"{repertory}/{instance_name}.lb_colors.dzn"
+    ub_color_dzn = f"{repertory}/{instance_name}.ub_colors_min_degree_chromatic.dzn"
+    color_degree_dzn = f"{repertory}/{instance_name}.ub_colors_degree.dzn"
+    color_chromatic_dzn = f"{repertory}/{instance_name}.ub_colors_chromatic.dzn"
     lb_score_dzn = f"{repertory}/{instance_name}.lb_score.dzn"
     ub_score_dzn = f"{repertory}/{instance_name}.ub_score.dzn"
 
@@ -80,10 +80,10 @@ def conversion_reduced(instance_name: str):
         file.write(f"ub_colors={graph.ub_colors};")
 
     with open(color_degree_dzn, "w", encoding="utf8") as file:
-        file.write(f"nr_colors={graph.nb_colors_degree};")
+        file.write(f"ub_colors={graph.nb_colors_degree};")
 
     with open(color_chromatic_dzn, "w", encoding="utf8") as file:
-        file.write(f"nr_colors={graph.nb_colors_chromatic};")
+        file.write(f"ub_colors={graph.nb_colors_chromatic};")
 
     # convert the score bounds to dzn
     with open(lb_score_dzn, "w", encoding="utf8") as file:
@@ -108,10 +108,10 @@ def conversion_original(instance_name: str):
 
     instance_dzn = f"{repertory}/{instance_name}.dzn"
     cliques_dzn = f"{repertory}/{instance_name}.clq.dzn"
-    lb_color_dzn = f"{repertory}/{instance_name}.lb_color.dzn"
-    ub_color_dzn = f"{repertory}/{instance_name}.ub_color.dzn"
-    color_degree_dzn = f"{repertory}/{instance_name}.nb_colors_degree.dzn"
-    color_chromatic_dzn = f"{repertory}/{instance_name}.nb_colors_chromatic.dzn"
+    lb_color_dzn = f"{repertory}/{instance_name}.lb_colors.dzn"
+    ub_color_dzn = f"{repertory}/{instance_name}.ub_colors_min_degree_chromatic.dzn"
+    color_degree_dzn = f"{repertory}/{instance_name}.ub_colors_degree.dzn"
+    color_chromatic_dzn = f"{repertory}/{instance_name}.ub_colors_chromatic.dzn"
     lb_score_dzn = f"{repertory}/{instance_name}.lb_score.dzn"
     ub_score_dzn = f"{repertory}/{instance_name}.ub_score.dzn"
 
@@ -132,10 +132,10 @@ def conversion_original(instance_name: str):
         file.write(f"ub_colors={graph.ub_colors};")
 
     with open(color_degree_dzn, "w", encoding="utf8") as file:
-        file.write(f"nr_colors={graph.nb_colors_degree};")
+        file.write(f"ub_colors={graph.nb_colors_degree};")
 
     with open(color_chromatic_dzn, "w", encoding="utf8") as file:
-        file.write(f"nr_colors={graph.nb_colors_chromatic};")
+        file.write(f"ub_colors={graph.nb_colors_chromatic};")
 
     # convert the score bounds to dzn
     with open(lb_score_dzn, "w", encoding="utf8") as file:

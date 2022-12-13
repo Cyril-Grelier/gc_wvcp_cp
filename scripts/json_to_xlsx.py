@@ -37,7 +37,9 @@ def main():
         ("primal dyn", "cp_1h_E1_feasible/E1_primal_dynamic"),
         ("dual ortools", "cp_1h_E1_feasible/E1_dual_ortool"),
         ("dual coin-bc", "cp_1h_E1_feasible/E1_dual_coin_bc"),
-        ("joint", "cp_1h_E1_feasible/E1_joint"),
+        ("dual cplex", "cp_1h_E1_feasible/E1_dual_cplex"),
+        ("joint static", "cp_1h_E1_feasible/E1_joint_static"),
+        ("joint dyn", "cp_1h_E1_feasible/E1_joint"),
     ]
 
     problem = "wvcp"
@@ -53,8 +55,8 @@ def main():
     instances_set = ("instance_list_wvcp", "all")
     instances_set = ("../instance_feasible", "feasible")
 
-    instance_type = "original"
     instance_type = "reduced"
+    instance_type = "original"
 
     output_file = f"xlsx_files/E1_1h_{instance_type}_{instances_set[1]}.xlsx"
 
@@ -82,33 +84,60 @@ class Method:
         self.score: float = float("inf")
         self.optimality_time: float = float("inf")
         self.optimal: bool = False
+        self.objective_bound: float = float("inf")
+        self.failures: float = float("inf")
 
         # load data
         json_file = f"outputs/{repertory}/{instance_type}_{instance_name}.json"
-        with open(json_file, "r", encoding="utf8") as file:
-            for line in file.readlines():
-                l_json = json.loads(line)
-                if l_json["type"] == "statistics":
-                    if "flatTime" in l_json["statistics"]:
-                        self.flat_time = round(l_json["statistics"]["flatTime"], 1)
-                        if self.flat_time > 3600:
-                            print(instance_name, "flattime > 3600")
-                    else:
-                        if self.optimal:
-                            self.optimality_time = round(
-                                l_json["statistics"]["solveTime"], 1
-                            )
+        cplex_file = f"outputs/{repertory}/{instance_type}_{instance_name}.cplex"
+        if os.path.exists(json_file):
+            with open(json_file, "r", encoding="utf8") as file:
+                for line in file.readlines():
+                    l_json = json.loads(line)
+                    if l_json["type"] == "statistics":
+                        if "flatTime" in l_json["statistics"]:
+                            self.flat_time = round(l_json["statistics"]["flatTime"], 1)
+                            if self.flat_time > 3600:
+                                print(instance_name, "flat time > 3600")
                         else:
-                            self.solve_time = round(
-                                l_json["statistics"]["solveTime"], 1
-                            )
-                elif l_json["type"] == "solution":
-                    if "x_score" in l_json["output"]["json"]:
-                        self.score = l_json["output"]["json"]["x_score"]
-                    else:
-                        self.score = l_json["output"]["json"]["yx_score"]
-                elif l_json["type"] == "status":
-                    self.optimal = l_json["status"] == "OPTIMAL_SOLUTION"
+                            if self.optimal:
+                                self.optimality_time = round(
+                                    l_json["statistics"]["solveTime"], 1
+                                )
+                            else:
+                                self.solve_time = round(
+                                    l_json["statistics"]["solveTime"], 1
+                                )
+                            try:
+                                self.objective_bound = l_json["statistics"][
+                                    "objectiveBound"
+                                ]
+                            except:
+                                pass
+                            try:
+                                self.failures = l_json["statistics"]["failures"]
+                            except:
+                                self.objective_bound = round(self.objective_bound, 2)
+                    elif l_json["type"] == "solution":
+                        if "x_score" in l_json["output"]["json"]:
+                            self.score = l_json["output"]["json"]["x_score"]
+                        else:
+                            self.score = l_json["output"]["json"]["yx_score"]
+                    elif l_json["type"] == "status":
+                        self.optimal = l_json["status"] == "OPTIMAL_SOLUTION"
+        elif os.path.exists(cplex_file):
+            self.flat_time = 0
+            with open(cplex_file, "r", encoding="utf8") as file:
+                for line in file.readlines():
+                    split = line.split()
+                    if line.startswith("Result"):
+                        self.score = int(split[-1])
+                    if line.startswith("Total (root+branch&cut)"):
+                        self.solve_time = float(split[3])
+                    if split and split[-1] == "0.00%":
+                        self.optimal = True
+                    if line.startswith("All rows and columns eliminated."):
+                        self.optimal = True
 
 
 class Instance:
@@ -170,7 +199,14 @@ class Table:
         # first row
         # first columns are the instances informations then the methods names
         instance_info = ["instance", "|V|", "|E|", "density", "BKS", "optim"]
-        columns_info = ["score", "flat(s)", "solve(s)", "opti(s)"]
+        columns_info = [
+            "score",
+            "flat(s)",
+            "solve(s)",
+            "opti(s)",
+            "LB",
+            "failures",
+        ]
         line: list[int | str | float] = list(instance_info)
         line += [m for m in self.methods_names for _ in columns_info]
         sheet.append(line)
@@ -214,6 +250,8 @@ class Table:
                     method.flat_time,
                     method.solve_time,
                     method.optimality_time,
+                    method.objective_bound,
+                    method.failures,
                 ]
             sheet.append(line)
             for col, m in enumerate(self.methods_names):
