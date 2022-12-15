@@ -56,23 +56,6 @@ int Solution::move_to_color_optimized(const int vertex, const int color) {
     assert(check_solution());
     const int old_color = delete_from_color(vertex);
 
-    // // update best moves
-    // for (const int neighbor : graph->neighborhood[vertex]) {
-    //     if (_colors[neighbor] == old_color) {
-    //         ++_best_delta[neighbor];
-    //         ++_best_delta[vertex];
-    //     }
-    //     const int best_improve = _best_delta[neighbor];
-    //     // if removing the vertex from the old_color become the best_improve
-    //     if (_delta_colors[neighbor][old_color] < best_improve) {
-    //         --_best_delta[neighbor];
-    //         _best_improve_colors[neighbor].clear();
-    //     }
-    //     if (_delta_colors[neighbor][old_color] == best_improve) {
-    //         insert_sorted(_best_improve_colors[neighbor], old_color);
-    //     }
-    // }
-
     add_to_color(vertex, color);
 
     for (const auto &neighbor : graph->neighborhood[vertex]) {

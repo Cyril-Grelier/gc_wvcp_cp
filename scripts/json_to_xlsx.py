@@ -33,13 +33,17 @@ def main():
     # Add method name and repertory of data of each method
     methods: list[tuple(str, str)] = [
         # E1
-        ("primal static", "cp_1h_E1_feasible/E1_primal_static"),
-        ("primal dyn", "cp_1h_E1_feasible/E1_primal_dynamic"),
+        ("primal static h1", "cp_1h_E1_feasible/E1_primal_static"),
+        ("primal static h2", "cp_1h_E1_feasible/E1_primal_static_h2"),
+        ("primal dyn h1", "cp_1h_E1_feasible/E1_primal_dynamic"),
+        ("primal dyn h2", "cp_1h_E1_feasible/E1_primal_dynamic_h2"),
         ("dual ortools", "cp_1h_E1_feasible/E1_dual_ortool"),
         ("dual coin-bc", "cp_1h_E1_feasible/E1_dual_coin_bc"),
         ("dual cplex", "cp_1h_E1_feasible/E1_dual_cplex"),
-        ("joint static", "cp_1h_E1_feasible/E1_joint_static"),
-        ("joint dyn", "cp_1h_E1_feasible/E1_joint"),
+        ("joint static h1", "cp_1h_E1_feasible/E1_joint_static"),
+        ("joint static h2", "cp_1h_E1_feasible/E1_joint_static_h2"),
+        ("joint dyn h1", "cp_1h_E1_feasible/E1_joint"),
+        ("joint dyn h2", "cp_1h_E1_feasible/E1_joint_dynamic_h2"),
     ]
 
     problem = "wvcp"
@@ -55,8 +59,8 @@ def main():
     instances_set = ("instance_list_wvcp", "all")
     instances_set = ("../instance_feasible", "feasible")
 
-    instance_type = "reduced"
     instance_type = "original"
+    instance_type = "reduced"
 
     output_file = f"xlsx_files/E1_1h_{instance_type}_{instances_set[1]}.xlsx"
 

@@ -43,115 +43,84 @@ def run_tabu(subgraph_file: str, subgraph_file_out: str):
     )
 
 
-def conversion_reduced(instance_name: str):
-    """convert instance reduced version"""
-    print(instance_name, "reduced start")
-    start = time.time()
-    repertory: str = "reduced_wvcp_dzn"
-    instance_file: str = f"instances/reduced_wvcp/{instance_name}.col"
-    weights_file: str = instance_file + ".w"
-
-    # load the graph
-    graph: Graph = Graph(instance_file, weights_file, to_sort=False)
-
-    instance_dzn = f"{repertory}/{instance_name}.dzn"
-    cliques_dzn = f"{repertory}/{instance_name}.clq.dzn"
-    lb_color_dzn = f"{repertory}/{instance_name}.lb_colors.dzn"
-    ub_color_dzn = f"{repertory}/{instance_name}.ub_colors_min_degree_chromatic.dzn"
-    color_degree_dzn = f"{repertory}/{instance_name}.ub_colors_degree.dzn"
-    color_chromatic_dzn = f"{repertory}/{instance_name}.ub_colors_chromatic.dzn"
-    lb_score_dzn = f"{repertory}/{instance_name}.lb_score.dzn"
-    ub_score_dzn = f"{repertory}/{instance_name}.ub_score.dzn"
-
-    # convert the graph to dzn
-    graph.save_graph_dzn(instance_dzn)
-
-    # convert the cliques to dzn
-    graph.save_cliques_dzn(cliques_dzn)
-    # graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
-
-    # convert the colors bounds to dzn
-    graph.compute_color_bounds(repertory)
-
-    with open(lb_color_dzn, "w", encoding="utf8") as file:
-        file.write(f"lb_colors={graph.lb_colors};")
-
-    with open(ub_color_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_colors={graph.ub_colors};")
-
-    with open(color_degree_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_colors={graph.nb_colors_degree};")
-
-    with open(color_chromatic_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_colors={graph.nb_colors_chromatic};")
-
-    # convert the score bounds to dzn
-    with open(lb_score_dzn, "w", encoding="utf8") as file:
-        file.write(f"lb_score={graph.lb_score};")
-
-    with open(ub_score_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_score={graph.ub_score};")
-
-    print(instance_name, f"reduced done ({int(time.time() - start)}s)")
-
-
-def conversion_original(instance_name: str):
-    """convert instance original version"""
-    print(instance_name, "original start")
-    start = time.time()
-    repertory: str = "original_wvcp_dzn"
-    instance_file: str = f"instances/original_graphs/{instance_name}.col"
-    weights_file: str = instance_file + ".w"
-
-    # load the graph
-    graph: Graph = Graph(instance_file, weights_file, to_sort=True)
-
-    instance_dzn = f"{repertory}/{instance_name}.dzn"
-    cliques_dzn = f"{repertory}/{instance_name}.clq.dzn"
-    lb_color_dzn = f"{repertory}/{instance_name}.lb_colors.dzn"
-    ub_color_dzn = f"{repertory}/{instance_name}.ub_colors_min_degree_chromatic.dzn"
-    color_degree_dzn = f"{repertory}/{instance_name}.ub_colors_degree.dzn"
-    color_chromatic_dzn = f"{repertory}/{instance_name}.ub_colors_chromatic.dzn"
-    lb_score_dzn = f"{repertory}/{instance_name}.lb_score.dzn"
-    ub_score_dzn = f"{repertory}/{instance_name}.ub_score.dzn"
-
-    # convert the graph to dzn
-    graph.save_graph_dzn_sort_vertices(instance_dzn)
-
-    # convert the cliques to dzn
-    graph.save_cliques_dzn(cliques_dzn)
-    # graph.save_cliques(f"{repertory_red}/{instance_name}.clq")
-
-    # convert the colors bounds to dzn
-    graph.compute_color_bounds(repertory)
-
-    with open(lb_color_dzn, "w", encoding="utf8") as file:
-        file.write(f"lb_colors={graph.lb_colors};")
-
-    with open(ub_color_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_colors={graph.ub_colors};")
-
-    with open(color_degree_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_colors={graph.nb_colors_degree};")
-
-    with open(color_chromatic_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_colors={graph.nb_colors_chromatic};")
-
-    # convert the score bounds to dzn
-    with open(lb_score_dzn, "w", encoding="utf8") as file:
-        file.write(f"lb_score={graph.lb_score};")
-
-    with open(ub_score_dzn, "w", encoding="utf8") as file:
-        file.write(f"ub_score={graph.ub_score};")
-    print(instance_name, f"original done ({int(time.time() - start)}s)")
-
-
 def conversion_dzn(instance_name: str, i: int, nb_instances: int):
     """convert instance"""
-    if i < nb_instances:
-        conversion_reduced(instance_name)
+    start = time.time()
+
+    is_original = i >= nb_instances
+
+    if is_original:
+        print(instance_name, "original start")
+        repertory: str = "original_wvcp_dzn"
+        instance_file: str = f"instances/original_graphs/{instance_name}.col"
     else:
-        conversion_original(instance_name)
+        print(instance_name, "reduced start")
+        repertory: str = "reduced_wvcp_dzn"
+        instance_file: str = f"instances/reduced_wvcp/{instance_name}.col"
+
+    # load the graph
+    graph: Graph = Graph(instance_file, instance_file + ".w", to_sort=is_original)
+
+    if is_original:
+        # convert the graph to dzn
+        graph.save_graph_dzn_sort_vertices(f"{repertory}/{instance_name}.dzn")
+    else:
+        # convert the graph to dzn
+        graph.save_graph_dzn(f"{repertory}/{instance_name}.dzn")
+
+    # convert the cliques to dzn
+    graph.save_cliques_dzn(f"{repertory}/{instance_name}.clq.dzn")
+    # graph.save_cliques(f"{repertory}/{instance_name}.clq")
+
+    # convert the colors bounds to dzn
+    graph.compute_color_bounds(repertory)
+
+    # bounds
+    base = f"{repertory}/{instance_name}."
+
+    # colors
+    with open(f"{base}lb_colors_default.dzn", "w", encoding="utf8") as file:
+        file.write(f"lb_colors={graph.lb_colors_default};")
+
+    with open(f"{base}lb_colors_max_size_clique.dzn", "w", encoding="utf8") as file:
+        file.write(f"lb_colors={graph.lb_colors_max_size_clique};")
+
+    with open(f"{base}ub_colors_default.dzn", "w", encoding="utf8") as file:
+        file.write(f"ub_colors={graph.ub_colors_default};")
+
+    with open(f"{base}ub_colors_sum_chromatic.dzn", "w", encoding="utf8") as file:
+        file.write(f"ub_colors={graph.ub_colors_sum_chromatic};")
+
+    with open(f"{base}ub_colors_max_degree.dzn", "w", encoding="utf8") as file:
+        file.write(f"ub_colors={graph.ub_colors_max_degree};")
+
+    with open(
+        f"{base}ub_colors_min_degree_chromatic.dzn", "w", encoding="utf8"
+    ) as file:
+        file.write(f"ub_colors={graph.ub_colors_min_degree_chromatic};")
+
+    # score
+    with open(f"{base}lb_score_default.dzn", "w", encoding="utf8") as file:
+        file.write(f"lb_score={graph.lb_score_default};")
+
+    with open(f"{base}lb_score_sum_cliques.dzn", "w", encoding="utf8") as file:
+        file.write(f"lb_score={graph.lb_score_sum_cliques};")
+
+    with open(f"{base}ub_score_default.dzn", "w", encoding="utf8") as file:
+        file.write(f"ub_score={graph.ub_score_default};")
+
+    with open(
+        f"{base}ub_score_sum_weights_chromatic.dzn", "w", encoding="utf8"
+    ) as file:
+        file.write(f"ub_score={graph.ub_score_sum_weights_chromatic};")
+
+    with open(f"{base}ub_score_bks.dzn", "w", encoding="utf8") as file:
+        file.write(f"ub_score={graph.ub_score_bks};")
+
+    if is_original:
+        print(instance_name, f"original done ({int(time.time() - start)}s)")
+    else:
+        print(instance_name, f"reduced done ({int(time.time() - start)}s)")
 
 
 def read_col_files(instance_file: str) -> tuple[int, list[tuple[int, int]]]:
@@ -231,16 +200,25 @@ class Graph:
         self.weights: list[int]
         self.cliques: list[list[int]]
         self.nodes_sorted: list[Node] = []
-        self.lb_colors: int = 0
-        self.ub_colors: int = 0
-        self.nb_colors_degree: int = 0
-        self.nb_colors_chromatic: int = 0
-        self.lb_score: int = 0
-        self.ub_score: int = 0
+        # bounds colors
+        self.lb_colors_default: int = 1
+        self.lb_colors_max_size_clique: int = 0
+        self.ub_colors_default: int = 0
+        self.ub_colors_sum_chromatic: int = 0
+        self.ub_colors_max_degree: int = 0
+        self.ub_colors_min_degree_chromatic: int = 0
+        # bounds score
+        self.lb_score_default: int = 0
+        self.lb_score_sum_cliques: int = 0
+        self.ub_score_default: int = 0
+        self.ub_score_sum_weights_chromatic: int = 0
+        self.ub_score_bks: int = 0
 
         # load instance
         self.name = instance_file.split("/")[-1][:-4]
         self.nb_vertices, self.edges_list = read_col_files(instance_file)
+
+        self.ub_colors_default = self.nb_vertices
 
         self.nb_edges = 0
         self.adjacency_matrix = [
@@ -378,8 +356,9 @@ class Graph:
 
     def compute_color_bounds(self, repertory: str):
         """compute bound related to the number of colors"""
-        self.lb_colors = max(len(c) for c in self.cliques)
-        self.ub_colors = 0
+        self.lb_colors_max_size_clique = max(len(c) for c in self.cliques)
+        self.ub_colors_sum_chromatic = 0
+        self.ub_score_sum_weights_chromatic = 0
         for weight in self.set_of_weights:
             subgraph_file = f"{repertory}/{self.name}_{weight}.col"
             subgraph_file_out = f"{repertory}/{self.name}_{weight}.k"
@@ -388,25 +367,29 @@ class Graph:
             with open(subgraph_file_out, "r", encoding="utf8") as file:
                 # max between 1 and the number gave by tabucol as it need at least one color
                 # even if there is only one vertex with the weight
-                self.ub_colors += max(int(file.readline()), 1)
+                nb_colors = max(int(file.readline()), 1)
+                self.ub_colors_sum_chromatic += nb_colors
+                self.ub_score_sum_weights_chromatic += nb_colors * weight
             os.remove(subgraph_file)
             os.remove(subgraph_file_out)
-        self.nb_colors_degree = (
+        self.ub_colors_max_degree = (
             max(len(self.neighborhood[v]) for v in range(self.nb_vertices)) + 1
         )
-        self.nb_colors_chromatic = max(
-            min(len(self.neighborhood[v]) + 1, self.ub_colors)
+        self.ub_colors_min_degree_chromatic = max(
+            min(len(self.neighborhood[v]) + 1, self.ub_colors_sum_chromatic)
             for v in range(self.nb_vertices)
         )
 
     def compute_score_bounds(self):
         """find the score bounds"""
         max_len = max(len(clique) for clique in self.cliques)
-        self.lb_score = sum(
+        self.lb_score_default = max(self.weights)
+        self.lb_score_sum_cliques = sum(
             max(self.weights[clique[i]] for clique in self.cliques if len(clique) > i)
             for i in range(max_len)
         )
-        self.ub_score = get_best_known_score(self.name)
+        self.ub_score_default = sum(self.weights)
+        self.ub_score_bks = get_best_known_score(self.name)
 
     def save_cliques(self, output_file: str):
         """save clique to a file, one line per clique"""
