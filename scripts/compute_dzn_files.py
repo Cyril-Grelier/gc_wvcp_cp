@@ -22,8 +22,8 @@ from joblib import Parallel, delayed
 
 def main():
     """for each instance, compute the dzn files"""
-    instances_file = "instances/instance_list_wvcp.txt"
     instances_file = "instance_feasible.txt"
+    instances_file = "instances/instance_list_wvcp.txt"
 
     instances_names: list[str] = []
     with open(instances_file, "r", encoding="utf8") as file:
