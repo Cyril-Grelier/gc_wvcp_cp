@@ -127,6 +127,14 @@ array[VERTEX] of int: weight = r_weight ++ [0 | i in V_VERTEX];
 set of int: WEIGHT_RANGE = min(weight)..max(weight);
 % scale of real/virtual vertex weights
 set of int: WEIGHT_SCALE = array2set(weight);
+% range of scale of real/virtual vertex weights
+set of int: WEIGHT_SCALE_RANGE = 1..card(WEIGHT_SCALE);
+% scale of real/virtual vertex weights
+array[WEIGHT_SCALE_RANGE] of WEIGHT_SCALE: weight_scale = reverse(set2array(WEIGHT_SCALE)); % !! sorting weights in descending order
+% weight-based distribution of real/virtual vertices
+array[WEIGHT_SCALE_RANGE] of set of VERTEX: weight_vertices = [{ v | v in VERTEX where weight[v]=weight_scale[i]} | i in WEIGHT_SCALE_RANGE];
+% weight-based count of real/virtual vertices
+array[WEIGHT_SCALE_RANGE] of W_VERTEX: weight_nr_vertices = [card(weight_vertices[i]) | i in WEIGHT_SCALE_RANGE];
 
 % CLIQUES
 % range of cliques

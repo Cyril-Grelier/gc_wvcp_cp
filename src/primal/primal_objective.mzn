@@ -60,32 +60,44 @@ endif;
 % ;
 
 
-% %%%%%%%%%%%%
-% %  DYNAMIC FLAG-BASED BOUND CONSTRAINTS
+%%%%%%%%%%%%
+%  DYNAMIC FLAG-BASED BOUND CONSTRAINTS
 
-% % UPPER-BOUND SCORE CONSTRAINT
+% UPPER-BOUND SCORE CONSTRAINT
 
-% constraint
-% if (M_SB_SCORE in WVCP_M)
-% then
-% 	wvcp_lub_score(x_score, r_weight_scale, r_weight_vertices, r_weight_nr_vertices, x_weight, x_color[R_VERTEX])
-% endif;
+constraint
+if true %(M_SB_SCORE in WVCP_M)
+then
+	wvcp_lub_score(x_score, weight_scale, weight_vertices, weight_nr_vertices, x_weight, x_color[R_VERTEX])
+endif;
 
-% % functional constraint GDC
-% include "arg_max.mzn";
-% include "arg_min.mzn";
-% include "global_cardinality_closed_fn.mzn";
+% functional constraint GDC
+include "arg_max.mzn";
+include "arg_min.mzn";
+include "global_cardinality_closed_fn.mzn";
+include "global_cardinality_fn.mzn";
 
-% predicate wvcp_lub_score(var int: y, array[int] of int: w, array[int] of set of int: wv, array[int] of int: wn, array[int] of var int: z, array[int] of var int: x) =
-% 	%TODO z used?
-% 	assert(index_set(w) == index_set(wv), "w and wv index sets do not match\n")
-% 	/\
-% 	assert(index_set(wv) == index_set(wn), "wv and wn index sets do not match\n")
-% 	/\
-% 	let {
-% 		set of int: W = index_set(w);
-% 		set of int: C = index_set(z);
-% 		set of int: G = 0..length(x);
+predicate wvcp_lub_score(var int: y, array[int] of int: w, array[int] of set of int: wv, array[int] of int: wn, array[int] of var int: z, array[int] of var int: x) =
+	%TODO z used?
+	assert(index_set(w) == index_set(wv), "w and wv index sets do not match\n")
+	/\
+	assert(index_set(wv) == index_set(wn), "wv and wn index sets do not match\n")
+	/\
+	let {
+		set of int: W = index_set(w);
+		set of int: C = index_set(z);
+		set of int: G = 0..length(x);
+		
+% 		array[COLOR] of var W_R_VERTEX: y_nr_vertices;
+		array[WEIGHT_SCALE_RANGE] of var 0..ub_colors: y_weight_colors;
+		constraint
+% 			global_cardinality_closed(x, C, y_nr_vertices) % !! close counting with gcc_closed
+% 			/\ sum(y_nr_vertices) = nr_vertices
+					forall(i in index_set(y_weight_colors))(y_weight_colors[i] <= wn[i])
+			/\		y_weight_colors = global_cardinality_closed(z, w) % !! close counting with gcc_closed
+			/\		x_score = sum(i in index_set(y_weight_colors))(y_weight_colors[i] * w[i]) :: domain
+			;
+		
 % 		% the weight-based vertex count distribution over colors
 % 		array[W, C] of var G: x_wcg;
 % 		constraint
@@ -114,6 +126,6 @@ endif;
 % 				} in
 % 					x_lu[i,2] <= x_m + wn[i] - sum(k in C where k>min(C))((k <= x_m) * x_wcg[i,k])
 % 			);				
-% 	} in
-% 	true
-%  	;
+	} in
+	true
+ 	;

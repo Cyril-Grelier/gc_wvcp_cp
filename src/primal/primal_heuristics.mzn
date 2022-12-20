@@ -11,7 +11,7 @@ enum WVCP_SEARCH = {
   WEIGHTS,
   COLORS,
   COLORS_VERTICES,
-  COLORS_WEIGHTS
+  COLORS_WEIGHTS_VERTICES
 };
 
 
@@ -31,10 +31,11 @@ function ann: wvcp_search() =
   then    seq_search(
             [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
             int_search(x_color,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))])
-  elseif  WVCP_SEARCH_STRATEGY=COLORS_WEIGHTS
+  elseif  WVCP_SEARCH_STRATEGY=COLORS_WEIGHTS_VERTICES
   then    seq_search(
             [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
-            int_search(x_weight,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))])
+            int_search(x_weight,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS)),
+            int_search(sort_vertex_variables(),input_order,heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))])
   else    int_search(x_color,input_order,indomain)
   endif;
 
