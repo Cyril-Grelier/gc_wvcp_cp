@@ -8,10 +8,11 @@
 enum WVCP_SEARCH = {
   VERTICES_GENERIC,
   VERTICES_SPECIFIC,
+  VERTICES_BY_WEIGHT,
   WEIGHTS,
   COLORS,
   COLORS_VERTICES,
-  COLORS_WEIGHTS_VERTICES
+  WEIGHTS_VERTICES
 };
 
 
@@ -23,6 +24,8 @@ function ann: wvcp_search() =
   then    int_search(x_color,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))
   elseif  WVCP_SEARCH_STRATEGY=VERTICES_SPECIFIC
   then    int_search(sort_vertex_variables(),input_order,heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))
+  elseif  WVCP_SEARCH_STRATEGY=VERTICES_BY_WEIGHT
+  then    seq_search(split_vertices_by_weight(weight_vertices))
   elseif  WVCP_SEARCH_STRATEGY=WEIGHTS
   then    int_search(x_weight,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))
   elseif  WVCP_SEARCH_STRATEGY=COLORS
@@ -31,11 +34,12 @@ function ann: wvcp_search() =
   then    seq_search(
             [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
             int_search(x_color,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))])
-  elseif  WVCP_SEARCH_STRATEGY=COLORS_WEIGHTS_VERTICES
+  elseif  WVCP_SEARCH_STRATEGY=WEIGHTS_VERTICES
   then    seq_search(
-            [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
-            int_search(x_weight,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS)),
-            int_search(sort_vertex_variables(),input_order,heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))])
+            [
+%             int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
+            int_search(y_weight_colors,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
+            ++ split_vertices_by_weight(weight_vertices))
   else    int_search(x_color,input_order,indomain)
   endif;
 
@@ -49,6 +53,17 @@ enum WVCP_SEARCH_VARIABLES = WVCPSV(SEARCH_VARIABLES) ++ {DESC_DEGREE, DESC_WEIG
 WVCP_SEARCH_VARIABLES: WVCP_SEARCH_VARIABLES_VERTICES;
 WVCP_SEARCH_VARIABLES: WVCP_SEARCH_VARIABLES_WEIGHTS;
 WVCP_SEARCH_VARIABLES: WVCP_SEARCH_VARIABLES_COLORS;
+
+
+function array[int] of ann: split_vertices_by_weight(array[int] of set of VERTEX: wv) =
+  if card(index_set(wv))=1
+  then
+  			[int_search([x_color[i] | i in wv[min(index_set(wv))]],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))]
+  	else
+  			[int_search([x_color[i] | i in wv[min(index_set(wv))]],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))]
+			++
+			split_vertices_by_weight(wv[min(index_set(wv))+1..max(index_set(wv))])
+  endif;
 
 
 function ann: wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES: flag) =

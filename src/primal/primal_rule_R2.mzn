@@ -157,9 +157,7 @@ predicate wvcp_gdc_3(array[int] of var int: x, var int: y) =
 		} in
 				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
 		/\		z[n+1] = 0
-		/\		y = nvalue(z) % <-> y = sum(i in 0..ub_x)(exists(j in 1..n+1)(z[j] == i))
-% 		/\		forall(j in 1..n) (x[l+j-1] >= y -> x[l+j-1] > y)
-		/\		forall(j in 1..n) (x[l+j-1] != y)
+		/\		y = sum(i in 0..ub_x)(exists(j in 1..n+1)(z[j] == i))
 	endif;
 	
 
@@ -187,6 +185,8 @@ predicate wvcp_gdc_4(int: v, array[int] of int: U, array[int] of var int: x, var
 				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
 		/\		z[n+1] = 0
 		/\		y = nvalue(z) % <-> y = sum(i in 0..ub_x)(exists(j in 1..n+1)(z[j] == i))
+% 		/\		forall(j in 1..n) (x[l+j-1] >= y -> x[l+j-1] > y)
+% 		/\		forall(j in 1..n) (x[l+j-1] != y)
 		/\		forall(j in 1..n where U[j]<v) (x[l+j-1] != y) % where clause to avoid duplicating binary disequality constraints
 	endif;
 	

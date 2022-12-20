@@ -3,7 +3,7 @@
 
 % the score is equal to the sum of the weights of the colors since unused colors have weight 0
 constraint
-x_score = sum(x_weight);
+x_score = sum(x_weight) :: domain;
 
 
 %%%%%%%%%%%%
@@ -28,21 +28,6 @@ constraint
 	endif;
 
 
-
-% % input lower bound on score
-% constraint
-% if (LB_SCORE in WVCP_B)
-% then
-% 	(x_score >= lb_score)
-% endif;
-
-% % input upper bound on score
-% constraint
-% if (UB_SCORE in WVCP_B)
-% then
-% 	(x_score <= ub_score)
-% endif;
-
 % heaviest clique provides lower bound on score
 constraint
 if (M_CLIQUES in WVCP_M /\ CLIQUE!={})
@@ -50,7 +35,7 @@ then
 	x_score >= max(k in CLIQUE)(sum([weight[u] | u in clique[k]]))
 endif;
 
-% % upper bound on score derived on the number of colors from the score
+% % TODO review - upper bound on score derived on the number of colors from the score
 % constraint
 % x_opened_colors <= x_ub_used
 % /\
@@ -63,19 +48,32 @@ endif;
 %%%%%%%%%%%%
 %  DYNAMIC FLAG-BASED BOUND CONSTRAINTS
 
-% UPPER-BOUND SCORE CONSTRAINT
+% GCC COLOR WEIGHT CONSTRAINT
+
+include "global_cardinality_closed_fn.mzn";
 
 constraint
-if true %(M_SB_SCORE in WVCP_M)
+if (M_GCCW in WVCP_M)
 then
-	wvcp_lub_score(x_score, weight_scale, weight_vertices, weight_nr_vertices, x_weight, x_color[R_VERTEX])
+	let {
+		array[WEIGHT_SCALE_RANGE,1..2] of var COLOR: y_weight_colors_minmax;
+	} in
+			forall(i in index_set(y_weight_colors))(y_weight_colors[i] <= weight_nr_vertices[i])
+	/\		forall(i in index_set(y_weight_colors))(y_weight_colors_minmax[i,1] = min(k in weight_vertices[i])(x_color[k]))
+	/\		forall(i in index_set(y_weight_colors))(y_weight_colors_minmax[i,2] = max(k in weight_vertices[i])(x_color[k]))
+	/\		forall(i in index_set(y_weight_colors))(y_weight_colors[i] <= y_weight_colors_minmax[i,2] - y_weight_colors_minmax[i,1] + 1)
+% 	/\		y_weight_colors[min(index_set(y_weight_colors))] = y_weight_colors_minmax[min(index_set(y_weight_colors)),2]
+% 	/\		forall(i in index_set(y_weight_colors) where i>min(index_set(y_weight_colors)))(y_weight_colors[i] <= max(0, y_weight_colors_minmax[i,2] - max(y_weight_colors_minmax[1..i-1,2])))
+	/\		y_weight_colors = global_cardinality_closed(x_weight, weight_scale) % !! close counting with gcc_closed
+	/\		x_score = sum(i in index_set(y_weight_colors))(y_weight_colors[i] * weight_scale[i]) :: domain
+			% 	wvcp_lub_score(x_score, weight_scale, weight_vertices, weight_nr_vertices, x_weight, x_color[R_VERTEX])
 endif;
 
+
 % functional constraint GDC
-include "arg_max.mzn";
-include "arg_min.mzn";
-include "global_cardinality_closed_fn.mzn";
-include "global_cardinality_fn.mzn";
+% include "arg_max.mzn";
+% include "arg_min.mzn";
+% include "global_cardinality_fn.mzn";
 
 predicate wvcp_lub_score(var int: y, array[int] of int: w, array[int] of set of int: wv, array[int] of int: wn, array[int] of var int: z, array[int] of var int: x) =
 	%TODO z used?
@@ -87,16 +85,6 @@ predicate wvcp_lub_score(var int: y, array[int] of int: w, array[int] of set of 
 		set of int: W = index_set(w);
 		set of int: C = index_set(z);
 		set of int: G = 0..length(x);
-		
-% 		array[COLOR] of var W_R_VERTEX: y_nr_vertices;
-		array[WEIGHT_SCALE_RANGE] of var 0..ub_colors: y_weight_colors;
-		constraint
-% 			global_cardinality_closed(x, C, y_nr_vertices) % !! close counting with gcc_closed
-% 			/\ sum(y_nr_vertices) = nr_vertices
-					forall(i in index_set(y_weight_colors))(y_weight_colors[i] <= wn[i])
-			/\		y_weight_colors = global_cardinality_closed(z, w) % !! close counting with gcc_closed
-			/\		x_score = sum(i in index_set(y_weight_colors))(y_weight_colors[i] * w[i]) :: domain
-			;
 		
 % 		% the weight-based vertex count distribution over colors
 % 		array[W, C] of var G: x_wcg;

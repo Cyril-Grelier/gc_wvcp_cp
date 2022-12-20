@@ -56,7 +56,6 @@ constraint assert(lb_score in 0..ub_score, "assertion failed: lb_score out of bo
 % Model features
 % TODO WVCP-specific flags (?) -> move elsewhere
 enum WVCP_MODEL = {
-	M_SB_SCORE, % enforce static lower/upper bound constraints on objective function
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1_v1, % enforces Dynamic Greatest Dominating Vertex rule variant 1
@@ -65,6 +64,7 @@ enum WVCP_MODEL = {
 	M_DR2_v2, % enforces Dynamic Heaviest Dominating Color rule variant 2
 	M_DR2_v3, % enforces Dynamic Heaviest Dominating Color rule variant 3
 	M_DR2_v4, % enforces Dynamic Heaviest Dominating Color rule variant 4
+	M_GCCW, % enforce gcc on colors' weights
 };
 
 % Instance options

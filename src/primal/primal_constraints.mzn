@@ -23,7 +23,7 @@ forall(v in V_VERTEX)(
 % binary coloring constraint between adjacent vertices
 include "alldifferent.mzn";
 constraint
-	if ({M_DR2_v3, M_DR2_v4} intersect WVCP_M != {})
+	if ({M_DR2_v4} intersect WVCP_M != {})
 	then
 		true % coloring constraints subsume DR2_v3 and DR2_v4
 	elseif (M_CLIQUES in WVCP_M)
