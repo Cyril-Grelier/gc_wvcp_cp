@@ -157,3 +157,13 @@ array[int] of R_VERTEX: disconnected = [v | v in R_VERTEX where neighbours[v] = 
 % fully-connected vertices (!! any vertex connected to all other vertices is necessarily placed in a color of its own)
 array[int] of R_VERTEX: cliqued = [v | v in R_VERTEX where neighbours[v] = R_VERTEX diff {v}];
 
+% some clique in V
+function set of VERTEX: clique(set of VERTEX: V) =
+	if card(V)<=1
+	then		V
+	else
+		let {
+			VERTEX: u = arg_max(v in V)(card(V intersect neighbours[v]));
+		} in
+		  {u} union clique(V intersect neighbours[u])
+	endif;

@@ -38,7 +38,7 @@ function ann: wvcp_search() =
   then    seq_search(
             [
 %             int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
-            int_search(y_weight_colors,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
+            int_search(x_weight_colors,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
             ++ split_vertices_by_weight(weight_vertices))
   else    int_search(x_color,input_order,indomain)
   endif;

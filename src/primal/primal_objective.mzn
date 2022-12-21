@@ -51,22 +51,40 @@ endif;
 % GCC COLOR WEIGHT CONSTRAINT
 
 include "global_cardinality_closed_fn.mzn";
+include "global_cardinality_fn.mzn";
+include "all_different.mzn";
 
 constraint
 if (M_GCCW in WVCP_M)
 then
 	let {
-		array[WEIGHT_SCALE_RANGE,1..2] of var COLOR: y_weight_colors_minmax;
+		set of int: WSR = index_set(x_weight_colors);
+		array[WSR] of set of VERTEX: w_cliques = [clique(weight_vertices[i]) | i in WSR];
+		array[WSR] of W_VERTEX: w_cliques_size = [card(w_cliques[i]) | i in WSR];
+		array[WSR] of var COLOR: x_weight_colors_max;
+		array[WSR] of var COLOR: x_weight_colors_min;
 	} in
-			forall(i in index_set(y_weight_colors))(y_weight_colors[i] <= weight_nr_vertices[i])
-	/\		forall(i in index_set(y_weight_colors))(y_weight_colors_minmax[i,1] = min(k in weight_vertices[i])(x_color[k]))
-	/\		forall(i in index_set(y_weight_colors))(y_weight_colors_minmax[i,2] = max(k in weight_vertices[i])(x_color[k]))
-	/\		forall(i in index_set(y_weight_colors))(y_weight_colors[i] <= y_weight_colors_minmax[i,2] - y_weight_colors_minmax[i,1] + 1)
-% 	/\		y_weight_colors[min(index_set(y_weight_colors))] = y_weight_colors_minmax[min(index_set(y_weight_colors)),2]
-% 	/\		forall(i in index_set(y_weight_colors) where i>min(index_set(y_weight_colors)))(y_weight_colors[i] <= max(0, y_weight_colors_minmax[i,2] - max(y_weight_colors_minmax[1..i-1,2])))
-	/\		y_weight_colors = global_cardinality_closed(x_weight, weight_scale) % !! close counting with gcc_closed
-	/\		x_score = sum(i in index_set(y_weight_colors))(y_weight_colors[i] * weight_scale[i]) :: domain
-			% 	wvcp_lub_score(x_score, weight_scale, weight_vertices, weight_nr_vertices, x_weight, x_color[R_VERTEX])
+			x_weight_colors = global_cardinality_closed(x_weight, weight_scale) :: domain % !! close counting with gcc_closed
+	/\		x_score = sum(i in WSR)(x_weight_colors[i] * weight_scale[i]) :: domain
+	/\		card(COLOR) = sum(x_weight_colors) :: domain
+	/\		x_weight_colors[min(WSR)..max(WSR)-1] = global_cardinality(x_weight, r_weight_scale) :: domain % !! close counting with gcc_closed
+	/\		x_opened_colors = sum(x_weight_colors[min(WSR)..max(WSR)-1]) :: domain
+
+	/\		forall(i in WSR)(x_weight_colors[i] <= weight_nr_vertices[i])
+	/\		forall(i in WSR)(x_weight_colors_max[i] = max(k in weight_vertices[i])(x_color[k]))
+	/\		x_weight_colors[min(WSR)] = x_weight_colors_max[min(WSR)]
+	/\		forall(i in WSR where i>min(WSR))(x_weight_colors[i] = max(0, x_weight_colors_max[i] - max(x_weight_colors_max[1..i-1])))
+
+	/\		forall(i in WSR)(x_weight_colors_min[i] = min(k in weight_vertices[i])(x_color[k]))
+	/\		forall(i in WSR)(x_weight_colors_max[i] - x_weight_colors_min[i] + 1 >= w_cliques_size[i])
+	
+	/\		x_opened_colors >= w_cliques_size[min(WSR)] + sum(i in WSR where i>min(WSR))(max(0, w_cliques_size[i] - max(j in min(WSR)..i-1)(w_cliques_size[j])))
+	/\		x_score >= weight_scale[min(WSR)] * w_cliques_size[min(WSR)] + sum(i in WSR where i>min(WSR))(weight_scale[i] * max(0, w_cliques_size[i] - max(j in min(WSR)..i-1)(w_cliques_size[j])))
+	
+	/\		forall(i in WSR)(alldifferent([x_color[u] | u in w_cliques[i]]))
+
+	
+	% 	wvcp_lub_score(x_score, weight_scale, weight_vertices, weight_nr_vertices, x_weight, x_color[R_VERTEX])
 endif;
 
 

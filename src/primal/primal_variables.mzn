@@ -24,8 +24,8 @@ array[COLOR] of var bool: x_opened;
 % the number of opened colors
 var W_COLOR: x_opened_colors;
 
-% y_weight_colors[i] = number of colors taking weight `weight_scale[i]`
-array[WEIGHT_SCALE_RANGE] of var W_COLOR: y_weight_colors;
+% x_weight_colors[i] = number of colors taking weight `weight_scale[i]`
+array[WEIGHT_SCALE_RANGE] of var W_COLOR: x_weight_colors;
 
 % the score
 %% the score is the sum of the weights of the used colors
