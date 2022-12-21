@@ -56,7 +56,6 @@ constraint assert(lb_score in 0..ub_score, "assertion failed: lb_score out of bo
 % Model features
 % TODO WVCP-specific flags (?) -> move elsewhere
 enum WVCP_MODEL = {
-	M_SB_SCORE, % enforce static lower/upper bound constraints on objective function
 	M_CLIQUES, % models each input clique with an all-different constraint instead of a clique of binary coloring disequality constraints
 	M_SR1, % enforces Static Greatest Dominating Vertex rule
 	M_DR1_v1, % enforces Dynamic Greatest Dominating Vertex rule variant 1
@@ -65,6 +64,7 @@ enum WVCP_MODEL = {
 	M_DR2_v2, % enforces Dynamic Heaviest Dominating Color rule variant 2
 	M_DR2_v3, % enforces Dynamic Heaviest Dominating Color rule variant 3
 	M_DR2_v4, % enforces Dynamic Heaviest Dominating Color rule variant 4
+	M_GCCW, % enforce gcc on colors' weights
 };
 
 % Instance options
@@ -127,6 +127,14 @@ array[VERTEX] of int: weight = r_weight ++ [0 | i in V_VERTEX];
 set of int: WEIGHT_RANGE = min(weight)..max(weight);
 % scale of real/virtual vertex weights
 set of int: WEIGHT_SCALE = array2set(weight);
+% range of scale of real/virtual vertex weights
+set of int: WEIGHT_SCALE_RANGE = 1..card(WEIGHT_SCALE);
+% scale of real/virtual vertex weights
+array[WEIGHT_SCALE_RANGE] of WEIGHT_SCALE: weight_scale = reverse(set2array(WEIGHT_SCALE)); % !! sorting weights in descending order
+% weight-based distribution of real/virtual vertices
+array[WEIGHT_SCALE_RANGE] of set of VERTEX: weight_vertices = [{ v | v in VERTEX where weight[v]=weight_scale[i]} | i in WEIGHT_SCALE_RANGE];
+% weight-based count of real/virtual vertices
+array[WEIGHT_SCALE_RANGE] of W_VERTEX: weight_nr_vertices = [card(weight_vertices[i]) | i in WEIGHT_SCALE_RANGE];
 
 % CLIQUES
 % range of cliques
@@ -149,3 +157,13 @@ array[int] of R_VERTEX: disconnected = [v | v in R_VERTEX where neighbours[v] = 
 % fully-connected vertices (!! any vertex connected to all other vertices is necessarily placed in a color of its own)
 array[int] of R_VERTEX: cliqued = [v | v in R_VERTEX where neighbours[v] = R_VERTEX diff {v}];
 
+% some clique in V
+function set of VERTEX: clique(set of VERTEX: V) =
+	if card(V)<=1
+	then		V
+	else
+		let {
+			VERTEX: u = arg_max(v in V)(card(V intersect neighbours[v]));
+		} in
+		  {u} union clique(V intersect neighbours[u])
+	endif;

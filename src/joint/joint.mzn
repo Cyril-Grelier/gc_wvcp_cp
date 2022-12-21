@@ -19,13 +19,6 @@ array[R_VERTEX] of var 0..1: y_dominated;
 % CONSTRAINTS
 
 
-%TODO review
-% constraint
-% forall(u in R_VERTEX)( 
-%   y_dominated[u] = bool2int(u != greatest(x_vertices[x_color[u]]))
-% );
-
-
 %%%%%%%%%%%
 % PRIMAL/DUAL CHANNELING CONSTRAINTS
 

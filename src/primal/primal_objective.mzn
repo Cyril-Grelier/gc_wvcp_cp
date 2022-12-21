@@ -3,7 +3,7 @@
 
 % the score is equal to the sum of the weights of the colors since unused colors have weight 0
 constraint
-x_score = sum(x_weight);
+x_score = sum(x_weight) :: domain;
 
 
 %%%%%%%%%%%%
@@ -28,21 +28,6 @@ constraint
 	endif;
 
 
-
-% % input lower bound on score
-% constraint
-% if (LB_SCORE in WVCP_B)
-% then
-% 	(x_score >= lb_score)
-% endif;
-
-% % input upper bound on score
-% constraint
-% if (UB_SCORE in WVCP_B)
-% then
-% 	(x_score <= ub_score)
-% endif;
-
 % heaviest clique provides lower bound on score
 constraint
 if (M_CLIQUES in WVCP_M /\ CLIQUE!={})
@@ -50,7 +35,7 @@ then
 	x_score >= max(k in CLIQUE)(sum([weight[u] | u in clique[k]]))
 endif;
 
-% % upper bound on score derived on the number of colors from the score
+% % TODO review - upper bound on score derived on the number of colors from the score
 % constraint
 % x_opened_colors <= x_ub_used
 % /\
@@ -60,32 +45,65 @@ endif;
 % ;
 
 
-% %%%%%%%%%%%%
-% %  DYNAMIC FLAG-BASED BOUND CONSTRAINTS
+%%%%%%%%%%%%
+%  DYNAMIC FLAG-BASED BOUND CONSTRAINTS
 
-% % UPPER-BOUND SCORE CONSTRAINT
+% GCC COLOR WEIGHT CONSTRAINT
 
-% constraint
-% if (M_SB_SCORE in WVCP_M)
-% then
-% 	wvcp_lub_score(x_score, r_weight_scale, r_weight_vertices, r_weight_nr_vertices, x_weight, x_color[R_VERTEX])
-% endif;
+include "global_cardinality_closed_fn.mzn";
+include "global_cardinality_fn.mzn";
+include "all_different.mzn";
 
-% % functional constraint GDC
+constraint
+if (M_GCCW in WVCP_M)
+then
+	let {
+		set of int: WSR = index_set(x_weight_colors);
+		array[WSR] of set of VERTEX: w_cliques = [clique(weight_vertices[i]) | i in WSR];
+		array[WSR] of W_VERTEX: w_cliques_size = [card(w_cliques[i]) | i in WSR];
+		array[WSR] of var COLOR: x_weight_colors_max;
+		array[WSR] of var COLOR: x_weight_colors_min;
+	} in
+			x_weight_colors = global_cardinality_closed(x_weight, weight_scale) :: domain % !! close counting with gcc_closed
+	/\		x_score = sum(i in WSR)(x_weight_colors[i] * weight_scale[i]) :: domain
+	/\		card(COLOR) = sum(x_weight_colors) :: domain
+	/\		x_weight_colors[min(WSR)..max(WSR)-1] = global_cardinality(x_weight, r_weight_scale) :: domain % !! close counting with gcc_closed
+	/\		x_opened_colors = sum(x_weight_colors[min(WSR)..max(WSR)-1]) :: domain
+
+	/\		forall(i in WSR)(x_weight_colors[i] <= weight_nr_vertices[i])
+	/\		forall(i in WSR)(x_weight_colors_max[i] = max(k in weight_vertices[i])(x_color[k]))
+	/\		x_weight_colors[min(WSR)] = x_weight_colors_max[min(WSR)]
+	/\		forall(i in WSR where i>min(WSR))(x_weight_colors[i] = max(0, x_weight_colors_max[i] - max(x_weight_colors_max[1..i-1])))
+
+	/\		forall(i in WSR)(x_weight_colors_min[i] = min(k in weight_vertices[i])(x_color[k]))
+	/\		forall(i in WSR)(x_weight_colors_max[i] - x_weight_colors_min[i] + 1 >= w_cliques_size[i])
+	
+	/\		x_opened_colors >= w_cliques_size[min(WSR)] + sum(i in WSR where i>min(WSR))(max(0, w_cliques_size[i] - max(j in min(WSR)..i-1)(w_cliques_size[j])))
+	/\		x_score >= weight_scale[min(WSR)] * w_cliques_size[min(WSR)] + sum(i in WSR where i>min(WSR))(weight_scale[i] * max(0, w_cliques_size[i] - max(j in min(WSR)..i-1)(w_cliques_size[j])))
+	
+	/\		forall(i in WSR)(alldifferent([x_color[u] | u in w_cliques[i]]))
+
+	
+	% 	wvcp_lub_score(x_score, weight_scale, weight_vertices, weight_nr_vertices, x_weight, x_color[R_VERTEX])
+endif;
+
+
+% functional constraint GDC
 % include "arg_max.mzn";
 % include "arg_min.mzn";
-% include "global_cardinality_closed_fn.mzn";
+% include "global_cardinality_fn.mzn";
 
-% predicate wvcp_lub_score(var int: y, array[int] of int: w, array[int] of set of int: wv, array[int] of int: wn, array[int] of var int: z, array[int] of var int: x) =
-% 	%TODO z used?
-% 	assert(index_set(w) == index_set(wv), "w and wv index sets do not match\n")
-% 	/\
-% 	assert(index_set(wv) == index_set(wn), "wv and wn index sets do not match\n")
-% 	/\
-% 	let {
-% 		set of int: W = index_set(w);
-% 		set of int: C = index_set(z);
-% 		set of int: G = 0..length(x);
+predicate wvcp_lub_score(var int: y, array[int] of int: w, array[int] of set of int: wv, array[int] of int: wn, array[int] of var int: z, array[int] of var int: x) =
+	%TODO z used?
+	assert(index_set(w) == index_set(wv), "w and wv index sets do not match\n")
+	/\
+	assert(index_set(wv) == index_set(wn), "wv and wn index sets do not match\n")
+	/\
+	let {
+		set of int: W = index_set(w);
+		set of int: C = index_set(z);
+		set of int: G = 0..length(x);
+		
 % 		% the weight-based vertex count distribution over colors
 % 		array[W, C] of var G: x_wcg;
 % 		constraint
@@ -114,6 +132,6 @@ endif;
 % 				} in
 % 					x_lu[i,2] <= x_m + wn[i] - sum(k in C where k>min(C))((k <= x_m) * x_wcg[i,k])
 % 			);				
-% 	} in
-% 	true
-%  	;
+	} in
+	true
+ 	;
