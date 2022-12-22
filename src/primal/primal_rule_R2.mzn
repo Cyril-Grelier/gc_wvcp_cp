@@ -54,41 +54,41 @@ function array[1..2] of int: count_SGDC() =
 %%%%%%%%%%%%
 % Rule DR2
 
-% rule GDC
 constraint
-	if ({M_DR2_v1, M_DR2_v2, M_DR2_v3, M_DR2_v4} intersect WVCP_M != {})
+	if			(M_DR2_v1 in WVCP_M)
 	then
-		forall(v in R_VERTEX) (
-			x_color[v] = wvcp_gdc(v, set2array(neighbours[v]), [x_color[u] | u in neighbours[v]])
+		forall(u in R_VERTEX) (
+			wvcp_gdc_1(x_color[u], [x_color[v] | v in neighbours[u]])
 		)
-	else
-		true
+	elseif (M_DR2_v2 in WVCP_M)
+	then
+		let {
+			constraint
+				forall(u in R_VERTEX, i in STRICT_R_DEGREE where i>r_degree[u])(
+					x_arc[u,i] = 0
+				);
+			constraint
+				forall(u in R_VERTEX, i in STRICT_R_DEGREE where i<=r_degree[u])(
+					forall(v in R_VERTEX where v=lookup_neighbour(u,i) /\ u<v)(
+						let {
+							R_DEGREE: j = arg_max(k in 1..r_degree[v])(lookup_neighbour(v,k) = u);
+						} in
+									x_arc[u,i] = (x_color[v] < x_color[u])
+							/\		x_arc[u,i] = 1 - x_arc[v,j]
+					)
+				);
+		} in
+			forall(u in R_VERTEX) (
+				wvcp_gdc_2(x_color[u], x_arc[u,1..r_degree[u]], [x_color[v] | v in neighbours[u]])
+			)
+	elseif (M_DR2_v3 in WVCP_M)
+	then
+			forall(u in R_VERTEX) (
+				wvcp_gdc_3(x_color[u], [x_color[v] | v in neighbours[u]])
+			)
+	else	
+			true
 	endif;
-
-% functional constraint GDC
-function var int: wvcp_gdc(R_VERTEX: v, array[int] of R_VERTEX: U, array[int] of var int: x)
-	::promise_total =
-	let {
-		var 1..length(x)+1: y::is_defined_var;
-		constraint
-			if			(M_DR2_v1 in WVCP_M)
-			then
-				wvcp_gdc_1(x, y)::defines_var(y)
-			elseif	(M_DR2_v2 in WVCP_M)
-			then
-				wvcp_gdc_2(x, y)::defines_var(y)
-			elseif	(M_DR2_v3 in WVCP_M)
-			then
-				wvcp_gdc_3(x, y)::defines_var(y)
-			elseif	(M_DR2_v4 in WVCP_M)
-			then
-				wvcp_gdc_4(v, U, x, y)::defines_var(y) % !! only variant depending on graph (neighborhoods)
-			else
-				true
-			endif;
-	}
-	in y	;
-
 
 
 %%%%%%%%%%%%
@@ -99,7 +99,7 @@ include "arg_min.mzn";
 include "global_cardinality_fn.mzn";
 
 % y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
-predicate wvcp_gdc_1(array[int] of var int: x, var int: y) =
+predicate wvcp_gdc_1(var int: y, array[int] of var int: x) =
 	if length(x)=0
 	then y = 1
 	else
@@ -119,22 +119,27 @@ predicate wvcp_gdc_1(array[int] of var int: x, var int: y) =
 
 include "nvalue_fn.mzn";
 
-% y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
-predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
-	if length(x)=0
-	then y = 1
-	else
-		let {
-			int: l = min(index_set(x));
-			int: u = max(index_set(x));
-			int: n = length(x);
-			int: ub_x = ub_array(x);			
-			array[1..n+1] of var 0..ub_x: z;
-		} in
-				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
-		/\		z[n+1] = 0
-		/\		y = nvalue(z) % <-> y = sum(i in 0..ub_x)(exists(j in 1..n+1)(z[j] == i))
-	endif;
+% y satisfies y = 1 + count(i in index_set(xc))(xc[i]<y)
+predicate wvcp_gdc_2(var int: y, array[int] of var int: xa, array[int] of var int: xc) =
+	assert(
+		index_set(xa) = index_set(xc),
+		"xa and xc must have identical index sets",
+		if length(xc)=0
+		then y = 1
+		else
+			let {
+				int: l = min(index_set(xc));
+				int: u = max(index_set(xc));
+				int: n = length(xc);
+				array[1..n+1] of var 0..n+1: z;
+			} in
+					y <= n + 1
+			/\		z[n+1] = 0
+% 			/\		forall(j in 1..n) (z[j] in {0} union (1..n+1 intersect dom(xc[l+j-1]))) :: domain
+			/\		forall(j in 1..n) (z[j] = xa[l+j-1] * xc[l+j-1]) :: domain
+			/\		y = nvalue(z) :: domain % <-> y = sum(i in 0..n+1)(exists(j in 1..n+1)(z[j] == i))
+		endif
+	);
 
 
 %%%%%%%%%%%%
@@ -142,53 +147,22 @@ predicate wvcp_gdc_2(array[int] of var int: x, var int: y) =
 
 include "nvalue_fn.mzn";
 
-% !! disables coloring constraints twice
-% y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
-predicate wvcp_gdc_3(array[int] of var int: x, var int: y) =
-	if length(x)=0
+% y satisfies y = 1 + count(i in index_set(xc))(xc[i]<y)
+predicate wvcp_gdc_3(var int: y, array[int] of var int: xc) =
+	if length(xc)=0
 	then y = 1
 	else
 		let {
-			int: l = min(index_set(x));
-			int: u = max(index_set(x));
-			int: n = length(x);
-			int: ub_x = ub_array(x);
-			array[1..n+1] of var 0..ub_x: z;
+			int: l = min(index_set(xc));
+			int: u = max(index_set(xc));
+			int: n = length(xc);
+			array[1..n+1] of var 1..n+1: z;
 		} in
-				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
-		/\		z[n+1] = 0
-		/\		y = sum(i in 0..ub_x)(exists(j in 1..n+1)(z[j] == i))
+				z[n+1] = y
+		/\		forall(j in 1..n) (z[j] = min(y, xc[l+j-1])) :: bounds
+		/\		y = nvalue(z) :: bounds % <-> y <= sum(i in 1..n+1)(exists(j in 1..n)(z[j] == i)) + 1
 	endif;
-	
 
-%%%%%%%%%%%%
-% GDC constraint - variant 4
-
-include "nvalue_fn.mzn";
-include "global_cardinality_closed_fn.mzn";
-
-% !! disables coloring constraints once
-% y satisfies y = 1 + count(i in index_set(x))(x[i]<y)
-predicate wvcp_gdc_4(int: v, array[int] of int: U, array[int] of var int: x, var int: y) =
-	assert(index_set(U) = index_set(x), "error: inconsistent index sets for U and x")
-	/\
-	if length(x)=0
-	then y = 1
-	else
-		let {
-			int: l = min(index_set(x));
-			int: u = max(index_set(x));
-			int: n = length(x);
-			int: ub_x = ub_array(x);
-			array[1..n+1] of var 0..ub_x: z;
-		} in
-				forall(j in 1..n) (z[j] = (x[l+j-1] < y) * x[l+j-1])
-		/\		z[n+1] = 0
-		/\		y = nvalue(z) % <-> y = sum(i in 0..ub_x)(exists(j in 1..n+1)(z[j] == i))
-% 		/\		forall(j in 1..n) (x[l+j-1] >= y -> x[l+j-1] > y)
-% 		/\		forall(j in 1..n) (x[l+j-1] != y)
-		/\		forall(j in 1..n where U[j]<v) (x[l+j-1] != y) % where clause to avoid duplicating binary disequality constraints
-	endif;
 	
 
 %%%%%%%%%%%%

@@ -25,19 +25,20 @@ array[R_VERTEX] of var 0..1: y_dominated;
 %
 include "global_cardinality.mzn";
 constraint
-global_cardinality([greatest(x_vertices[c]) | c in COLOR], R_VERTEX,[1 - y_dominated[i] | i in R_VERTEX]);
+global_cardinality([x_dominant[c] | c in COLOR], R_VERTEX,[1 - y_dominated[i] | i in R_VERTEX]);
 
 % 
 constraint
 forall(ij in ARC)( 
-  y_arc[ij] <= bool2int(x_color[head[ij]] == x_color[tail[ij]])
+  y_arc[ij] <= bool2int(x_color[head[ij]] == x_color[tail[ij]]) :: domain
 ); 
+
 
 % objectives
 constraint
 x_score = yx_score;
 
-% stars
+% stars - !! seems to degrade performances (small tests though)
 % constraint
 % x_opened_colors = yx_opened_colors;
 

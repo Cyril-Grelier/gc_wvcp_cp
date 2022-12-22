@@ -47,5 +47,5 @@ function array[int] of string: show_wvcp_rules() =
 	++		STAB
 	++  [if(M_SR2 in WVCP_M) then show(M_SR2) else "S-GDC" endif ++ "="] ++ [show(count_SGDC())]
 	++		STAB
-	++  [if(M_DR2_v1 in WVCP_M) then show(M_DR2_v1) elseif(M_DR2_v2 in WVCP_M) then show(M_DR2_v2) elseif(M_DR2_v3 in WVCP_M) then show(M_DR2_v3) elseif(M_DR2_v4 in WVCP_M) then show(M_DR2_v4) else "D-GDC" endif ++ "="] ++ [show(count_DGDC())]
+	++  [if(M_DR2_v1 in WVCP_M) then show(M_DR2_v1) elseif(M_DR2_v2 in WVCP_M) then show(M_DR2_v2) elseif(M_DR2_v3 in WVCP_M) then show(M_DR2_v3) else "D-GDC" endif ++ "="] ++ [show(count_DGDC())]
 	;

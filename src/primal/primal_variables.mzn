@@ -24,9 +24,12 @@ array[COLOR] of var bool: x_opened;
 % the number of opened colors
 var W_COLOR: x_opened_colors;
 
-% x_weight_colors[i] = number of colors taking weight `weight_scale[i]`
-array[WEIGHT_SCALE_RANGE] of var W_COLOR: x_weight_colors;
-
 % the score
 %% the score is the sum of the weights of the used colors
 var SCORE: x_score;
+
+% x_weight_colors[i] = number of colors taking weight `weight_scale[i]`
+array[WEIGHT_SCALE_RANGE] of var W_COLOR: x_weight_colors;
+
+% x_arc[u,i]=1 iff x_color[v] < x_color[u] where v=lookup_neighbour(u,i)
+array[R_VERTEX,STRICT_R_DEGREE] of var 0..1: x_arc;

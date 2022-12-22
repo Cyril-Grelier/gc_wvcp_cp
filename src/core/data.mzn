@@ -63,7 +63,6 @@ enum WVCP_MODEL = {
 	M_DR2_v1, % enforces Dynamic Heaviest Dominating Color rule variant 1
 	M_DR2_v2, % enforces Dynamic Heaviest Dominating Color rule variant 2
 	M_DR2_v3, % enforces Dynamic Heaviest Dominating Color rule variant 3
-	M_DR2_v4, % enforces Dynamic Heaviest Dominating Color rule variant 4
 	M_GCCW, % enforce gcc on colors' weights
 };
 
@@ -75,7 +74,7 @@ set of WVCP_MODEL: WVCP_M;
 % META-MODEL ASSERTIONS
 
 % constraint assert(card({M_DR1_v1} intersect WVCP_M) <= 1, "assertion failed: choose one of M_DR1_v*");
-constraint assert(card({M_DR2_v1, M_DR2_v2, M_DR2_v3, M_DR2_v4} intersect WVCP_M) <= 1, "assertion failed: choose one of M_DR2_v*");
+constraint assert(card({M_DR2_v1, M_DR2_v2, M_DR2_v3} intersect WVCP_M) <= 1, "assertion failed: choose one of M_DR2_v*");
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -167,3 +166,21 @@ function set of VERTEX: clique(set of VERTEX: V) =
 		} in
 		  {u} union clique(V intersect neighbours[u])
 	endif;
+
+% neighbour lookup function
+array[R_VERTEX] of int: r_degree = [card(neighbours[u]) | u in R_VERTEX];
+set of int: STRICT_R_DEGREE = 1..max(r_degree);
+set of int: R_DEGREE = 0..card(STRICT_R_DEGREE);
+
+array[int] of R_VERTEX: flattened_neighbours = flatten_sets(neighbours[R_VERTEX]);
+function array[int] of R_VERTEX: flatten_sets(array[int] of set of R_VERTEX: tab) =
+	if length(tab) = 1
+	then		set2array(tab[min(index_set(tab))])
+	else		set2array(tab[min(index_set(tab))]) ++ flatten_sets(tab[min(index_set(tab))+1..max(index_set(tab))])
+	endif;
+
+function R_VERTEX: lookup_neighbour(R_VERTEX: v, STRICT_R_DEGREE: i) =
+	let {
+		constraint assert(i <= r_degree[v], "assertion failed: neighbour id beyond vertex' degree");
+	} in
+		flattened_neighbours[sum(u in R_VERTEX where u<v)(r_degree[u]) + i];
