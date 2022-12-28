@@ -248,7 +248,7 @@ Each model is customizable using parameters and options to switch between equiva
 The following parameters _must_ be defined for each model
 
 - `lb_colors (int)`- lower bound on the number of colors
-- `nr_colors (int)`- upper bound on the number of colors
+- `ub_colors (int)`- upper bound on the number of colors
 - `lb_score (int)`- lower bound on the score
 - `ub_score (int)`- upper bound on the score
 - `nr_cliques (int)`- the number of pre-computed cliques
@@ -288,7 +288,6 @@ Option `WVCP_M` regroups various flags that switch on or off different fragments
 - `M_DR2_v1` - if supplied, enforces variant 1 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
 - `M_DR2_v2` - if supplied, enforces variant 2 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
 - `M_DR2_v3` - if supplied, enforces variant 3 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
-- `M_DR2_v4` - if supplied, enforces variant 4 of symmetry breaking rule DR2 (Dynamic Greatest Dominating Color rule)
 
 Notes
 
@@ -320,9 +319,10 @@ Technically, model-specific options are Minizinc enumerations that extend generi
 The primal model exposes the following variables:
 
 - the color of each vertex
-- the number of opened colors (colors including at least one vertex)
+- the vertices of each color
 - the weight of each color
 - the dominant vertex of each color (the heaviest vertex of the color with smallest id)
+- the number of opened colors (colors including at least one vertex)
 - the score of the coloring
 
 The following options set the search and restart strategies
@@ -337,12 +337,14 @@ The following options set the variable selection heuristics
 - `WVCP_SEARCH_VARIABLES_COLORS`- the de-facto selection of the single variable modeling the number of colors to open
 - `WVCP_SEARCH_VARIABLES_VERTICES`- the prioritization of vertices to color
 - `WVCP_SEARCH_VARIABLES_WEIGHTS`- the prioritization of colors to weigh
+<!-- `WVCP_SEARCH_VARIABLES_ARCS`- the prioritization of arcs to exclude (or include based on the value selection heuristic)  -->
 
 The following options set the value selection heuristics
 
 - `WVCP_SEARCH_DOMAIN_COLORS`- the heuristics to set the number of colors to open
 - `WVCP_SEARCH_DOMAIN_VERTICES`- the prioritization of colors for vertices
 - `WVCP_SEARCH_DOMAIN_WEIGHTS`- the prioritization of weighs for colors
+<!-- `WVCP_SEARCH_DOMAIN_ARCS`- the prioritization of inclusion vs. exclusion decisions for arcs -->
 
 ---
 
@@ -352,9 +354,9 @@ The dual model exposes the following variables:
 
 - the decision to include or exclude an arc for each arc of the dual graph
 - the score of the MWSSP solution (the weighted sum of the heads of all included arcs)
-- the score of an equivalent WVCP solution (derived by subtracting the MWSSP score from the sum of the vertex weights)
+- the score of any equivalent WVCP solution (derived by subtracting the MWSSP score from the sum of the vertex weights)
 - the number of stars (excludes stand-alone nodes)
-- the number of opened colors in an equivalent WVCP solution
+- the number of opened colors in any equivalent WVCP solution
 
 
 The following options set the search and restart strategies
@@ -411,7 +413,7 @@ minizinc \
 --parallel 1 \
 --compiler-statistics --solver-statistics \
 --intermediate \
--D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
+-D "WVCP_SEARCH_STRATEGY=VERTICES_BY_WEIGHT" \
 -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
 -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
 -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" \
@@ -419,7 +421,7 @@ minizinc \
 -D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" \
 -D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" \
 -D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" \
--D "WVCP_M={M_SR2,M_DR2_v2}" \
+-D "WVCP_M={M_SR2,M_DR1_v1}" \
 -d core/default_lb_colors.dzn \
 -d core/default_ub_colors.dzn \
 -d core/default_lb_score.dzn \
@@ -439,17 +441,17 @@ minizinc \
   - the score [flag `UB_SCORE`] using the default upper-bound value [`-d core/defaut_ub_score.dzn`]
 -->
 - not modeling any cliques [no flag `M_CLIQUES`] neither supplying any clique [`-d core/no_cliques.dzn`]
-- enforcing symmetry breaking rules SR2 [flag `M_SR2`] and DR2_v2 [flag `M_DR2_v2`]
+- enforcing symmetry breaking rules SR2 [flag `M_SR2`] and DR1_v1 [flag `M_DR1_v1`]
 - using
-  - the search strategy labelling vertices based on generic CP heuristics [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`]
-  - the first-fail variable selection heuristics [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
+  - the search strategy grouping vertices by descending weight values [`-D WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`]
+  - the first-fail variable selection heuristics applied in each group of vertices [`-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)"`]
   - the domain bisection value selection heuristics [`-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT"`]
-- displaying flattener [`--compiler-statistics`] and solver [`--solver-statistics`] statistics
+- displaying flattener statistics [`--compiler-statistics`] and solver [`--solver-statistics`] statistics
 - and displaying intermediate solutions [`--intermediate`]
 
 Note
 
-- All heuristic options supported in the primal model _have_ to be set although some will be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` in the above command since the search strategy is to branch on vertices (`WVCP_SEARCH_STRATEGY=VERTICES_GENERIC`).
+- All heuristic options supported in the primal model _have_ to be set although some will be ignored based on the selected search strategy. For instance, `WVCP_SEARCH_VARIABLES_COLORS`, `WVCP_SEARCH_DOMAIN_COLORS`, `WVCP_SEARCH_VARIABLES_WEIGHTS`, `WVCP_SEARCH_DOMAIN_WEIGHTS` will be ignored in the above command since the search strategy is to branch on vertices (`WVCP_SEARCH_STRATEGY=VERTICES_BY_WEIGHT`).
 
 - Heuristics options (`*_SEARCH_VARIABLES_*`) that are set to generic values (e.g. `INPUT_ORDER`) _must_ be coerced with `WVCPSV` (.g. `"WVCPSV(INPUT_ORDER)"` in the above command. They _must not_ be coerced if they are primal-specific heuristics (eg. `DESC_WEIGHT_DEGREE`). See `primal/primal_heuristics.mzn` for the list of primal-specific heuristics and `heuristics.mzn` for the list of generic heuristics.
 
@@ -494,7 +496,7 @@ minizinc \
 --compiler-statistics --solver-statistics \
 --intermediate \
 -D "MWSSP_WVCP_SEARCH_STRATEGY=WVCP" \
--D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" \
+-D "WVCP_SEARCH_STRATEGY=VERTICES_BY_WEIGHT" \
 -D "WVCP_SEARCH_RESTART=RESTART_NONE" \
 -D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" \
 -D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_MIN" \
@@ -506,7 +508,7 @@ minizinc \
 -D "MWSSP_SEARCH_RESTART=RESTART_NONE" \
 -D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" \
 -D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" \
--D "WVCP_M={M_SR2,M_DR2_v2}" \
+-D "WVCP_M={M_SR2,M_DR1_v1}" \
 -d core/default_lb_colors.dzn \
 -d core/default_ub_colors.dzn \
 -d core/default_lb_score.dzn \
@@ -546,4 +548,6 @@ Default solver configurations and options set in the files `primal/primal.mpc`, 
 
 # Running models from the IDE
 
-3 Minizinc project files to launch from the IDE are supplied for each model: `primal/primal.mzp`, `dual/dual.mzp` and `joint/joint.mzp`.
+3 Minizinc project files to launch from the IDE are supplied for each model - `primal/primal.mzp`, `dual/dual.mzp` and `joint/joint.mzp`. 
+
+The projects include parameter files - `core/parameters.mzn`, `primal/primal_parameters.mzn`, `dual/dual_parameters.mzn` and `joint/joint_parameters.mzn` - and default color/score bound files - `core/default_lb_colors.dzn`, `core/default_ub_colors.dzn`, `core/default_lb_score.dzn` and `core/default_ub_score.dzn` - to use and possibly customize to solve an instance.

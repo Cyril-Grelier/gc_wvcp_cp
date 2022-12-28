@@ -9,6 +9,8 @@
         "../../original_wvcp_dzn/p06.dzn",
         "../../reduced_wvcp_dzn/p06.clq.dzn",
         "../../reduced_wvcp_dzn/p06.dzn",
+        "../../reduced_wvcp_dzn/p40.dzn",
+        "../../reduced_wvcp_dzn/r01.dzn",
         "../_instances/g1.dzn",
         "../_instances/g2.dzn",
         "../_instances/g3.dzn",

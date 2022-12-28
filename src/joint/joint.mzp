@@ -8,6 +8,7 @@
     "projectFiles": [
         "../../reduced_wvcp_dzn/p06.clq.dzn",
         "../../reduced_wvcp_dzn/p06.dzn",
+        "../../reduced_wvcp_dzn/p40.dzn",
         "../core/data.mzn",
         "../core/default_lb_colors.dzn",
         "../core/default_lb_score.dzn",

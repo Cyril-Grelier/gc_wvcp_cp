@@ -23,3 +23,11 @@ if I_SORT
 then
 	strictly_increasing([x_dominant[c] | c in COLOR])
 endif;
+
+% redundant
+include "decreasing.mzn";
+constraint
+if I_SORT
+then
+	decreasing([x_weight[c] | c in COLOR])
+endif;

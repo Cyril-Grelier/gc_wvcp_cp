@@ -37,7 +37,7 @@ constraint
 	else % not({M_CLIQUES} intersect WVCP_M != {})
 		% default coloring constraints
 		forall(v in VERTEX, u in neighbours[v] where u<v)(
-			(x_color[u] != x_color[v])
+			(x_color[u] != x_color[v]) %:: bounds
 		)
 	endif;
 
@@ -72,7 +72,6 @@ constraint x_opened_colors = sum(x_opened);
 constraint	x_opened_colors <= max(COLOR) - length(disconnected) + 1;
 
 % lower-bound constraint based on cliqued nodes
-include "arg_max.mzn";
 constraint x_opened_colors >= length(cliqued);
 
 % (redundant) lower-bound constraint based on cliqued nodes

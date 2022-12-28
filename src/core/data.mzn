@@ -84,6 +84,7 @@ constraint assert(card({M_DR2_v1, M_DR2_v2, M_DR2_v3} intersect WVCP_M) <= 1, "a
 set of int: R_VERTEX = 1..nr_vertices;
 % count of real vertices
 set of int: W_R_VERTEX = 0..card(R_VERTEX);
+
 % range of colors (!! upper-bounded by ub_colors)
 set of int: COLOR = 1..ub_colors;
 % count of colors
@@ -103,6 +104,10 @@ set of int: W_VERTEX = 0..card(VERTEX);
 % !! vertices indexed from 0 in instance file -> re-indexed from min(R_VERTEX)
 % virtual vertices are disconnected
 array[VERTEX] of set of VERTEX: neighbours = [{min(R_VERTEX)+j | j in neighborhoods[i]} | i in index_set(neighborhoods)] ++ [{} | v in V_VERTEX];
+
+array[R_VERTEX] of int: r_degree = [card(neighbours[u]) | u in R_VERTEX];
+set of int: STRICT_R_DEGREE = 1..max(r_degree);
+set of int: R_DEGREE = 0..card(STRICT_R_DEGREE);
 
 % WEIGHTS
 % real vertex weights
@@ -143,7 +148,9 @@ array[CLIQUE] of set of VERTEX: clique = [{min(R_VERTEX)+v | v in cliques[i]} | 
 
 % SCORE
 % range of WVCP objective function
-set of int: SCORE = lb_score..ub_score;
+set of int: P_SCORE = lb_score..ub_score;
+% range of MWSSP objective function
+set of int: D_SCORE = sum(r_weight)-max(P_SCORE)..sum(r_weight)-min(P_SCORE);
 
 % GRAPH METRICS
 % graph density
@@ -168,11 +175,8 @@ function set of VERTEX: clique(set of VERTEX: V) =
 	endif;
 
 % neighbour lookup function
-array[R_VERTEX] of int: r_degree = [card(neighbours[u]) | u in R_VERTEX];
-set of int: STRICT_R_DEGREE = 1..max(r_degree);
-set of int: R_DEGREE = 0..card(STRICT_R_DEGREE);
-
 array[int] of R_VERTEX: flattened_neighbours = flatten_sets(neighbours[R_VERTEX]);
+
 function array[int] of R_VERTEX: flatten_sets(array[int] of set of R_VERTEX: tab) =
 	if length(tab) = 1
 	then		set2array(tab[min(index_set(tab))])

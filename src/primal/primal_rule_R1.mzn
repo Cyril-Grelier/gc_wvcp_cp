@@ -68,6 +68,8 @@ function array[1..2] of int: count_SGDV() =
 % Rule DR1
 
 % rule GDV
+% include "arg_max.mzn"; % !! required by arg_min only!!
+% include "arg_min.mzn";
 constraint
 	if ({M_DR1_v1} intersect WVCP_M != {})
 	then
@@ -79,54 +81,28 @@ constraint
 		} in
 			forall(v in R_VERTEX) (
 				let {
-					% the GNA vertices of vertex v sorted in descending order with >_{w} and to which v is appended
-					array[int] of R_VERTEX: GNAv = sort_by_desc_weight(GNA[v]) ++ [v];
+					% the GNA vertices of vertex v sorted in descending order with >_{w}
+					array[int] of R_VERTEX: GNAv = sort_by_desc_weight(GNA[v]);
 					% the NA vertices of each GNA of v that are adjacent to v
-					array[int] of set of R_VERTEX: Av = [NA[GNAv[i]] diff ({v} union NA[v]) | i in index_set(GNAv)];
+					array[index_set(GNAv)] of set of R_VERTEX: Av = [NA[GNAv[i]] diff ({v} union NA[v]) | i in index_set(GNAv)];
+					array[index_set(GNAv)] of var bool: z :: is_defined_var;
 				} in
-				x_color[v] = x_color[wvcp_gdv(v, Av, GNAv, x_color[R_VERTEX])]
+					if (length(GNAv)) = 0
+					then
+						x_weight[x_color[v]] = weight[v]
+					else
+							forall(i in index_set(z))(
+										(z[i] = forall(w in Av[i])(x_color[w] != x_color[GNAv[i]])) %:: bounds
+								/\		
+										(z[i] -> x_color[v] <= x_color[GNAv[i]]) %:: bounds
+% 								/\
+% 										(z[i] -> x_weight[x_color[v]] >= weight[GNAv[i]]) %x_weight[x_color[GNAv[i]]])
+							)
+					endif
 			)
 	else
 		true
 	endif;
-
-% functional constraint GDV
-function var int: wvcp_gdv(int: v, array[int] of set of int: Av, array[int] of int: GNAv, array[int] of var int: x)
-	::promise_total =
-	let {
-		var 1..length(x): y::is_defined_var;
-		constraint
-			if			(M_DR1_v1 in WVCP_M)
-			then
-				wvcp_gdv_1(v, Av, GNAv, x, y)::defines_var(y)
-			else
-				true
-			endif;
-	}
-	in y	;
-	
-	
-%%%%%%%%%%%%
-% GDV constraint - variant 1
-
-include "arg_max.mzn"; % !! required by arg_min only!!
-include "arg_min.mzn";
-
-% returns color of s-GDV of vertex v in current solution s if it exists else returns v
-predicate wvcp_gdv_1(int: v, array[int] of set of int: Av, array[int] of int: GNAv, array[int] of var int: x, var int: y) =
-	assert(index_set(Av) = index_set(GNAv), "error: inconsistent index sets for Av and GNAv")
-% 	/\
-% 	assert(forall(i in index_set(GNAv))(Av[i] intersect array2set(GNAv) = {}), "error: overlapping sets Av and GNAv")
-	/\
-	let {
-			int: l = min(index_set(GNAv));
-			int: u = max(index_set(GNAv));
-			array[l..u] of var bool: z = [exists(w in Av[i])(x[w] = x[GNAv[i]]) | i in l..u];
-	} in
-	y = GNAv[arg_min(i in l..u)(z[i])]
-% 	/\
-% 	forall(i in l..u) (z[i] -> (x[y] != x[GNAv[i]]))
-	;
 
 
 

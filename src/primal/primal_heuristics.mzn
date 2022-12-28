@@ -36,18 +36,20 @@ function ann: wvcp_search() =
   then    seq_search(
             [int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
             int_search(x_color,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_VERTICES),heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))])
-  elseif  WVCP_SEARCH_STRATEGY=WEIGHTS_VERTICES
-  then    seq_search(
-            [
-%             int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
-            int_search(x_weight_colors,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
-            ++ split_vertices_by_weight(weight_vertices))
-  elseif  WVCP_SEARCH_STRATEGY=ARCS
-  then    seq_search(
-            [
-            % !! TODO change to WVCP_SEARCH_VARIABLES_ARCS
-            int_search(sort_primal_arc_variables(), input_order, heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
-            ++ split_vertices_by_weight(weight_vertices))
+% TODO uncomment if x_weight_colors made global
+%   elseif  WVCP_SEARCH_STRATEGY=WEIGHTS_VERTICES
+%   then    seq_search(
+%             [
+% %             int_search([x_opened_colors],wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_COLORS),heuristic_domain(WVCP_SEARCH_DOMAIN_COLORS)),
+%             int_search(x_weight_colors,wvcp_heuristic_variables(WVCP_SEARCH_VARIABLES_WEIGHTS),heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
+%             ++ split_vertices_by_weight(weight_vertices))
+% TODO uncomment if x_arc made global
+%   elseif  WVCP_SEARCH_STRATEGY=ARCS
+%   then    seq_search(
+%             [
+%             % !! TODO change to WVCP_SEARCH_VARIABLES_ARCS
+%             int_search(sort_primal_arc_variables(), input_order, heuristic_domain(WVCP_SEARCH_DOMAIN_WEIGHTS))]
+%             ++ split_vertices_by_weight(weight_vertices))
   elseif  WVCP_SEARCH_STRATEGY=NEIGHBOURS
   then    int_search([x_color[u] | u in flattened_neighbours], input_order, heuristic_domain(WVCP_SEARCH_DOMAIN_VERTICES))
   else    int_search(x_color,input_order,indomain)
@@ -98,24 +100,24 @@ function array[int] of int: sort_vertices(array[int] of int: V) =
   else    V
   endif;
 
+% TODO uncomment if x_arc made global
+% function array[int] of var 0..1: sort_primal_arc_variables() = 
+%   let {
+% 		% number of arcs
+% 		int: nr_primal_arcs = sum(r_degree) div 2;
+% 		% set of arcs
+% 		set of int: P_ARC = 1..nr_primal_arcs;
+% 		% successors of nodes by orientating each arc by decreasing weights
+% 		array[R_VERTEX] of set of R_VERTEX: p_successors = [{v | v in neighbours[u] where greater(u,v)} | u in R_VERTEX];
+% 		% arc tails and heads
+% 		array[P_ARC] of R_VERTEX: p_tail = [u | u in R_VERTEX, v in p_successors[u]];
+% 		array[P_ARC] of R_VERTEX: p_head = [v | u in R_VERTEX, v in p_successors[u]];
 
-function array[int] of var 0..1: sort_primal_arc_variables() = 
-  let {
-		% number of arcs
-		int: nr_primal_arcs = sum(r_degree) div 2;
-		% set of arcs
-		set of int: P_ARC = 1..nr_primal_arcs;
-		% successors of nodes by orientating each arc by decreasing weights
-		array[R_VERTEX] of set of R_VERTEX: p_successors = [{v | v in neighbours[u] where greater(u,v)} | u in R_VERTEX];
-		% arc tails and heads
-		array[P_ARC] of R_VERTEX: p_tail = [u | u in R_VERTEX, v in p_successors[u]];
-		array[P_ARC] of R_VERTEX: p_head = [v | u in R_VERTEX, v in p_successors[u]];
-
-  		array[int] of var 0..1: x = [x_arc[u,i] | u in R_VERTEX, i in STRICT_R_DEGREE where i<=r_degree[u] /\ greater(u,lookup_neighbour(u,i))];  		
-  		array[index_set(x)] of index_set(x): permutation = array1d(index_set(x),sort_primal_arcs(set2array(index_set(x)), p_tail, p_head));
-  } in
-  		[x[permutation[i]] | i in index_set(permutation)]
-  	;
+%   		array[int] of var 0..1: x = [x_arc[u,i] | u in R_VERTEX, i in STRICT_R_DEGREE where i<=r_degree[u] /\ greater(u,lookup_neighbour(u,i))];  		
+%   		array[index_set(x)] of index_set(x): permutation = array1d(index_set(x),sort_primal_arcs(set2array(index_set(x)), p_tail, p_head));
+%   } in
+%   		[x[permutation[i]] | i in index_set(permutation)]
+%   	;
 
 
 % !! TODO change to WVCP_SEARCH_VARIABLES_ARCS

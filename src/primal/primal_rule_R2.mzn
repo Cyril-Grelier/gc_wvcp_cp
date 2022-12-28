@@ -16,18 +16,24 @@
 
 	
 %%%%%%%%%%%%
+% Rule S|D-R2
+
+constraint
+	if {M_SR2, M_DR2_v1, M_DR2_v2, M_DR2_v3} intersect WVCP_M != {}
+	then x_opened_colors <= max(r_degree) + 1
+	endif;
+
+
+
+%%%%%%%%%%%%
 % Rule SR2
 
 constraint if (M_SR2 in WVCP_M) then SGDC() endif;
 
 predicate SGDC() =
 	forall(v in R_VERTEX) (
-		(x_color[v] <= card(neighbours[v]) + 1)
+		x_color[v] <= r_degree[v] + 1
 	)
-% 	/\
-% 	% !! redundant/alternative
-% 	% empties max(card(neighbours[v]) + 1) | v) + 1 -th color (restricts it to its virtual vertex) and successive colors due to symmetry breaking constraint
-% 	card(x_vertices[max([card(neighbours[v]) + 1 | v in R_VERTEX]) + 1]) == 1
  	;
 
 
@@ -36,11 +42,11 @@ predicate SGDC() =
 
 % SGDC gap of input vertex in solution
 function 0..max(COLOR): count_SGDC_vertex_gap(R_VERTEX: v) =
-	if fix(x_color[v]) <= card(neighbours[v]) + 1
+	if fix(x_color[v]) <= r_degree[v] + 1
 	then
 		0
 	else
-		fix(x_color[v]) - (card(neighbours[v]) + 1)
+		fix(x_color[v]) - (r_degree[v] + 1)
 	endif;
 
 % SGDC gaps in solution
@@ -63,6 +69,8 @@ constraint
 	elseif (M_DR2_v2 in WVCP_M)
 	then
 		let {
+			% x_arc[u,i]=1 iff x_color[v] < x_color[u] where v=lookup_neighbour(u,i)
+			array[R_VERTEX,STRICT_R_DEGREE] of var 0..1: x_arc :: is_defined_var;
 			constraint
 				forall(u in R_VERTEX, i in STRICT_R_DEGREE where i>r_degree[u])(
 					x_arc[u,i] = 0
@@ -108,7 +116,7 @@ predicate wvcp_gdc_1(var int: y, array[int] of var int: x) =
 			int: u = max(index_set(x)) + 1; % !! allow 1 feasible slot 
 			int: n = length(x);
 			array[l..u] of int: y_dom = [i | i in 1..n+1];
-			array[l..u] of var 0..n: z = global_cardinality(x, y_dom); % !! do not close counting with gcc_closed
+			array[l..u] of var 0..n: z = global_cardinality(x, y_dom) :: is_defined_var; % !! do not close counting with gcc_closed
 		} in
 		y = arg_min(z) % y is the smallest slot in l..u satisfying z[y]=0
 	endif;
@@ -131,7 +139,7 @@ predicate wvcp_gdc_2(var int: y, array[int] of var int: xa, array[int] of var in
 				int: l = min(index_set(xc));
 				int: u = max(index_set(xc));
 				int: n = length(xc);
-				array[1..n+1] of var 0..n+1: z;
+				array[1..n+1] of var 0..n+1: z :: is_defined_var;
 			} in
 					y <= n + 1
 			/\		z[n+1] = 0
@@ -156,7 +164,7 @@ predicate wvcp_gdc_3(var int: y, array[int] of var int: xc) =
 			int: l = min(index_set(xc));
 			int: u = max(index_set(xc));
 			int: n = length(xc);
-			array[1..n+1] of var 1..n+1: z;
+			array[1..n+1] of var 1..n+1: z :: is_defined_var;
 		} in
 				z[n+1] = y
 		/\		forall(j in 1..n) (z[j] = min(y, xc[l+j-1])) :: bounds

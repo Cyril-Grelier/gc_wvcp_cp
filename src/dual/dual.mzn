@@ -44,10 +44,10 @@ array[NODE] of set of ARC: ins = [{a | a in ARC where i=head[a]} | i in NODE];
 array[ARC] of var 0..1: y_arc;
 
 % score of the solution to the MWSSP instance
-var 0..sum(weights): y_score;
+var D_SCORE: y_score;
 
 % (auxilliary) WVCP score inferred from the MWSSP solution
-var 0..sum(weights): yx_score;
+var P_SCORE: yx_score;
 
 % (auxilliary) number of stars (excludes stand-alone nodes) 
 var W_R_VERTEX: y_stars;
