@@ -78,11 +78,16 @@ constraint
 			constraint
 				forall(u in R_VERTEX, i in STRICT_R_DEGREE where i<=r_degree[u])(
 					forall(v in R_VERTEX where v=lookup_neighbour(u,i) /\ u<v)(
+						x_arc[u,i] = (x_color[v] < x_color[u])
+					)
+				);
+			constraint
+				forall(u in R_VERTEX, i in STRICT_R_DEGREE where i<=r_degree[u])(
+					forall(v in R_VERTEX where v=lookup_neighbour(u,i) /\ u<v)(
 						let {
 							R_DEGREE: j = arg_max(k in 1..r_degree[v])(lookup_neighbour(v,k) = u);
 						} in
-									x_arc[u,i] = (x_color[v] < x_color[u])
-							/\		x_arc[u,i] = 1 - x_arc[v,j]
+							x_arc[v,j] = (x_color[v] > x_color[u])
 					)
 				);
 		} in
