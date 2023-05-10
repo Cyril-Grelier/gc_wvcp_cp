@@ -1,0 +1,12 @@
+click
+black
+flake8
+pylint
+mypy
+plotly
+igraph
+pandas
+joblib
+openpyxl
+tqdm
+ruff

@@ -1,0 +1,2 @@
+% default upper bound on the score
+ub_score = sum(weights);

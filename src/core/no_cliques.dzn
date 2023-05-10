@@ -1,0 +1,3 @@
+% use this data file together with the basic clique-less instance data file when cliques are not used
+nr_cliques = 0;
+cliques = [];

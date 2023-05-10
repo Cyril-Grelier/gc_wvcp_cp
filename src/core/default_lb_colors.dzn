@@ -1,0 +1,2 @@
+% default lower bound on the number of colors
+lb_colors = 1;

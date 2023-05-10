@@ -1,0 +1,37 @@
+{
+    "openFiles": [
+        "dual_heuristics.mzn",
+        "dual.mzn",
+        "dual_solve.mzn"
+    ],
+    "openTab": 2,
+    "projectFiles": [
+        "../../original_wvcp_dzn/p06.dzn",
+        "../../original_wvcp_dzn/p40.dzn",
+        "../../reduced_wvcp_dzn/p06.clq.dzn",
+        "../../reduced_wvcp_dzn/p06.dzn",
+        "../../reduced_wvcp_dzn/p40.clq.dzn",
+        "../../reduced_wvcp_dzn/p40.dzn",
+        "../_instances/g1.dzn",
+        "../_instances/g2.dzn",
+        "../_instances/g3.dzn",
+        "../_instances/g4.dzn",
+        "../core/data.mzn",
+        "../core/default_lb_colors.dzn",
+        "../core/default_lb_score.dzn",
+        "../core/default_ub_colors.dzn",
+        "../core/default_ub_score.dzn",
+        "../core/heuristics.mzn",
+        "../core/instance_output.mzn",
+        "../core/no_cliques.dzn",
+        "../core/parameters.dzn",
+        "dual.mpc",
+        "dual.mzn",
+        "dual_heuristics.mzn",
+        "dual_output.mzn",
+        "dual_parameters.dzn",
+        "dual_solve.mzn"
+    ],
+    "selectedSolverConfigFile": "dual.mpc",
+    "version": 106
+}
