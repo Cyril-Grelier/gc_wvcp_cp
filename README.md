@@ -6,6 +6,8 @@ This work is related to the paper: New Bounds and Constraint Programming Models 
 
 Which studies the reduction of WVCP benchmark instances, finds color, and score bounds, and seeks to solve the problem with constraint programming.
 
+See [`technical_appendix/technical_appendix.pdf`](technical_appendix/technical_appendix.pdf) for the proofs of reduction, bounds, and models presented in the paper.
+
 # Requirements
 
 The reduction part is coded in Python.
