@@ -34,6 +34,20 @@ then
 	x_score >= max(k in CLIQUE)(sum([weight[u] | u in clique[k]]))
 endif;
 
+% % cliques provide lower bound on score
+% constraint
+% if false /\ I_SORT %/\ (M_CLIQUES in WVCP_M /\ CLIQUE!={})
+% then
+% 	let {
+% 		array[WEIGHT_SCALE_RANGE] of set of VERTEX: w_cliques = [clique(weight_vertices[i]) | i in WEIGHT_SCALE_RANGE];
+% 		array[WEIGHT_SCALE_RANGE] of W_VERTEX: w_cliques_size = [card(w_cliques[i]) | i in WEIGHT_SCALE_RANGE];
+% 		int: l = max(w_cliques_size);
+% 		array[int] of W_VERTEX: padded_cliques = pad_cliques(w_cliques, l);
+% 		array[WEIGHT_SCALE_RANGE,1..l] of W_VERTEX: w_cliques_matrix = array2d(WEIGHT_SCALE_RANGE, 1..l, padded_cliques);
+% 	} in
+% 		x_score >= sum(j in 1..l)(max(i in WEIGHT_SCALE_RANGE)(weight[w_cliques_matrix[i,j]]))
+% endif;
+
 
 
 %%%%%%%%%%%%

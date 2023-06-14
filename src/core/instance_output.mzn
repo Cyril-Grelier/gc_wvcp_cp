@@ -8,7 +8,7 @@ array[int] of string: SEP = ["**************************"];
 function array[int] of string: show_size() =
 			["Instance"]
 	++  STAB
-	++  ["vertices=" ++ show(card(R_VERTEX))]
+	++  ["vertices=" ++ show(card(R_VERTEX)) ++ "\tmax(degree)=" ++ show(max(R_DEGREE))]
 	++  STAB
 	++		["density=" ++ show(round(100*density)) ++ "% " ++ "disconnected/cliqued=" ++ show(length(disconnected)) ++ "/" ++ show(length(cliqued))]
 	++		STAB

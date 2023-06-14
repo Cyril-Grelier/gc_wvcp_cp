@@ -69,7 +69,7 @@ constraint
 	elseif (M_DR2_v2 in WVCP_M)
 	then
 		let {
-			% x_arc[u,i]=1 iff x_color[v] < x_color[u] where v=lookup_neighbour(u,i)
+			% x_arc[u,i]=1 iff x_color[v] < x_color[u] where v=			eighbour(u,i)
 			array[R_VERTEX,STRICT_R_DEGREE] of var 0..1: x_arc :: is_defined_var;
 			constraint
 				forall(u in R_VERTEX, i in STRICT_R_DEGREE where i>r_degree[u])(
