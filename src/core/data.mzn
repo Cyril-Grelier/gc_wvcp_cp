@@ -163,22 +163,31 @@ array[int] of R_VERTEX: disconnected = [v | v in R_VERTEX where neighbours[v] = 
 % fully-connected vertices (!! any vertex connected to all other vertices is necessarily placed in a color of its own)
 array[int] of R_VERTEX: cliqued = [v | v in R_VERTEX where neighbours[v] = R_VERTEX diff {v}];
 
-% some clique in V
+% some clique in V !! assumes I_SORT
 function set of VERTEX: clique(set of VERTEX: V) =
 	if card(V)<=1
 	then		V
 	else
 		let {
-			VERTEX: u = arg_max(v in V)(card(V intersect neighbours[v]));
+			VERTEX: u = min(V);
 		} in
-		  {u} union clique(V intersect neighbours[u])
+		  {u} union clique({v | v in V intersect neighbours[u] where v>u})
+	endif;
+
+% padding cliques !! assumes I_SORT
+function array[int] of W_VERTEX: pad_cliques(array[int] of set of VERTEX: M, int: l) =
+	if (length(M)=1)
+	then		set2array(M[min(index_set(M))]) ++ [min(V_VERTEX) | i in card(M[min(index_set(M))])+1..l]
+	else		set2array(M[min(index_set(M))]) ++ [min(V_VERTEX) | i in card(M[min(index_set(M))])+1..l] ++ pad_cliques(M[min(index_set(M))+1..max(index_set(M))], l)
 	endif;
 
 % neighbour lookup function
 array[int] of R_VERTEX: flattened_neighbours = flatten_sets(neighbours[R_VERTEX]);
 
 function array[int] of R_VERTEX: flatten_sets(array[int] of set of R_VERTEX: tab) =
-	if length(tab) = 1
+	if length(tab) = 0
+	then		[]
+	elseif length(tab) = 1
 	then		set2array(tab[min(index_set(tab))])
 	else		set2array(tab[min(index_set(tab))]) ++ flatten_sets(tab[min(index_set(tab))+1..max(index_set(tab))])
 	endif;
