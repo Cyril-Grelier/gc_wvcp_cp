@@ -1,2 +1,4 @@
-% default lower bound on the score
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Default lower bound on WVCP score
+
 lb_score = max(weights);

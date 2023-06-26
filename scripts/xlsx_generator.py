@@ -64,26 +64,26 @@ def main():
         # ("joint bounds", "joint_h1_none_all_bounds"),
         # # # E2 none/static/dynamic
         # ("primal", "primal_h1_none_no_bounds"),
-        # ("primal S/D", "primal_h1_SR2_DR2_no_bounds"),
+        # ("primal S/D", "primal_h1_DG_MLS_no_bounds"),
         # ("dual", "dual_h1_none_no_bounds"),
         # # ("joint", "joint_h1_none_no_bounds"),
-        # ("joint S/D", "joint_h1_SR2_DR1_DR2_no_bounds"),
+        # ("joint S/D", "joint_h1_DG_LS_MLS_no_bounds"),
         # # E3 none/static/dynamic + bounds
         # ("primal", "primal_h1_none_no_bounds"),
         # ("primal bounds", "primal_h1_none_all_bounds"),
-        # ("primal S/D", "primal_h1_SR2_DR2_no_bounds"),
-        # ("primal S/D bounds", "primal_h1_SR2_DR2_all_bounds"),
+        # ("primal S/D", "primal_h1_DG_MLS_no_bounds"),
+        # ("primal S/D bounds", "primal_h1_DG_MLS_all_bounds"),
         # ("dual", "dual_h1_none_no_bounds"),
         # ("dual bounds", "dual_h1_none_all_bounds"),
         # ("joint", "joint_h1_none_no_bounds"),
         # ("joint bounds", "joint_h1_none_all_bounds"),
-        # ("joint S/D", "joint_h1_SR2_DR1_DR2_no_bounds"),
-        # ("joint S/D bounds", "joint_h1_SR2_DR1_DR2_all_bounds"),
+        # ("joint S/D", "joint_h1_DG_LS_MLS_no_bounds"),
+        # ("joint S/D bounds", "joint_h1_DG_LS_MLS_all_bounds"),
         # # 1h run, 8Go RAM, 10 CPU
         # # E4 parallelism
-        ("primal S/D bounds parallel", "primal_h1_SR2_DR2_all_bounds_parallel"),
+        ("primal S/D bounds parallel", "primal_h1_DG_MLS_all_bounds_parallel"),
         ("dual bounds parallel", "dual_h1_none_all_bounds_parallel"),
-        ("joint S/D bounds parallel", "joint_h1_SR2_DR1_DR2_all_bounds_parallel"),
+        ("joint S/D bounds parallel", "joint_h1_DG_LS_MLS_all_bounds_parallel"),
     ]
 
     for i, method in enumerate(methods):
@@ -166,10 +166,10 @@ class Method:
                             except:
                                 self.objective_bound = int(self.objective_bound)
                     elif l_json["type"] == "solution":
-                        if "x_score" in l_json["output"]["json"]:
-                            self.score = l_json["output"]["json"]["x_score"]
+                        if "x_o" in l_json["output"]["json"]:
+                            self.score = l_json["output"]["json"]["x_o"]
                         else:
-                            self.score = l_json["output"]["json"]["yx_score"]
+                            self.score = l_json["output"]["json"]["yx_o"]
                     elif l_json["type"] == "status":
                         self.optimal = l_json["status"] == "OPTIMAL_SOLUTION"
 

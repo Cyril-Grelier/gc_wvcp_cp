@@ -1,3 +1,5 @@
-% use this data file together with the basic clique-less instance data file when cliques are not used
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% When cliques are not used (no flag M_CLIQUES), include this data file.
+
 nr_cliques = 0;
 cliques = [];

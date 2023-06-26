@@ -55,18 +55,18 @@ compile_coin_bc = (
 
 
 # 1.1 primal avec les bornes par défaut et avec la règle statique bornant
-# les domaines des sommets en fonction de leurs degrés (SR2)
+# les domaines des sommets en fonction de leurs degrés (DG)
 command_primal_v1 = Template(
     f"{compile_ortools} "
-    '-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" '
-    '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" '
-    '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
-    '-D "WVCP_M={M_SR2}" '
+    '-D "PRIMAL_STRATEGY=VERTICES_GENERIC" '
+    '-D "PRIMAL_RESTART=RESTART_NONE" '
+    '-D "PRIMAL_H_VAR_COLORS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_COLORS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_WEIGHTS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_WEIGHTS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_VERTICES=WVCPSV(FIRST_FAIL)" '
+    '-D "PRIMAL_H_VAL_VERTICES=INDOMAIN_SPLIT" '
+    '-D "WVCP_M={M_DG}" '
     f"{bounds} "
     "-m src/primal/primal_solve.mzn "
     "-d ${instance_type}_wvcp_dzn/${instance}.dzn "
@@ -76,18 +76,18 @@ command_primal_v1 = Template(
 )
 
 # 1.2 primal avec les bornes par défaut et avec la règle en version statique
-# et dynamique v2 bornant les domaines des sommets en fonction de leurs degrés (SR2 + DR2_v2)
+# et dynamique v2 bornant les domaines des sommets en fonction de leurs degrés (DG + MLS)
 command_primal_v2 = Template(
     f"{compile_ortools} "
-    '-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" '
-    '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" '
-    '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
-    '-D "WVCP_M={M_SR2, M_DR2_v2}" '
+    '-D "PRIMAL_STRATEGY=VERTICES_GENERIC" '
+    '-D "PRIMAL_RESTART=RESTART_NONE" '
+    '-D "PRIMAL_H_VAR_COLORS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_COLORS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_WEIGHTS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_WEIGHTS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_VERTICES=WVCPSV(FIRST_FAIL)" '
+    '-D "PRIMAL_H_VAL_VERTICES=INDOMAIN_SPLIT" '
+    '-D "WVCP_M={M_DG, M_MLS}" '
     f"{bounds} "
     "-m src/primal/primal_solve.mzn "
     "-d ${instance_type}_wvcp_dzn/${instance}.dzn "
@@ -99,10 +99,10 @@ command_primal_v2 = Template(
 # 1.3 dual avec les bornes par défaut et sans aucune règle (ne sont pas activées de toute façon)
 command_dual_ortools = Template(
     f"{compile_ortools} "
-    '-D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" '
-    '-D "MWSSP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" '
-    '-D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" '
+    '-D "DUAL_STRATEGY=ARCS_SPECIFIC" '
+    '-D "DUAL_RESTART=RESTART_NONE" '
+    '-D "DUAL_H_VAR_ARCS=DESC_WEIGHT_TAIL" '
+    '-D "DUAL_H_VAL_ARCS=INDOMAIN_MAX" '
     '-D "WVCP_M={}" '
     f"{bounds} "
     "-m src/dual/dual_solve.mzn "
@@ -114,10 +114,10 @@ command_dual_ortools = Template(
 
 command_dual_coin_bc = Template(
     f"{compile_coin_bc} "
-    '-D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" '
-    '-D "MWSSP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" '
-    '-D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" '
+    '-D "DUAL_STRATEGY=ARCS_SPECIFIC" '
+    '-D "DUAL_RESTART=RESTART_NONE" '
+    '-D "DUAL_H_VAR_ARCS=DESC_WEIGHT_TAIL" '
+    '-D "DUAL_H_VAL_ARCS=INDOMAIN_MAX" '
     '-D "WVCP_M={}" '
     f"{bounds} "
     "-m src/dual/dual_solve.mzn "
@@ -128,23 +128,23 @@ command_dual_coin_bc = Template(
 )
 
 
-# 1.4 joint avec les bornes par défaut et avec la règle en version statique et dynamique v2 bornant les domaines des sommets en fonction de leurs degrés (SR2 + DR2_v2)
+# 1.4 joint avec les bornes par défaut et avec la règle en version statique et dynamique v2 bornant les domaines des sommets en fonction de leurs degrés (DG + MLS)
 command_joint = Template(
     f"{compile_ortools} "
-    '-D "MWSSP_WVCP_SEARCH_STRATEGY=WVCP" '
-    '-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" '
-    '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_MIN" '
-    '-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" '
-    '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
-    '-D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" '
-    '-D "MWSSP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" '
-    '-D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" '
-    '-D "WVCP_M={M_SR2,M_DR2_v2}" '
+    '-D "JOINT_STRATEGY=PRIMAL" '
+    '-D "PRIMAL_STRATEGY=VERTICES_GENERIC" '
+    '-D "PRIMAL_RESTART=RESTART_NONE" '
+    '-D "PRIMAL_H_VAR_COLORS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_COLORS=INDOMAIN_MIN" '
+    '-D "PRIMAL_H_VAR_WEIGHTS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_WEIGHTS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_VERTICES=WVCPSV(FIRST_FAIL)" '
+    '-D "PRIMAL_H_VAL_VERTICES=INDOMAIN_SPLIT" '
+    '-D "DUAL_STRATEGY=ARCS_SPECIFIC" '
+    '-D "DUAL_RESTART=RESTART_NONE" '
+    '-D "DUAL_H_VAR_ARCS=DESC_WEIGHT_TAIL" '
+    '-D "DUAL_H_VAL_ARCS=INDOMAIN_MAX" '
+    '-D "WVCP_M={M_DG,M_MLS}" '
     f"{bounds} "
     "-m src/joint/joint_solve.mzn "
     "-d ${instance_type}_wvcp_dzn/${instance}.dzn "

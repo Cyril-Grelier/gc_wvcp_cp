@@ -1,2 +1,4 @@
-% default upper bound on the number of colors
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Default upper bound on the number of colors
+
 ub_colors = nr_vertices;

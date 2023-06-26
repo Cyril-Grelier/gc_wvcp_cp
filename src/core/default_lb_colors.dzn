@@ -1,2 +1,4 @@
-% default lower bound on the number of colors
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Default lower bound on the number of colors
+
 lb_colors = 1;

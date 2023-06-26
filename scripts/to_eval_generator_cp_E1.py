@@ -46,27 +46,27 @@ rep_joint_h1_none_lb_score = "joint_h1_none_lb_score"
 rep_joint_h1_none_ub_score = "joint_h1_none_ub_score"
 rep_joint_h1_none_all_bounds = "joint_h1_none_all_bounds"
 # E2 none/static/dynamic
-rep_primal_h1_SR2_DR2_no_bounds = "primal_h1_SR2_DR2_no_bounds"
-rep_joint_h1_SR2_DR1_DR2_no_bounds = "joint_h1_SR2_DR1_DR2_no_bounds"
+rep_primal_h1_DG_DR2_no_bounds = "primal_h1_DG_DR2_no_bounds"
+rep_joint_h1_DG_DR1_DR2_no_bounds = "joint_h1_DG_DR1_DR2_no_bounds"
 # E3 none/static/dynamic + bounds
-rep_primal_h1_SR2_DR2_all_bounds = "primal_h1_SR2_DR2_all_bounds"
-rep_joint_h1_SR2_DR1_DR2_all_bounds = "joint_h1_SR2_DR1_DR2_all_bounds"
+rep_primal_h1_DG_DR2_all_bounds = "primal_h1_DG_DR2_all_bounds"
+rep_joint_h1_DG_DR1_DR2_all_bounds = "joint_h1_DG_DR1_DR2_all_bounds"
 
 # 1h run, 8Go RAM, 10 CPU
 # E4 parallelism
-rep_primal_h1_SR2_DR2_all_bounds_parallel = "primal_h1_SR2_DR2_all_bounds_parallel"
+rep_primal_h1_DG_DR2_all_bounds_parallel = "primal_h1_DG_DR2_all_bounds_parallel"
 rep_dual_h1_none_all_bounds_parallel = "dual_h1_none_all_bounds_parallel"
-rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel = (
-    "joint_h1_SR2_DR1_DR2_all_bounds_parallel"
+rep_joint_h1_DG_DR1_DR2_all_bounds_parallel = (
+    "joint_h1_DG_DR1_DR2_all_bounds_parallel"
 )
 
 # 20h run, 8Go RAM, 10 CPU
 # E5 parallelism try hard
-rep_primal_h1_SR2_DR2_all_bounds_parallel_20h = (
-    "primal_h1_SR2_DR2_all_bounds_parallel_20h"
+rep_primal_h1_DG_DR2_all_bounds_parallel_20h = (
+    "primal_h1_DG_DR2_all_bounds_parallel_20h"
 )
-rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel_20h = (
-    "joint_h1_SR2_DR1_DR2_all_bounds_parallel_20h"
+rep_joint_h1_DG_DR1_DR2_all_bounds_parallel_20h = (
+    "joint_h1_DG_DR1_DR2_all_bounds_parallel_20h"
 )
 
 # os.mkdir(f"{output_directory}")
@@ -91,15 +91,15 @@ rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel_20h = (
 # os.mkdir(f"{output_directory}/{rep_joint_h1_none_lb_score}")
 # os.mkdir(f"{output_directory}/{rep_joint_h1_none_ub_score}")
 # os.mkdir(f"{output_directory}/{rep_joint_h1_none_all_bounds}")
-# os.mkdir(f"{output_directory}/{rep_primal_h1_SR2_DR2_no_bounds}")
-# os.mkdir(f"{output_directory}/{rep_joint_h1_SR2_DR1_DR2_no_bounds}")
-# os.mkdir(f"{output_directory}/{rep_primal_h1_SR2_DR2_all_bounds}")
-# os.mkdir(f"{output_directory}/{rep_joint_h1_SR2_DR1_DR2_all_bounds}")
-# os.mkdir(f"{output_directory}/{rep_primal_h1_SR2_DR2_all_bounds_parallel}")
+# os.mkdir(f"{output_directory}/{rep_primal_h1_DG_DR2_no_bounds}")
+# os.mkdir(f"{output_directory}/{rep_joint_h1_DG_DR1_DR2_no_bounds}")
+# os.mkdir(f"{output_directory}/{rep_primal_h1_DG_DR2_all_bounds}")
+# os.mkdir(f"{output_directory}/{rep_joint_h1_DG_DR1_DR2_all_bounds}")
+# os.mkdir(f"{output_directory}/{rep_primal_h1_DG_DR2_all_bounds_parallel}")
 # os.mkdir(f"{output_directory}/{rep_dual_h1_none_all_bounds_parallel}")
-# os.mkdir(f"{output_directory}/{rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel}")
-os.mkdir(f"{output_directory}/{rep_primal_h1_SR2_DR2_all_bounds_parallel_20h}")
-os.mkdir(f"{output_directory}/{rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel_20h}")
+# os.mkdir(f"{output_directory}/{rep_joint_h1_DG_DR1_DR2_all_bounds_parallel}")
+os.mkdir(f"{output_directory}/{rep_primal_h1_DG_DR2_all_bounds_parallel_20h}")
+os.mkdir(f"{output_directory}/{rep_joint_h1_DG_DR1_DR2_all_bounds_parallel_20h}")
 
 
 time_limit_s = 3600 * 1
@@ -108,56 +108,56 @@ parallel = 0
 
 
 primal_h1 = (
-    '-D "WVCP_SEARCH_STRATEGY=VERTICES_GENERIC" '
-    '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" '
-    '-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" '
-    '-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" '
-    '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_STRATEGY=VERTICES_GENERIC" '
+    '-D "PRIMAL_RESTART=RESTART_NONE" '
+    '-D "PRIMAL_H_VAR_COLORS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_COLORS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_WEIGHTS=INPUT_ORDER" '
+    '-D "PRIMAL_H_VAL_WEIGHTS=INDOMAIN_SPLIT" '
+    '-D "PRIMAL_H_VAR_VERTICES=WVCPSV(FIRST_FAIL)" '
+    '-D "PRIMAL_H_VAL_VERTICES=INDOMAIN_SPLIT" '
 )
 
 # primal_h2 = (
-#     '-D "WVCP_SEARCH_STRATEGY=VERTICES_SPECIFIC" '
-#     '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
-#     '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
-#     '-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" '
-#     '-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" '
-#     '-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" '
-#     '-D "WVCP_SEARCH_VARIABLES_VERTICES=DESC_WEIGHT_DEGREE" '
-#     '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
+#     '-D "PRIMAL_STRATEGY=VERTICES_SPECIFIC" '
+#     '-D "PRIMAL_RESTART=RESTART_NONE" '
+#     '-D "PRIMAL_H_VAR_COLORS=INPUT_ORDER" '
+#     '-D "PRIMAL_H_VAL_COLORS=INDOMAIN_SPLIT" '
+#     '-D "PRIMAL_H_VAR_WEIGHTS=INPUT_ORDER" '
+#     '-D "PRIMAL_H_VAL_WEIGHTS=INDOMAIN_SPLIT" '
+#     '-D "PRIMAL_H_VAR_VERTICES=DESC_WEIGHT_DEGREE" '
+#     '-D "PRIMAL_H_VAL_VERTICES=INDOMAIN_SPLIT" '
 # )
 
 # primal_h3 = (
-#     '-D "WVCP_SEARCH_STRATEGY=VERTICES_BY_WEIGHT" '
-#     '-D "WVCP_SEARCH_RESTART=RESTART_NONE" '
-#     '-D "WVCP_SEARCH_VARIABLES_COLORS=WVCPSV(INPUT_ORDER)" '
-#     '-D "WVCP_SEARCH_DOMAIN_COLORS=INDOMAIN_SPLIT" '
-#     '-D "WVCP_SEARCH_VARIABLES_WEIGHTS=WVCPSV(INPUT_ORDER)" '
-#     '-D "WVCP_SEARCH_DOMAIN_WEIGHTS=INDOMAIN_SPLIT" '
-#     '-D "WVCP_SEARCH_VARIABLES_VERTICES=WVCPSV(FIRST_FAIL)" '
-#     '-D "WVCP_SEARCH_DOMAIN_VERTICES=INDOMAIN_SPLIT" '
+#     '-D "PRIMAL_STRATEGY=VERTICES_BY_WEIGHT" '
+#     '-D "PRIMAL_RESTART=RESTART_NONE" '
+#     '-D "PRIMAL_H_VAR_COLORS=INPUT_ORDER" '
+#     '-D "PRIMAL_H_VAL_COLORS=INDOMAIN_SPLIT" '
+#     '-D "PRIMAL_H_VAR_WEIGHTS=INPUT_ORDER" '
+#     '-D "PRIMAL_H_VAL_WEIGHTS=INDOMAIN_SPLIT" '
+#     '-D "PRIMAL_H_VAR_VERTICES=WVCPSV(FIRST_FAIL)" '
+#     '-D "PRIMAL_H_VAL_VERTICES=INDOMAIN_SPLIT" '
 # )
 
 dual_h1 = (
-    '-D "MWSSP_SEARCH_STRATEGY=ARCS_SPECIFIC" '
-    '-D "MWSSP_SEARCH_RESTART=RESTART_NONE" '
-    '-D "MWSSP_SEARCH_VARIABLES_ARCS=DESC_WEIGHT_TAIL" '
-    '-D "MWSSP_SEARCH_DOMAIN_ARCS=INDOMAIN_MAX" '
+    '-D "DUAL_STRATEGY=ARCS_SPECIFIC" '
+    '-D "DUAL_RESTART=RESTART_NONE" '
+    '-D "DUAL_H_VAR_ARCS=DESC_WEIGHT_TAIL" '
+    '-D "DUAL_H_VAL_ARCS=INDOMAIN_MAX" '
 )
 
-joint_h1 = '-D "MWSSP_WVCP_SEARCH_STRATEGY=WVCP" ' + primal_h1 + dual_h1
+joint_h1 = '-D "JOINT_STRATEGY=PRIMAL" ' + primal_h1 + dual_h1
 
-# joint_h2 = '-D "MWSSP_WVCP_SEARCH_STRATEGY=WVCP" ' + primal_h2 + dual_h1
+# joint_h2 = '-D "JOINT_STRATEGY=PRIMAL" ' + primal_h2 + dual_h1
 
-# joint_h3 = '-D "MWSSP_WVCP_SEARCH_STRATEGY=WVCP" ' + primal_h3 + dual_h1
+# joint_h3 = '-D "JOINT_STRATEGY=PRIMAL" ' + primal_h3 + dual_h1
 
 propagation_none = '-D "WVCP_M={}" '
-# propagation_static = '-D "WVCP_M={M_SR2}" '
-propagation_dynamic_primal = '-D "WVCP_M={M_SR2, M_DR1_v1}" '
-# propagation_dynamic2 = '-D "WVCP_M={M_SR2, M_DR2_v2}" '
-propagation_dynamic_joint = '-D "WVCP_M={M_SR2, M_DR1_v1, M_DR2_v2}" '
+# propagation_static = '-D "WVCP_M={M_DG}" '
+propagation_dynamic_primal = '-D "WVCP_M={M_DG, M_LS}" '
+# propagation_dynamic2 = '-D "WVCP_M={M_DG, M_MLS}" '
+propagation_dynamic_joint = '-D "WVCP_M={M_DG, M_LS, M_MLS}" '
 
 model_primal = "-m src/primal/primal_solve.mzn "
 model_dual = "-m src/dual/dual_solve.mzn "
@@ -604,7 +604,7 @@ score_bks = "bks"
 #             )
 #         )
 #         # E2 none/static/dynamic
-#         # rep_primal_h1_SR2_DR2_no_bounds
+#         # rep_primal_h1_DG_DR2_no_bounds
 #         file.write(
 #             command_minizinc.substitute(
 #                 solver=solver_ortools,
@@ -616,14 +616,14 @@ score_bks = "bks"
 #                 model=model_primal,
 #                 heuristic=primal_h1,
 #                 static_dynamic=propagation_dynamic_primal,
-#                 repertory=rep_primal_h1_SR2_DR2_no_bounds,
+#                 repertory=rep_primal_h1_DG_DR2_no_bounds,
 #                 lb_colors=default,
 #                 ub_colors=default,
 #                 lb_score=default,
 #                 ub_score=default,
 #             )
 #         )
-#         # rep_joint_h1_SR2_DR1_DR2_no_bounds
+#         # rep_joint_h1_DG_DR1_DR2_no_bounds
 #         file.write(
 #             command_minizinc.substitute(
 #                 solver=solver_ortools,
@@ -635,7 +635,7 @@ score_bks = "bks"
 #                 model=model_joint,
 #                 heuristic=joint_h1,
 #                 static_dynamic=propagation_dynamic_joint,
-#                 repertory=rep_joint_h1_SR2_DR1_DR2_no_bounds,
+#                 repertory=rep_joint_h1_DG_DR1_DR2_no_bounds,
 #                 lb_colors=default,
 #                 ub_colors=default,
 #                 lb_score=default,
@@ -643,7 +643,7 @@ score_bks = "bks"
 #             )
 #         )
 #         # E3 none/static/dynamic + bounds
-#         # rep_primal_h1_SR2_DR2_all_bounds
+#         # rep_primal_h1_DG_DR2_all_bounds
 #         file.write(
 #             command_minizinc.substitute(
 #                 solver=solver_ortools,
@@ -655,14 +655,14 @@ score_bks = "bks"
 #                 model=model_primal,
 #                 heuristic=primal_h1,
 #                 static_dynamic=propagation_dynamic_primal,
-#                 repertory=rep_primal_h1_SR2_DR2_all_bounds,
+#                 repertory=rep_primal_h1_DG_DR2_all_bounds,
 #                 lb_colors=colors_lb,
 #                 ub_colors=colors_ub,
 #                 lb_score=score_lb,
 #                 ub_score=score_ub,
 #             )
 #         )
-#         # rep_joint_h1_SR2_DR1_DR2_all_bounds
+#         # rep_joint_h1_DG_DR1_DR2_all_bounds
 #         file.write(
 #             command_minizinc.substitute(
 #                 solver=solver_ortools,
@@ -674,7 +674,7 @@ score_bks = "bks"
 #                 model=model_joint,
 #                 heuristic=joint_h1,
 #                 static_dynamic=propagation_dynamic_joint,
-#                 repertory=rep_joint_h1_SR2_DR1_DR2_all_bounds,
+#                 repertory=rep_joint_h1_DG_DR1_DR2_all_bounds,
 #                 lb_colors=colors_lb,
 #                 ub_colors=colors_ub,
 #                 lb_score=score_lb,
@@ -687,7 +687,7 @@ score_bks = "bks"
 # with open("to_solve_parallel", "w", encoding="UTF8") as file:
 #     for instance in instances:
 #         # E4 parallelism
-#         # rep_primal_h1_SR2_DR2_all_bounds_parallel
+#         # rep_primal_h1_DG_DR2_all_bounds_parallel
 #         file.write(
 #             command_minizinc.substitute(
 #                 solver=solver_ortools,
@@ -699,7 +699,7 @@ score_bks = "bks"
 #                 model=model_primal,
 #                 heuristic=primal_h1,
 #                 static_dynamic=propagation_dynamic_primal,
-#                 repertory=rep_primal_h1_SR2_DR2_all_bounds_parallel,
+#                 repertory=rep_primal_h1_DG_DR2_all_bounds_parallel,
 #                 lb_colors=colors_lb,
 #                 ub_colors=colors_ub,
 #                 lb_score=score_lb,
@@ -725,7 +725,7 @@ score_bks = "bks"
 #                 ub_score=score_ub,
 #             )
 #         )
-#         # rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel
+#         # rep_joint_h1_DG_DR1_DR2_all_bounds_parallel
 #         file.write(
 #             command_minizinc.substitute(
 #                 solver=solver_ortools,
@@ -737,7 +737,7 @@ score_bks = "bks"
 #                 model=model_joint,
 #                 heuristic=joint_h1,
 #                 static_dynamic=propagation_dynamic_joint,
-#                 repertory=rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel,
+#                 repertory=rep_joint_h1_DG_DR1_DR2_all_bounds_parallel,
 #                 lb_colors=colors_lb,
 #                 ub_colors=colors_ub,
 #                 lb_score=score_lb,
@@ -752,7 +752,7 @@ parallel = 10
 with open("to_solve_parallel", "w", encoding="UTF8") as file:
     for instance in instances:
         # E5 parallelism try hard
-        # rep_primal_h1_SR2_DR2_all_bounds_parallel_20h
+        # rep_primal_h1_DG_DR2_all_bounds_parallel_20h
         file.write(
             command_minizinc.substitute(
                 solver=solver_ortools,
@@ -764,14 +764,14 @@ with open("to_solve_parallel", "w", encoding="UTF8") as file:
                 model=model_primal,
                 heuristic=primal_h1,
                 static_dynamic=propagation_dynamic_primal,
-                repertory=rep_primal_h1_SR2_DR2_all_bounds_parallel_20h,
+                repertory=rep_primal_h1_DG_DR2_all_bounds_parallel_20h,
                 lb_colors=colors_lb,
                 ub_colors=colors_ub,
                 lb_score=score_lb,
                 ub_score=score_ub,
             )
         )
-        # rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel_20h
+        # rep_joint_h1_DG_DR1_DR2_all_bounds_parallel_20h
         file.write(
             command_minizinc.substitute(
                 solver=solver_ortools,
@@ -783,7 +783,7 @@ with open("to_solve_parallel", "w", encoding="UTF8") as file:
                 model=model_joint,
                 heuristic=joint_h1,
                 static_dynamic=propagation_dynamic_joint,
-                repertory=rep_joint_h1_SR2_DR1_DR2_all_bounds_parallel_20h,
+                repertory=rep_joint_h1_DG_DR1_DR2_all_bounds_parallel_20h,
                 lb_colors=colors_lb,
                 ub_colors=colors_ub,
                 lb_score=score_lb,
