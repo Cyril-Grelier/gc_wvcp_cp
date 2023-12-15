@@ -33,6 +33,9 @@ def main():
     if not os.path.exists("reduced_wvcp_dzn"):
         os.mkdir("reduced_wvcp_dzn")
 
+    print(
+        "instance_name,original,time(s),lb_colors_default,lb_colors_max_size_clique, ub_colors_default,ub_colors_sum_chromatic,ub_colors_max_degree,ub_colors_min_degree_chromatic,lb_score_default,lb_score_sum_cliques,ub_score_default,ub_score_sum_weights_chromatic,ub_score_bks"
+    )
     Parallel(n_jobs=15)(
         delayed(conversion_dzn)(instance_name, i, len(instances_names))
         for i, instance_name in enumerate(instances_names + instances_names)
@@ -54,11 +57,11 @@ def conversion_dzn(instance_name: str, i: int, nb_instances: int):
     is_original = i >= nb_instances
 
     if is_original:
-        print(instance_name, "original start")
+        # print(instance_name, "original start")
         repertory: str = "original_wvcp_dzn"
         instance_file: str = f"instances/original_graphs/{instance_name}.col"
     else:
-        print(instance_name, "reduced start")
+        # print(instance_name, "reduced start")
         repertory: str = "reduced_wvcp_dzn"
         instance_file: str = f"instances/reduced_wvcp/{instance_name}.col"
     if not os.path.exists(instance_file):
@@ -124,10 +127,13 @@ def conversion_dzn(instance_name: str, i: int, nb_instances: int):
     with open(f"{base}ub_score_bks.dzn", "w", encoding="utf8") as file:
         file.write(f"ub_score={graph.ub_score_bks};")
 
-    if is_original:
-        print(instance_name, f"original done ({int(time.time() - start)}s)")
-    else:
-        print(instance_name, f"reduced done ({int(time.time() - start)}s)")
+    print(
+        f"{instance_name},{is_original},{int(time.time() - start)},{graph.lb_colors_default},{graph.lb_colors_max_size_clique},{graph.ub_colors_default},{graph.ub_colors_sum_chromatic},{graph.ub_colors_max_degree},{graph.ub_colors_min_degree_chromatic},{graph.lb_score_default},{graph.lb_score_sum_cliques},{graph.ub_score_default},{graph.ub_score_sum_weights_chromatic},{graph.ub_score_bks}"
+    )
+    # if is_original:
+    #     print(instance_name, f"original done ({int(time.time() - start)}s)")
+    # else:
+    #     print(instance_name, f"reduced done ({int(time.time() - start)}s)")
 
 
 def read_col_files(instance_file: str) -> tuple[int, list[tuple[int, int]]]:
@@ -427,7 +433,6 @@ class Graph:
     def save_graph_dzn(self, output_file: str):
         """convert graph to dzn"""
         with open(output_file, "w", encoding="utf8") as file:
-
             file.write(f'name="{self.name}";\n')
             file.write(f"nr_vertices={self.nb_vertices};\n")
             file.write(f"nr_edges={self.nb_edges};\n")
