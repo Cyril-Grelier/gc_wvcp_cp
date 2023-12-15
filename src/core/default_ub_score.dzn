@@ -1,2 +1,4 @@
-% default upper bound on the score
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Default upper bound on WVCP score
+
 ub_score = sum(weights);

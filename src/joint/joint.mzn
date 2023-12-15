@@ -1,79 +1,84 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% FILE INCLUSION
+% David Lesaint (david.lesaint@univ-angers.fr)
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% FILE INCLUSION
+
+include "../core/core.mzn";
 include "../dual/dual.mzn";
 include "../primal/primal.mzn";
 
-include "../joint/joint_heuristics.mzn";
-include "../joint/joint_output.mzn";
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% VARIABLES
+%%% JOINT CONSTRAINTS
 
-% 
-array[R_VERTEX] of var 0..1: y_dominated;
+%% (J1) an arc in the dual solution suffices to color its nodes identically in the primal solution
+constraint
+	forall(ij in ARC)( 
+		y_A[ij] <= (x_U[tail[ij]] == x_U[head[ij]]) :: domain
+	); 
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% CONSTRAINTS
-
-
-%%%%%%%%%%%
-% PRIMAL/DUAL CHANNELING CONSTRAINTS
-
-%
+%% (J2) matching color dominants of primal and dual solutions
 include "global_cardinality.mzn";
 constraint
-global_cardinality([x_dominant[c] | c in COLOR], R_VERTEX,[1 - y_dominated[i] | i in R_VERTEX]);
+	global_cardinality([x_D[k] | k in K], V, [z_V[i] | i in V]) :: domain;
 
-% 
+%% (J3) matching scores of primal and dual solutions
 constraint
-forall(ij in ARC)( 
-  y_arc[ij] <= bool2int(x_color[head[ij]] == x_color[tail[ij]]) :: domain
-); 
+	x_o = yx_o :: bounds;
+
+%% (J4) -> placed in primal.mzn using left_shift.mzn. Switched on by M_LS
 
 
-% objectives
+%%% ADDITIONAL CONSTRAINTS
+
+% (J5) redundant constraint matching numbers of opened colors (omitted in IJCAI model)
 constraint
-x_score = yx_score;
-
-% stars - !! seems to degrade performances (small tests though)
-% constraint
-% x_opened_colors = yx_opened_colors;
+	if (M_AUX in WVCP_M)
+	then	y_KOS = x_KOS :: bounds
+	endif;
 
 
-%%%%%%%%%%%
-% JOINT-DUAL CONSTRAINTS
 
-% disconnected vertices are dominant
-constraint
-forall(i in R_VERTEX where ins[i]={} /\ outs[i]={})( 
-  y_dominated[i] = 0
-); 
 
-% backward vertices are dominant (this constraint may be merged with above constraint)
-constraint
-forall(i in R_VERTEX where ins[i]={} /\ outs[i]!={})( 
-  y_dominated[i] = 0
-); 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% JOINT SEARCH
 
-% forward vertices are dominated iff backward dominated
-constraint
-forall(i in R_VERTEX where ins[i]!={} /\ outs[i]={})(
-  y_dominated[i] = sum(hi in ins[i])(y_arc[hi])
-); 
 
-% backward and forward vertices
-constraint
-forall(i in R_VERTEX where ins[i]!={} /\ outs[i]!={})( 
-	(		1 - y_dominated[i] >= max(ij in outs[i])(y_arc[ij])
-  	/\		y_dominated[i] >= sum(hi in ins[i])(y_arc[hi])
-  	)
-);
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SEARCH STRATEGIES
 
-% backward and forward vertices are assumed dominant if not grouped
-constraint
-forall(i in R_VERTEX where ins[i]!={} /\ outs[i]!={})(
-	1 - y_dominated[i] >= (1 - max(ij in outs[i])(y_arc[ij])) * (1 - sum(hi in ins[i])(y_arc[hi]))
-);
+enum JOINT_SEARCH = {
+  DUAL,
+  PRIMAL
+};
+
+
+JOINT_SEARCH: JOINT_STRATEGY;
+
+
+function ann: mwssp_wvcp_search() =
+  if      JOINT_STRATEGY=DUAL
+  then    mwssp_search()
+  else    wvcp_search()
+  endif;
+
+
+function ann: mwssp_wvcp_restart() =
+  if      JOINT_STRATEGY=DUAL
+  then    mwssp_restart()
+  else    wvcp_restart()
+  endif;
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% DISPLAY
+
+%%
+function array[int] of string: show_mwssp_wvcp_heuristics() =
+			["Joint strategy"]
+	++		STAB
+	++		[show(JOINT_STRATEGY)];

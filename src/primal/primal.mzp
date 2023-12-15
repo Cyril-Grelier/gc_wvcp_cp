@@ -1,10 +1,13 @@
 {
     "openFiles": [
-        "primal_heuristics.mzn",
+        "primal_solve.mzn",
         "primal.mzn",
-        "primal_solve.mzn"
+        "max_left_shift.mzn",
+        "left_shift.mzn",
+        "primal_aux.mzn",
+        "../core/core.mzn"
     ],
-    "openTab": 2,
+    "openTab": 4,
     "projectFiles": [
         "../../original_wvcp_dzn/p06.dzn",
         "../../reduced_wvcp_dzn/p06.clq.dzn",
@@ -15,28 +18,18 @@
         "../_instances/g2.dzn",
         "../_instances/g3.dzn",
         "../_instances/g4.dzn",
-        "../core/data.mzn",
+        "../core/core.mzn",
         "../core/default_lb_colors.dzn",
         "../core/default_lb_score.dzn",
         "../core/default_ub_colors.dzn",
         "../core/default_ub_score.dzn",
-        "../core/heuristics.mzn",
-        "../core/instance_output.mzn",
         "../core/no_cliques.dzn",
-        "../core/parameters.dzn",
+        "left_shift.mzn",
+        "max_left_shift.mzn",
         "primal.mpc",
         "primal.mzn",
-        "primal_constraints.mzn",
-        "primal_data.mzn",
-        "primal_heuristics.mzn",
-        "primal_objective.mzn",
-        "primal_output.mzn",
-        "primal_parameters.dzn",
-        "primal_rule_R1.mzn",
-        "primal_rule_R2.mzn",
-        "primal_rules.mzn",
-        "primal_solve.mzn",
-        "primal_variables.mzn"
+        "primal_aux.mzn",
+        "primal_solve.mzn"
     ],
     "selectedSolverConfigFile": "primal.mpc",
     "version": 106
